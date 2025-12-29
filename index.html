@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Diario Stellare</title>
+    <style>
+        /* --- STILE GENERALE --- */
+        body {
+            margin: 0; padding: 0;
+            background: radial-gradient(ellipse at center, #010105 0%, #000000 60%, #020c2b 100%);
+            height: 100vh; width: 100vw;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            user-select: none;
+        }
+
+        /* STILE TASTO STATISTICHE ESTERNO */
+        .btn-stats {
+            position: fixed;
+            top: 70px; /* 50px sotto il tasto Menu (che è a 20px) */
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%; /* Rotondo per coerenza con gli altri */
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            transition: background 0.3s;
+        }
+        .btn-stats:hover { background: rgba(255, 255, 255, 0.3); }
+        
+        /* STILI STATISTICHE */
+        .pie-container { display: flex; justify-content: center; margin: 20px 0; }
+        .pie-chart {
+            width: 200px; height: 200px; border-radius: 50%;
+            background: conic-gradient(#333 0deg 360deg); /* Base vuota */
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            position: relative;
+        }
+        
+        .stat-legend { display: flex; flex-direction: column; gap: 10px; }
+        .legend-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 5px; }
+        .legend-color { width: 15px; height: 15px; border-radius: 50%; margin-right: 10px; display: inline-block; }
+        
+        .tab-active { background: #2196F3 !important; border-color: #2196F3 !important; color: white !important; }
+
+        /* IL CIELO */
+        #skyContainer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: 1;
+        }
+        #sky {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            transform-origin: center center; transition: transform 0.1s linear; will-change: transform;
+        }
+        #skyContainer.grabbing { cursor: grabbing; }
+        #skyContainer.grab { cursor: grab; }
+
+        /* LAYER SVG (Linee) */
+        #constellationLayer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none; overflow: visible; 
+        }
+        .constellation-line {
+            stroke: rgba(255, 255, 255, 0.3); stroke-width: 1px;
+            pointer-events: auto; cursor: crosshair; transition: stroke 0.3s;
+            vector-effect: non-scaling-stroke;
+        }
+        .constellation-line:hover { stroke: rgba(255, 255, 255, 0.8); stroke-width: 2px; }
+
+        /* LAYER ETICHETTE */
+        #labelsLayer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5; pointer-events: none;
+        }
+        .constellation-label {
+            position: absolute; transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.6);
+            font-family: 'Cinzel', 'Trajan Pro', serif;
+            font-size: 14px; letter-spacing: 2px; text-transform: uppercase;
+            text-shadow: 0 0 5px rgba(0,0,0,0.8);
+            pointer-events: auto; cursor: pointer;
+            transition: color 0.3s, font-size 0.3s;
+            white-space: nowrap; border-bottom: 1px solid transparent;
+        }
+        /* Effetto hover sull'etichetta per far capire che è cliccabile */
+        body.editing .constellation-label:hover { 
+            color: #00e5ff; border-bottom: 1px solid #00e5ff; 
+            font-size: 16px; z-index: 100; text-shadow: 0 0 10px #00e5ff;
+        }
+
+        /* --- STELLE --- */
+        .star {
+            position: absolute; border-radius: 50%;
+            cursor: pointer; transition: box-shadow 0.3s;
+            animation: twinkle 3s infinite ease-in-out alternate;
+            z-index: 10; transform: translate(-50%, -50%);
+        }
+        .star:hover { z-index: 20; box-shadow: 0 0 20px white; }
+        body.editing .star { animation: shake 0.5s infinite alternate; cursor: move; }
+        
+        /* Selezione normale (Verde) */
+        .star.selected-connect { border: 2px solid #00ff00; box-shadow: 0 0 15px #00ff00; }
+        
+        /* Selezione Gruppo (Ciano) */
+        .star.selected-group { border: 2px solid #00e5ff; box-shadow: 0 0 20px #00e5ff; transform: translate(-50%, -50%) scale(1.5); z-index: 60; }
+
+        @keyframes twinkle { from { opacity: 0.5; } to { opacity: 1; box-shadow: 0 0 15px #fff; } }
+        @keyframes shake { from { margin-left: -1px; } to { margin-left: 1px; } }
+
+        /* Colori e Preferiti */
+        .star.white { background-color: #fff; box-shadow: 0 0 5px #fff, 0 0 10px #fff; }
+        .star.red { background-color: #ff5e5e; box-shadow: 0 0 5px #ff5e5e, 0 0 10px #ff2222; }
+        .star.blue { background-color: #5eaaff; box-shadow: 0 0 5px #5eaaff, 0 0 10px #2288ff; }
+        .star.yellow { background-color: #ffea5e; box-shadow: 0 0 5px #ffea5e, 0 0 10px #ffcc00; }
+        .star.orange { background-color: #ffaa33; box-shadow: 0 0 5px #ffaa33, 0 0 10px #ff8800; }
+        
+        .star.favorite { z-index: 50; animation: pulse-big 2s infinite ease-in-out alternate !important;min-width: 4px !important; min-height: 4px !important; }
+        .star.red.favorite { background-color: #ff0000 !important; box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000, 0 0 60px #ff0000; }
+        .star.blue.favorite { background-color: #0055ff !important; box-shadow: 0 0 15px #0055ff, 0 0 30px #0055ff, 0 0 60px #0055ff; }
+        .star.yellow.favorite { background-color: #ffcc00 !important; box-shadow: 0 0 15px #ffcc00, 0 0 30px #ffcc00, 0 0 60px #ffcc00; }
+        .star.white.favorite { background-color: #ffffff !important; box-shadow: 0 0 15px #ffffff, 0 0 30px #ffffff, 0 0 60px #ffffff; }
+        .star.orange.favorite { background-color: #ff6600 !important; box-shadow: 0 0 15px #ff6600, 0 0 30px #ff6600, 0 0 60px #ff4500; }
+
+        @keyframes pulse-big { from { transform: translate(-50%, -50%) scale(2); opacity: 0.9; } to { transform: translate(-50%, -50%) scale(2.6); opacity: 1; filter: brightness(1.3); } }
+        .star.highlight { border: 3px solid #ff00ff; transform: translate(-50%, -50%) scale(3) !important; z-index: 100; transition: all 0.5s ease; }
+
+        /* --- UI --- */
+        .btn-float { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background-color: #ffffff; color: #000; font-size: 30px; border: none; box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); cursor: pointer; z-index: 100; }
+        .btn-menu { position: fixed; top: 20px; left: 20px; background: transparent; color: white; font-size: 24px; border: none; cursor: pointer; z-index: 100; text-shadow: 0 0 5px black; }
+        .btn-music { position: fixed; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 24px; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        
+        .zoom-controls { position: fixed; bottom: 100px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
+        .btn-zoom { width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+
+        .btn-edit { position: fixed; bottom: 20px; left: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; font-size: 20px; border: 1px solid rgba(255, 255, 255, 0.3); cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .btn-edit.active { background: linear-gradient(to right, #ff9966, #ff5e62); color: white; border: none; box-shadow: 0 0 15px #ff5e62; }
+
+        /* PANNELLO COSTELLAZIONI */
+        #constellationPanel {
+            position: fixed; bottom: 80px; left: 20px;
+            background: rgba(0, 0, 0, 0.85); border: 1px solid #444;
+            padding: 15px; border-radius: 10px; display: none;
+            flex-direction: column; gap: 10px; z-index: 95;
+            backdrop-filter: blur(10px); min-width: 200px;
+        }
+        .btn-small { background: #444; color: white; border: 1px solid #666; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; margin-bottom: 5px; width: 100%; }
+        .btn-small.cyan { background: #00acc1; border-color: #00acc1; font-weight: bold; }
+        .btn-small.red { background: #d32f2f; border-color: #d32f2f; }
+        .btn-small:hover { opacity: 0.9; filter: brightness(1.2); }
+
+        /* Menu Laterale */
+        #sideMenu { position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: rgba(15, 32, 39, 0.98); border-right: 1px solid #333; transition: left 0.3s ease; z-index: 150; padding: 20px; box-sizing: border-box; overflow-y: auto; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        #sideMenu.open { left: 0; }
+        .close-menu { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: white; font-size: 30px; cursor: pointer; }
+        .menu-title { font-size: 22px; margin-bottom: 20px; margin-top: 10px; border-bottom: 1px solid #555; padding-bottom: 10px; }
+        .memory-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 14px; cursor: pointer; }
+        .btn-backup { display: block; width: 100%; padding: 10px; margin-bottom: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; text-align: left; font-size: 14px; font-weight: bold; transition: opacity 0.2s; }
+        
+        #entryModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; flex-direction: column; justify-content: center; align-items: center; }
+        #viewModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 400px; background: #222; padding: 20px; border-radius: 10px; box-shadow: 0 0 20px rgba(255,255,255,0.2); z-index: 300; text-align: center; }
+        
+        textarea { width: 90%; max-width: 500px; height: 200px; background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 10px; padding: 15px; font-family: 'Courier New', monospace; font-size: 16px; margin-bottom: 20px; resize: none; }
+        .btn-save { background: linear-gradient(45deg, #8e2de2, #4a00e0); box-shadow: 0 0 15px #8e2de2; border: none; color: white; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .color-selector { display: flex; gap: 15px; margin-bottom: 20px; }
+        .color-option { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+        .color-option.selected { border: 2px solid white; transform: scale(1.2); }
+        .modal-btn { padding: 10px 20px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .btn-cancel { background-color: #f44336; color: white; }
+        
+        #tutorialModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 500; justify-content: center; align-items: center; }
+        .tutorial-card { background: #1a1a1a; width: 90%; max-width: 350px; padding: 30px; border-radius: 15px; text-align: center; border: 1px solid #444; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        .tut-buttons { display: flex; justify-content: space-between; margin-top: 20px; }
+        .btn-tut { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; background: #444; color: white; }
+        .btn-tut.primary { background: #4CAF50; }
+        
+        #instructionText { font-size: 13px; color: #ccc; margin-bottom: 10px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="musica.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="skyContainer" class="grab">
+        <div id="sky">
+            <svg id="constellationLayer"></svg>
+            <div id="labelsLayer"></div>
+        </div>
+    </div>
+
+    <button class="btn-menu" onclick="toggleMenu()">☰ Ricordi</button>
+    <button class="btn-music" onclick="toggleMusic()">🔇</button>
+    <button class="btn-stats" onclick="openStats()" title="Statistiche">📊</button>
+    
+    <div class="zoom-controls">
+        <button class="btn-zoom" onclick="zoomIn()">+</button>
+        <button class="btn-zoom" onclick="zoomOut()">-</button>
+    </div>
+
+    <button class="btn-edit" onclick="toggleEditMode()" title="Modalità Modifica">✏️</button>
+    
+    <div id="constellationPanel">
+        <div id="instructionText">Modo: <b>Sposta/Collega</b><br><small>Clicca 2 stelle per unire.</small></div>
+        
+        <button class="btn-small cyan" id="btnGroupMode" onclick="toggleGroupMode()">✨ Crea Nuova Costellazione</button>
+        
+        <div id="groupControls" style="display:none;">
+            <div id="groupStatus" style="font-size:12px; color:#00e5ff; margin-bottom:8px; border-bottom:1px solid #444; padding-bottom:5px;">
+                Seleziona stelle...
+            </div>
+            <button class="btn-small" onclick="saveConstellationName()" style="background:#4CAF50; border-color:#4CAF50;">💾 Salva Gruppo</button>
+            <button class="btn-small red" id="btnDeleteGroup" onclick="deleteCurrentGroup()" style="display:none;">🗑 Elimina Gruppo</button>
+            <button class="btn-small" onclick="cancelGroupMode()" style="background:#f44336; border-color:#f44336;">Annulla</button>
+        </div>
+    </div>
+
+    <button class="btn-float" onclick="openWriter()">+</button>
+
+    <div id="sideMenu">
+        <button class="close-menu" onclick="toggleMenu()">×</button>
+        <div class="menu-title" style="color: #ffd700;">★ Preferiti</div>
+        <div id="favList"></div>
+        <div class="menu-title">Tutti i Ricordi</div>
+        <div id="memoryList"></div>
+        <div style="margin-top: 30px; border-top: 1px solid #555; padding-top: 20px;">
+            <div class="menu-title" style="font-size: 18px; border:none;">Gestione Dati</div>
+            <button class="btn-backup" onclick="exportData()" style="background: #4CAF50;">💾 Salva Backup (File App)</button>
+            <button class="btn-backup" onclick="exportText()" style="background: #2196F3;">📄 Scarica come Testo</button>
+            <button class="btn-backup" onclick="document.getElementById('importFile').click()" style="background: #ff9800;">📂 Importa Backup</button>
+            <input type="file" id="importFile" style="display:none" onchange="importData(this)">
+        </div>
+    </div>
+
+    <div id="entryModal">
+        <h2 style="color:white">Come ti senti oggi?</h2>
+        <textarea id="journalInput" placeholder="Scrivi qui i tuoi pensieri..."></textarea>
+        <div class="color-selector">
+            <div class="color-option" style="background:white; border: 2px solid white;" onclick="selectColor('white', this)"></div>
+            <div class="color-option" style="background:#ff5e5e" onclick="selectColor('red', this)"></div>
+            <div class="color-option" style="background:#5eaaff" onclick="selectColor('blue', this)"></div>
+            <div class="color-option" style="background:#ffea5e" onclick="selectColor('yellow', this)"></div>
+            <div class="color-option" style="background:#ffaa33" onclick="selectColor('orange', this)"></div>
+        </div>
+        <div><button class="modal-btn btn-cancel" onclick="closeWriter()">Annulla</button><button class="modal-btn btn-save" onclick="saveEntry()">Accendi Stella</button></div>
+    </div>
+
+    <div id="viewModal">
+        <h3 id="viewDate" style="margin-top:0; margin-bottom: 5px;"></h3>
+        <div id="viewColorInfo"></div>
+        <p id="viewText"></p>
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; border-top: 1px solid #444; padding-top: 15px;">
+            <button class="modal-btn" id="btnFav" onclick="toggleFavorite()" style="background:transparent; border:1px solid #666; color:white;">★ Preferito</button>
+            <button class="modal-btn" onclick="deleteMemory()" style="background:transparent; border:1px solid #ff5e5e; color:#ff5e5e;">🗑 Elimina</button>
+        </div>
+        <br><button class="modal-btn btn-cancel" onclick="closeViewer()">Chiudi</button>
+    </div>
+
+    <div id="tutorialModal">
+        <div class="tutorial-card">
+            <span id="tutIcon" style="font-size:40px; display:block; margin-bottom:15px;"></span>
+            <div id="tutTitle" style="font-size:22px; color:#ffd700; margin-bottom:10px;"></div>
+            <div id="tutText" style="font-size:16px; color:#ccc; margin-bottom:20px;"></div>
+            <div class="tut-buttons"><button class="btn-tut" onclick="prevStep()" id="btnPrev">Indietro</button><button class="btn-tut primary" onclick="nextStep()" id="btnNext">Avanti</button></div>
+        </div>
+    </div>
+
+    <div id="statsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:400; flex-direction:column; align-items:center; overflow-y:auto;">
+        <div style="width:90%; max-width:500px; margin-top:50px; padding-bottom:50px;">
+            <h2 style="text-align:center; color:white;">Analisi del Cielo</h2>
+            
+            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+                <button class="modal-btn" onclick="switchStatTab('time')" id="btnTabTime" style="background:#444; border:1px solid #666;">⏳ Tempo</button>
+                <button class="modal-btn" onclick="switchStatTab('const')" id="btnTabConst" style="background:#444; border:1px solid #666;">✨ Costellazioni</button>
+            </div>
+
+            <div id="statTabTime">
+                <div style="display:flex; justify-content:center; gap:5px; margin-bottom:20px;">
+                    <button class="btn-small" onclick="renderTimeStats('week')">7 Giorni</button>
+                    <button class="btn-small" onclick="renderTimeStats('month')">Mese</button>
+                    <button class="btn-small" onclick="renderTimeStats('year')">Anno</button>
+                    <button class="btn-small" onclick="renderTimeStats('all')">Sempre</button>
+                </div>
+                <h3 id="statTimeTitle" style="text-align:center; color:#ccc;">Ultimi 7 Giorni</h3>
+                
+                <div class="pie-container">
+                    <div id="timePieChart" class="pie-chart"></div>
+                </div>
+                
+                <div id="timeLegend" class="stat-legend"></div>
+            </div>
+
+            <div id="statTabConst" style="display:none;">
+                <h3 style="text-align:center; color:#ccc;">Analisi Costellazioni</h3>
+                <p style="text-align:center; font-size:12px; color:#888; margin-bottom:20px;">
+                    Dettaglio mood per ogni storia creata.
+                </p>
+                
+                <div id="constListStats" style="display:flex; flex-direction:column; gap:20px;"></div>
+            </div>
+
+            <button class="modal-btn btn-cancel" onclick="document.getElementById('statsModal').style.display='none'" style="width:100%; margin-top:30px;">Chiudi</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATI ---
+        let memories = JSON.parse(localStorage.getItem('stardiary_memories')) || [];
+        let lines = JSON.parse(localStorage.getItem('stardiary_lines')) || [];
+        let constellations = JSON.parse(localStorage.getItem('stardiary_labels')) || [];
+
+        let selectedColor = 'white';
+        let currentMemoryId = null;
+        let isEditing = false;
+        let connectStartId = null;
+
+        let currentZoom = 1; let panX = 0; let panY = 0;
+        let isPanning = false; let startPanX = 0, startPanY = 0;
+
+        // VARIABILI PER MODIFICA GRUPPI
+        let isGroupMode = false;
+        let editingConstellationId = null; // ID della costellazione che stiamo modificando (se null = nuova)
+        let selectedForGroup = []; // Array ID stelle
+
+        window.onload = function() {
+            renderStars(); renderLines(); renderLabels(); renderList();
+            checkTutorial(); setupSkyInteraction();
+        };
+
+        // --- RENDER ---
+        function renderStars() {
+            const sky = document.getElementById('sky');
+            document.querySelectorAll('.star').forEach(e => e.remove());
+            memories.forEach(mem => {
+                const star = document.createElement('div');
+                star.classList.add('star', mem.color || 'white');
+                if (mem.isFavorite) star.classList.add('favorite');
+                star.id = 'star-' + mem.id;
+                star.style.left = mem.x + '%'; star.style.top = mem.y + '%';
+                star.style.width = mem.size + 'px'; star.style.height = mem.size + 'px';
+                star.style.animationDelay = (Math.random()*2) + 's';
+                setupStarInteraction(star, mem);
+                sky.appendChild(star);
+            });
+        }
+
+        function renderLines() {
+            const svg = document.getElementById('constellationLayer');
+            svg.innerHTML = '';
+            lines.forEach((line, index) => {
+                const s = memories.find(m => m.id === line.from);
+                const e = memories.find(m => m.id === line.to);
+                if (s && e) {
+                    const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    el.setAttribute('x1', s.x + '%'); el.setAttribute('y1', s.y + '%');
+                    el.setAttribute('x2', e.x + '%'); el.setAttribute('y2', e.y + '%');
+                    el.classList.add('constellation-line');
+                    el.onclick = () => { if(isEditing && !isGroupMode && confirm("Cancellare collegamento?")) { lines.splice(index, 1); saveData(); renderLines(); } };
+                    svg.appendChild(el);
+                }
+            });
+        }
+
+        function renderLabels() {
+            const layer = document.getElementById('labelsLayer');
+            layer.innerHTML = '';
+            constellations.filter(c => c.stars.length > 0).forEach((c) => {
+                let totalX = 0, totalY = 0, count = 0;
+                c.stars.forEach(sid => {
+                    const m = memories.find(x => x.id === sid);
+                    if(m) { totalX += m.x; totalY += m.y; count++; }
+                });
+
+                if(count > 0) {
+                    const label = document.createElement('div');
+                    label.className = 'constellation-label';
+                    label.innerText = c.name;
+                    label.style.left = (totalX / count) + '%';
+                    label.style.top = (totalY / count) + '%';
+                    
+                    // CLICK SU LABEL: Apre modifica se in Edit Mode
+                    label.onclick = (e) => {
+                        e.stopPropagation();
+                        if(isEditing) {
+                            if(isGroupMode) return; // Già editando
+                            startEditingConstellation(c);
+                        }
+                    };
+                    layer.appendChild(label);
+                }
+            });
+        }
+
+        // --- GESTIONE MODIFICA COSTELLAZIONI ---
+        function startEditingConstellation(constellation) {
+            // Entriamo in modalità gruppo ma caricando i dati esistenti
+            toggleGroupMode(); 
+            editingConstellationId = constellation.id;
+            selectedForGroup = [...constellation.stars]; // Copia le stelle
+            
+            // Aggiorna UI
+            document.getElementById('instructionText').innerHTML = "Modifica: <b>" + constellation.name + "</b>";
+            document.getElementById('groupStatus').innerHTML = selectedForGroup.length + " stelle selezionate";
+            document.getElementById('btnGroupMode').style.display = 'none'; // Nascondi tasto crea
+            document.getElementById('btnDeleteGroup').style.display = 'block'; // Mostra tasto elimina
+
+            // Evidenzia visualmente
+            updateSelectionVisuals();
+        }
+
+        function toggleGroupMode() {
+            isGroupMode = true;
+            editingConstellationId = null; // Di base è nuova
+            selectedForGroup = [];
+            
+            document.getElementById('instructionText').innerHTML = "Modo: <b>Creazione Gruppo</b>";
+            document.getElementById('groupStatus').innerHTML = "0 stelle selezionate";
+            
+            document.getElementById('btnGroupMode').style.display = 'none';
+            document.getElementById('groupControls').style.display = 'block';
+            document.getElementById('btnDeleteGroup').style.display = 'none';
+            
+            connectStartId = null; 
+            document.querySelectorAll('.star').forEach(s => s.classList.remove('selected-connect'));
+        }
+
+        function cancelGroupMode() {
+            isGroupMode = false;
+            editingConstellationId = null;
+            selectedForGroup = [];
+            
+            document.getElementById('instructionText').innerHTML = "Modo: <b>Sposta/Collega</b><br><small>Clicca 2 stelle per unire.</small>";
+            document.getElementById('btnGroupMode').style.display = 'block';
+            document.getElementById('groupControls').style.display = 'none';
+            
+            updateSelectionVisuals();
+        }
+
+        function updateSelectionVisuals() {
+            document.querySelectorAll('.star').forEach(s => {
+                const id = parseInt(s.id.split('-')[1]);
+                if (selectedForGroup.includes(id)) s.classList.add('selected-group');
+                else s.classList.remove('selected-group');
+            });
+        }
+
+        function saveConstellationName() {
+            if (selectedForGroup.length < 1) { alert("Seleziona almeno una stella!"); return; }
+            
+            // Chiedi nome (precompilato se modifica)
+            let defaultName = "";
+            if (editingConstellationId) {
+                const existing = constellations.find(c => c.id === editingConstellationId);
+                if(existing) defaultName = existing.name;
+            }
+            
+            const name = prompt("Nome della Costellazione:", defaultName);
+            if (!name || name.trim() === "") return;
+
+            // NUOVO: Chiedi se tracciare linee automatiche
+            const autoLines = confirm("Vuoi unire automaticamente queste stelle con delle linee bianche?");
+
+            if (editingConstellationId) {
+                // AGGIORNA ESISTENTE
+                const idx = constellations.findIndex(c => c.id === editingConstellationId);
+                if (idx !== -1) {
+                    constellations[idx].name = name.trim();
+                    constellations[idx].stars = [...selectedForGroup];
+                }
+            } else {
+                // CREA NUOVA
+                constellations.push({
+                    id: Date.now(),
+                    name: name.trim(),
+                    stars: [...selectedForGroup]
+                });
+            }
+
+            // LOGICA LINEE AUTOMATICHE (Collega in sequenza di array)
+            if (autoLines && selectedForGroup.length > 1) {
+                for(let i=0; i<selectedForGroup.length-1; i++) {
+                    const from = selectedForGroup[i];
+                    const to = selectedForGroup[i+1];
+                    // Evita duplicati
+                    const exists = lines.some(l => (l.from===from && l.to===to)||(l.from===to && l.to===from));
+                    if (!exists) lines.push({from, to});
+                }
+            }
+
+            saveData();
+            renderLabels();
+            renderLines(); // Aggiorna linee
+            cancelGroupMode();
+        }
+
+        function deleteCurrentGroup() {
+            if(editingConstellationId && confirm("Eliminare questo nome? (Le stelle resteranno)")) {
+                constellations = constellations.filter(c => c.id !== editingConstellationId);
+                saveData();
+                renderLabels();
+                cancelGroupMode();
+            }
+        }
+
+        // --- INTERAZIONE ---
+        function setupStarInteraction(starElement, memData) {
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            function startDrag(e) {
+                if (!isEditing || isGroupMode) return;
+                e.stopPropagation(); isDragging = true;
+                const cX = e.clientX || e.touches[0].clientX; const cY = e.clientY || e.touches[0].clientY;
+                startX = cX; startY = cY; initialLeft = memData.x; initialTop = memData.y;
+                document.addEventListener('mousemove', moveDrag); document.addEventListener('touchmove', moveDrag, {passive:false});
+                document.addEventListener('mouseup', stopDrag); document.addEventListener('touchend', stopDrag);
+            }
+
+            function moveDrag(e) {
+                if (!isDragging) return; e.preventDefault();
+                const cX = e.clientX || e.touches[0].clientX; const cY = e.clientY || e.touches[0].clientY;
+                memData.x = initialLeft + (((cX-startX)/currentZoom)/window.innerWidth)*100;
+                memData.y = initialTop + (((cY-startY)/currentZoom)/window.innerHeight)*100;
+                starElement.style.left = memData.x+'%'; starElement.style.top = memData.y+'%';
+                renderLines(); renderLabels();
+            }
+
+            function stopDrag() { if(isDragging){ isDragging=false; document.removeEventListener('mousemove', moveDrag); document.removeEventListener('touchmove', moveDrag); document.removeEventListener('mouseup', stopDrag); document.removeEventListener('touchend', stopDrag); saveData(); } }
+
+            starElement.addEventListener('mousedown', startDrag); starElement.addEventListener('touchstart', startDrag, {passive:false});
+
+            starElement.onclick = (e) => {
+                if (isEditing) {
+                    if (isGroupMode) {
+                        // LOGICA SELEZIONE GRUPPO
+                        const idx = selectedForGroup.indexOf(memData.id);
+                        if (idx === -1) {
+                            selectedForGroup.push(memData.id); // Aggiunge
+                        } else {
+                            selectedForGroup.splice(idx, 1); // Rimuove
+                        }
+                        updateSelectionVisuals();
+                        document.getElementById('groupStatus').innerHTML = selectedForGroup.length + " stelle selezionate";
+                    } else {
+                        // LOGICA CONNESSIONE LINEE (VECCHIA)
+                        if (connectStartId === null) {
+                            connectStartId = memData.id; starElement.classList.add('selected-connect');
+                        } else {
+                            if (connectStartId !== memData.id) {
+                                const exists = lines.some(l => (l.from===connectStartId && l.to===memData.id)||(l.from===memData.id && l.to===connectStartId));
+                                if (!exists) { lines.push({ from: connectStartId, to: memData.id }); saveData(); renderLines(); }
+                            }
+                            document.querySelectorAll('.star').forEach(s => s.classList.remove('selected-connect'));
+                            connectStartId = null;
+                        }
+                    }
+                } else {
+                    viewMemory(memData);
+                }
+            };
+        }
+
+        // --- SISTEMA UI E CORE ---
+        function toggleEditMode() {
+            isEditing = !isEditing;
+            const b = document.querySelector('.btn-edit');
+            const p = document.getElementById('constellationPanel');
+            if (isEditing) {
+                document.body.classList.add('editing'); b.classList.add('active'); p.style.display = 'flex'; cancelGroupMode();
+            } else {
+                document.body.classList.remove('editing'); b.classList.remove('active'); p.style.display = 'none'; cancelGroupMode();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('stardiary_memories', JSON.stringify(memories));
+            localStorage.setItem('stardiary_lines', JSON.stringify(lines));
+            localStorage.setItem('stardiary_labels', JSON.stringify(constellations));
+        }
+        
+        function exportData() {
+            const data = { memories, lines, labels: constellations };
+            const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'backup_diario.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+
+        function importData(input) {
+            const file = input.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const d = JSON.parse(e.target.result);
+                    if(d.memories && confirm("Sovrascrivere tutto?")) {
+                        memories = d.memories; lines = d.lines || []; constellations = d.labels || [];
+                        saveData(); location.reload();
+                    }
+                } catch(err) { alert("File non valido"); }
+            };
+            reader.readAsText(file);
+        }
+        
+        function saveEntry() {
+            const t = document.getElementById('journalInput').value; if(!t.trim())return;
+            const now = new Date();
+            let x = 50+(Math.random()*20-10); let y = 50+(Math.random()*20-10);
+            memories.push({ id: Date.now(), text: t, date: now.toLocaleDateString()+' '+now.toLocaleTimeString(), x, y, size: Math.random()*3+2, color: selectedColor, isFavorite: false });
+            saveData(); closeWriter(); renderStars(); renderList();
+            currentZoom=1; panX=0; panY=0; updateSkyTransform();
+        }
+        function updateSkyTransform() { document.getElementById('sky').style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`; }
+        function zoomIn() { if(currentZoom<3) { currentZoom+=0.2; updateSkyTransform(); } }
+        function zoomOut() { if(currentZoom>0.5) { currentZoom-=0.2; updateSkyTransform(); } }
+        window.addEventListener('wheel', function(e) {
+            
+            e.preventDefault();
+            
+            if (e.deltaY < 0) zoomIn();
+            else zoomOut();
+        }, { passive: false });
+        function setupSkyInteraction() {
+            const c = document.getElementById('skyContainer');
+            c.addEventListener('mousedown', e => { if(e.target.closest('.star')||e.target.tagName==='BUTTON')return; isPanning=true; startPanX=e.clientX-panX; startPanY=e.clientY-panY; c.classList.add('grabbing'); });
+            window.addEventListener('mousemove', e => { if(!isPanning)return; e.preventDefault(); panX=e.clientX-startPanX; panY=e.clientY-startPanY; updateSkyTransform(); });
+            window.addEventListener('mouseup', () => { isPanning=false; c.classList.remove('grabbing'); });
+            c.addEventListener('touchstart', e => { if(e.target.closest('.star')||e.target.tagName==='BUTTON')return; isPanning=true; startPanX=e.touches[0].clientX-panX; startPanY=e.touches[0].clientY-panY; }, {passive:false});
+            window.addEventListener('touchmove', e => { if(!isPanning)return; panX=e.touches[0].clientX-startPanX; panY=e.touches[0].clientY-startPanY; updateSkyTransform(); }, {passive:false});
+            window.addEventListener('touchend', () => isPanning=false);
+        }
+        
+        function toggleMenu() { document.getElementById('sideMenu').classList.toggle('open'); }
+        function toggleMusic() { const m=document.getElementById('bgMusic'); const b=document.querySelector('.btn-music'); if(m.paused){m.play();b.innerHTML='🎵';b.style.borderColor='#00ff00';}else{m.pause();b.innerHTML='🔇';b.style.borderColor='rgba(255,255,255,0.3)';} }
+        function openWriter() { document.getElementById('entryModal').style.display = 'flex'; }
+        function closeWriter() { document.getElementById('entryModal').style.display = 'none'; document.getElementById('journalInput').value = ''; }
+        function closeViewer() { document.getElementById('viewModal').style.display = 'none'; }
+        function selectColor(c, el) { selectedColor=c; document.querySelectorAll('.color-option').forEach(e=>e.style.border='2px solid transparent'); el.style.border='2px solid white'; }
+        function viewMemory(m) { currentMemoryId=m.id; document.getElementById('viewDate').innerText=m.date; document.getElementById('viewColorInfo').innerText="Colore: "+m.color; document.getElementById('viewText').innerText=m.text; const b=document.getElementById('btnFav'); if(m.isFavorite){b.innerText='★ Preferito (Sì)';}else{b.innerText='☆ Aggiungi a Preferiti';} document.getElementById('viewModal').style.display='block'; }
+        function toggleFavorite() { const m=memories.find(x=>x.id===currentMemoryId); if(m){m.isFavorite=!m.isFavorite; saveData(); viewMemory(m); renderStars(); renderList();} }
+        function deleteMemory() { if(confirm("Spegnere questa stella?")){ memories=memories.filter(x=>x.id!==currentMemoryId); lines=lines.filter(l=>l.from!==currentMemoryId && l.to!==currentMemoryId); constellations.forEach(c=>{c.stars=c.stars.filter(id=>id!==currentMemoryId)}); saveData(); closeViewer(); renderStars(); renderLines(); renderLabels(); renderList(); } }
+        function exportText() { let c="IL MIO DIARIO STELLARE\n\n"; [...memories].sort((a,b)=>a.id-b.id).forEach(m=>{c+=`DATA: ${m.date}\nCOLORE: ${m.color}\n${m.text}\n------------------\n`;}); const b=new Blob([c],{type:"text/plain"}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='diario.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+        function renderList() { const l=document.getElementById('memoryList'); const f=document.getElementById('favList'); l.innerHTML=''; f.innerHTML=''; [...memories].reverse().forEach(m=>{ const i=document.createElement('div'); i.className='memory-item'; i.innerHTML=`<span class="color-dot" style="background:${m.color==='red'?'#ff5e5e':m.color==='blue'?'#5eaaff':m.color==='yellow'?'#ffea5e':m.color==='orange'?'#ffaa33':'white'}"></span> ${m.date} - ${m.text.substring(0,20)}...`; i.onclick=()=>{currentZoom=1;panX=0;panY=0;updateSkyTransform();viewMemory(m);setTimeout(()=>{document.getElementById('star-'+m.id).classList.add('highlight');setTimeout(()=>document.getElementById('star-'+m.id).classList.remove('highlight'),2000);},300);}; if(m.isFavorite)f.appendChild(i); else l.appendChild(i); }); if(f.innerHTML==='')f.innerHTML='<div style="font-size:12px; color:#666; padding:5px;">Nessun preferito</div>'; }
+
+        // TUTORIAL NUOVO
+        const tutorialSteps = [
+            { icon: "👋", title: "Benvenut*", text: "Nello spazio nessuno può sentire i tuoi pensieri, ma potrai vederli brillare. In questo spazio sicuro, ogni tuo pensiero diventa una stella. Il cielo si riempirà col tempo." },
+            { icon: "🔍", title: "Navigazione", text: "Usa la rotellina (o i tasti + e -) per Zoomare. Clicca e trascina lo sfondo nero per spostarti ed esplorare il cielo." },
+            { icon: "+", title: "Nuovo Ricordo", text: "Usa il tasto + in basso a destra per scrivere come ti senti. Puoi scegliere il colore della tua stella in base al tuo umore." },
+            { icon: "☰", title: "I tuoi Ricordi", text: "Usa il menu Ricordi in alto a sinistra per rivedere tutti i tuoi pensieri ordinati o ritrovare i preferiti." },
+            { icon: "✏️", title: "Costellazioni", text: "Clicca la matita. Puoi unire due stelle, oppure cliccare 'Crea Nuova Costellazione' per selezionare tante stelle e dare un nome unico." },
+            { icon: "🎵", title: "Atmosfera", text: "Usa l'icona in alto a destra per attivare la musica di sottofondo." }
+        ];
+        let currentStep=0;
+        function checkTutorial() { if(!localStorage.getItem('tutorial_seen_v6')) { document.getElementById('tutorialModal').style.display='flex'; showStep(0); } }
+        function showStep(i) { currentStep=i; const s=tutorialSteps[i]; document.getElementById('tutIcon').innerText=s.icon; document.getElementById('tutTitle').innerText=s.title; document.getElementById('tutText').innerText=s.text; document.getElementById('btnPrev').style.visibility=i===0?'hidden':'visible'; document.getElementById('btnNext').innerText=i===tutorialSteps.length-1?'Inizia':'Avanti'; }
+        function nextStep() { if(currentStep<tutorialSteps.length-1)showStep(currentStep+1); else { document.getElementById('tutorialModal').style.display='none'; localStorage.setItem('tutorial_seen_v6','true'); } }
+        function prevStep() { if(currentStep>0)showStep(currentStep-1); }
+
+        // --- FUNZIONI STATISTICHE ---
+
+        function openStats() {
+            document.getElementById('statsModal').style.display = 'flex';
+            switchStatTab('time'); // Apre di default sul tempo
+            renderTimeStats('all'); // Mostra "Sempre" di default
+        }
+
+        function switchStatTab(tab) {
+            const tTime = document.getElementById('statTabTime');
+            const tConst = document.getElementById('statTabConst');
+            const bTime = document.getElementById('btnTabTime');
+            const bConst = document.getElementById('btnTabConst');
+
+            if (tab === 'time') {
+                tTime.style.display = 'block'; tConst.style.display = 'none';
+                bTime.classList.add('tab-active'); bConst.classList.remove('tab-active');
+            } else {
+                tTime.style.display = 'none'; tConst.style.display = 'block';
+                bTime.classList.remove('tab-active'); bConst.classList.add('tab-active');
+                renderConstStats();
+            }
+        }
+
+        // CALCOLO STATISTICHE TEMPORALI
+        function renderTimeStats(period) {
+            const now = new Date();
+            let filtered = [];
+            let title = "";
+
+            if (period === 'all') {
+                filtered = memories;
+                title = "Statistiche: Sempre";
+            } else if (period === 'week') {
+                const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                filtered = memories.filter(m => {
+                    // Convertiamo la data italiana dd/mm/yyyy in oggetto Date
+                    const parts = m.date.split(' ')[0].split('/');
+                    const memDate = new Date(parts[2], parts[1]-1, parts[0]);
+                    return memDate >= oneWeekAgo;
+                });
+                title = "Ultimi 7 Giorni";
+            } else if (period === 'month') {
+                filtered = memories.filter(m => {
+                    const parts = m.date.split(' ')[0].split('/');
+                    return parseInt(parts[1]) === (now.getMonth() + 1) && parseInt(parts[2]) === now.getFullYear();
+                });
+                title = "Questo Mese";
+            } else if (period === 'year') {
+                filtered = memories.filter(m => {
+                    const parts = m.date.split(' ')[0].split('/');
+                    return parseInt(parts[2]) === now.getFullYear();
+                });
+                title = "Anno " + now.getFullYear();
+            }
+
+            document.getElementById('statTimeTitle').innerText = title;
+            drawPieChart(filtered, 'timePieChart', 'timeLegend');
+        }
+
+       // NUOVA FUNZIONE STATISTICHE COSTELLAZIONI (Dettagliata)
+        function renderConstStats() {
+            const listDiv = document.getElementById('constListStats');
+            listDiv.innerHTML = ''; // Pulisci lista
+            
+            if (constellations.length === 0) {
+                listDiv.innerHTML = '<p style="text-align:center; color:#666;">Nessuna costellazione creata.</p>';
+                return;
+            }
+
+            // Per ogni costellazione creiamo una scheda
+            constellations.forEach((c, index) => {
+                // Recupera le memorie di questa costellazione
+                const cMemories = memories.filter(m => c.stars.includes(m.id));
+                
+                // Crea il contenitore della scheda
+                const card = document.createElement('div');
+                card.style.cssText = "background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; border:1px solid #444;";
+                
+                // Genera ID unici per grafico e legenda
+                const chartId = 'chart-const-' + index;
+                const legendId = 'legend-const-' + index;
+
+                // HTML interno della scheda
+                card.innerHTML = `
+                    <div style="font-size:16px; font-weight:bold; color:#00e5ff; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px;">
+                        ${c.name} <span style="font-size:12px; color:#aaa; font-weight:normal;">(${c.stars.length} stelle)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <div id="${chartId}" style="width:80px; height:80px; border-radius:50%; flex-shrink:0; background:#333;"></div>
+                        <div id="${legendId}" style="flex-grow:1; font-size:11px; display:flex; flex-direction:column; gap:3px;"></div>
+                    </div>
+                `;
+                
+                listDiv.appendChild(card);
+
+                // Disegna il grafico specifico per questa costellazione
+                drawPieChart(cMemories, chartId, legendId, true); // true = versione compatta
+            });
+        }
+
+        // MOTORE GRAFICO (Generico)
+        function drawPieChart(dataArray, chartId, legendId, isCompact = false) {
+            const chart = document.getElementById(chartId);
+            const legend = document.getElementById(legendId);
+            legend.innerHTML = '';
+
+            if (!dataArray || dataArray.length === 0) {
+                chart.style.background = '#333';
+                legend.innerHTML = '<span style="color:#666">Nessun dato</span>';
+                return;
+            }
+
+            // Conta i colori
+            const counts = {};
+            dataArray.forEach(m => {
+                const c = m.color || 'white';
+                counts[c] = (counts[c] || 0) + 1;
+            });
+
+            // MAPPA COLORI "PREFERITI" (Tonalità accese/centrali)
+            const colorMap = {
+                'white': '#ffffff',  // Bianco puro
+                'red': '#ff0000',    // Rosso Supernova
+                'blue': '#0055ff',   // Blu Elettrico
+                'yellow': '#ffcc00', // Giallo Oro
+                'orange': '#ff6600'  // Arancione Vivido
+            };
+            
+            // Etichette (solo per versione grande)
+            const labelMap = { 'white':'Bianco','red':'Rosso','blue':'Blu','yellow':'Giallo','orange':'Arancione' };
+
+            let gradientStr = "";
+            let currentDeg = 0;
+            const total = dataArray.length;
+
+            for (const [color, count] of Object.entries(counts)) {
+                const deg = (count / total) * 360;
+                const cssColor = colorMap[color] || '#ccc';
+                gradientStr += `${cssColor} ${currentDeg}deg ${currentDeg + deg}deg, `;
+                
+                const perc = Math.round((count / total) * 100);
+                
+                // Legenda Diversa se è Compatta (Costellazioni) o Full (Tempo)
+                if(isCompact) {
+                    // Solo pallino e percentuale per risparmiare spazio
+                    legend.innerHTML += `
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <span><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${cssColor}; margin-right:5px;"></span>${perc}%</span>
+                        </div>`;
+                } else {
+                    // Legenda completa per tab Tempo
+                    legend.innerHTML += `
+                        <div class="legend-item">
+                            <div style="display:flex; align-items:center;">
+                                <span class="legend-color" style="background:${cssColor}"></span>
+                                <span>${labelMap[color] || color}</span>
+                            </div>
+                            <div><b>${count}</b> (${perc}%)</div>
+                        </div>`;
+                }
+                currentDeg += deg;
+            }
+
+            chart.style.background = `conic-gradient(${gradientStr.slice(0, -2)})`;
+        }
+    </script>
+</body>
+</html>
