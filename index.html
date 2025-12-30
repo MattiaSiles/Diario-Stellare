@@ -16,6 +16,24 @@
             user-select: none;
         }
 
+        /* STILE RICERCA */
+        #searchInput::placeholder { color: rgba(255,255,255,0.5); }
+        
+        /* Classe per le stelle che NON corrispondono alla ricerca */
+        .star.dimmed {
+            opacity: 0.05 !important; /* Diventano quasi invisibili */
+            transform: scale(0.5) !important; /* Si rimpiccioliscono */
+            filter: grayscale(100%); /* Perdono colore */
+            transition: all 0.5s ease; /* Transizione morbida */
+            pointer-events: none; /* Non puoi cliccarle per sbaglio */
+        }
+
+        /* Le linee delle costellazioni devono sparire se cerchi */
+        .searching #constellationLayer {
+            opacity: 0.1;
+            transition: opacity 0.5s;
+        }
+
         /* STILE TASTO STATISTICHE ESTERNO */
         .btn-stats {
             position: fixed;
@@ -226,6 +244,16 @@
     </div>
 
     <button class="btn-float" onclick="openWriter()">+</button>
+
+    <div id="searchContainer" style="position:fixed; top:20px; right:20px; z-index:100; display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+        <div style="background:rgba(255,255,255,0.1); backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:5px 15px; display:flex; align-items:center;">
+            <span style="font-size:18px; margin-right:10px;">🔍</span>
+            <input type="text" id="searchInput" placeholder="Cerca un ricordo..." onkeyup="searchStars()" 
+                   style="background:transparent; border:none; color:white; font-family:'Courier New', monospace; outline:none; width:150px;">
+            <span id="clearSearch" onclick="resetSearch()" style="cursor:pointer; display:none; color:#aaa; margin-left:5px;">✖</span>
+        </div>
+        <div id="searchCounter" style="color:#aaa; font-size:12px; margin-right:10px; display:none;"></div>
+    </div>
 
     <div id="sideMenu">
         <button class="close-menu" onclick="toggleMenu()">×</button>
@@ -830,6 +858,73 @@
             }
 
             chart.style.background = `conic-gradient(${gradientStr.slice(0, -2)})`;
+        }
+
+        // --- FUNZIONI TELESCOPIO (RICERCA) ---
+
+        function searchStars() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const counter = document.getElementById('searchCounter');
+            const clearBtn = document.getElementById('clearSearch');
+            const sky = document.getElementById('sky');
+
+            // Gestione visiva tasto X e classe body
+            if (filter.length > 0) {
+                clearBtn.style.display = 'block';
+                document.body.classList.add('searching'); // Utile per nascondere costellazioni
+            } else {
+                resetSearch();
+                return;
+            }
+
+            let foundCount = 0;
+
+            // Scorre tutti i ricordi
+            memories.forEach(mem => {
+                const starEl = document.getElementById(`star-${mem.id}`);
+                if (!starEl) return;
+
+                // Cerca nel testo e nella data
+                const textMatch = mem.text.toLowerCase().includes(filter);
+                const dateMatch = mem.date.includes(filter);
+
+                if (textMatch || dateMatch) {
+                    // TROVATO: Rimuovi oscuramento
+                    starEl.classList.remove('dimmed');
+                    // Aggiungi un leggero bagliore extra per evidenziarla
+                    starEl.style.boxShadow = `0 0 15px ${starEl.style.backgroundColor}`;
+                    foundCount++;
+                } else {
+                    // NON TROVATO: Oscura
+                    starEl.classList.add('dimmed');
+                    starEl.style.boxShadow = 'none';
+                }
+            });
+
+            // Aggiorna contatore
+            counter.style.display = 'block';
+            counter.innerText = foundCount === 0 ? "Nessuna stella trovata" : 
+                                foundCount === 1 ? "1 stella trovata" : 
+                                `${foundCount} stelle trovate`;
+        }
+
+        function resetSearch() {
+            const input = document.getElementById('searchInput');
+            const counter = document.getElementById('searchCounter');
+            const clearBtn = document.getElementById('clearSearch');
+
+            input.value = '';
+            clearBtn.style.display = 'none';
+            counter.style.display = 'none';
+            document.body.classList.remove('searching');
+
+            // Riporta tutte le stelle alla normalità
+            document.querySelectorAll('.star').forEach(el => {
+                el.classList.remove('dimmed');
+                // Resetta box-shadow (rimuovendo l'inline style così torna a quello del CSS)
+                el.style.boxShadow = ''; 
+            });
         }
     </script>
 </body>
