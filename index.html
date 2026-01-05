@@ -152,6 +152,28 @@
         @keyframes pulse-big { from { transform: translate(-50%, -50%) scale(2); opacity: 0.9; } to { transform: translate(-50%, -50%) scale(2.6); opacity: 1; filter: brightness(1.3); } }
         .star.highlight { border: 3px solid #ff00ff; transform: translate(-50%, -50%) scale(3) !important; z-index: 100; transition: all 0.5s ease; }
 
+        /* --- SATELLITE (ALLEGATO FOTO) --- */
+        .satellite {
+            position: absolute;
+            top: 50%; 
+            left: 50%;
+            width: 2px; 
+            height: 2px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 0 4px #ffffff;
+            pointer-events: none;
+            
+            /* L'animazione magica */
+            animation: satelliteOrbit 6s linear infinite;
+        }
+
+        /* Definisce il movimento circolare */
+        @keyframes satelliteOrbit {
+            from { transform: rotate(0deg) translateX(16px); } /* 16px è la distanza dalla stella */
+            to   { transform: rotate(360deg) translateX(16px); }
+        }
+
         .nebula-container {
             position: absolute;
             transform: translate(-50%, -50%); /* Centra esattamente come le stelle */
@@ -529,6 +551,13 @@
                     star.style.width = mem.size + 'px'; star.style.height = mem.size + 'px';
                     star.style.animationDelay = (Math.random()*2) + 's';
                     setupStarInteraction(star, mem);
+                    if (mem.image) {
+                        const sat = document.createElement('div');
+                        sat.className = 'satellite';
+                        // Se vuoi che il satellite abbia lo stesso colore della stella, scommenta questa riga:
+                        // sat.style.backgroundColor = getComputedStyle(star).backgroundColor; 
+                        star.appendChild(sat);
+                    }
                     sky.appendChild(star);
                 }
             });
