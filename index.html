@@ -250,6 +250,50 @@
         .btn-tut.primary { background: #4CAF50; }
         
         #instructionText { font-size: 13px; color: #ccc; margin-bottom: 10px; line-height: 1.4; }
+
+        /* --- ANIMAZIONE GALASSIA --- */
+
+        /* 1. Il motore della rotazione (Il contenitore #galaxy) */
+        @keyframes galaxySpin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        /* 2. La contro-rotazione (Per tenere le stelle e i testi dritti) */
+        @keyframes counterSpin {
+            from { transform: translate(-50%, -50%) rotate(360deg); }
+            to   { transform: translate(-50%, -50%) rotate(0deg); }
+        }
+
+        /* Applichiamo la rotazione al nuovo contenitore */
+        #galaxy {
+            animation: galaxySpin 120s linear infinite; /* 4 minuti per un giro completo */
+            transform-origin: 50% 50%;
+        }
+
+        /* Applichiamo la contro-rotazione agli oggetti */
+        .star, .constellation-label, .nebula-container {
+            animation: counterSpin 120s linear infinite !important; 
+        }
+
+        /* --- GESTIONE PAUSA INTELLIGENTE --- */
+        body.user-interacting #galaxy, body.manual-pause #galaxy,
+        body.user-interacting .star,   body.manual-pause .star,
+        body.user-interacting .constellation-label, body.manual-pause .constellation-label,
+        body.user-interacting .nebula-container,    body.manual-pause .nebula-container,
+        body.user-interacting .nebula-particle,     body.manual-pause .nebula-particle,
+        body.manual-pause .satellite {
+            animation-play-state: paused !important;
+        }
+        
+        /* Stile per il tasto quando è attivo (Rosso/Acceso) */
+        .btn-music.active-lock {
+            background: rgba(255, 90, 90, 0.3);
+            border-color: #ff5a5a;
+            box-shadow: 0 0 10px #ff5a5a;
+        }
+
+
     </style>
 </head>
 <body>
@@ -260,13 +304,27 @@
 
     <div id="skyContainer" class="grab">
         <div id="sky">
-            <svg id="constellationLayer"></svg>
-            <div id="labelsLayer"></div>
+            <div id="galaxy" style="width:100%; height:100%; position:absolute; top:0; left:0;">
+                
+                <div id="galacticCenter" style="
+                    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                    width: 150px; height: 150px; border-radius: 50%;
+                    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0) 70%);
+                    pointer-events: none; z-index: 0;">
+                </div>
+
+
+                <svg id="constellationLayer"></svg>
+                <div id="labelsLayer"></div>
+            </div>
         </div>
     </div>
 
     <button class="btn-menu" onclick="toggleMenu()">☰ Ricordi</button>
     <button class="btn-music" onclick="toggleMusic()">🔇</button>
+    <button id="btnRotation" onclick="toggleRotation()" class="btn-music" style="top: 80px;" title="Blocca/Sblocca Rotazione">
+        ⏸️
+    </button>
     <button class="btn-stats" onclick="openStats()" title="Statistiche">📊</button>
     
     <div class="zoom-controls">
@@ -491,7 +549,7 @@
 
         // --- RENDER ---
         function renderStars() {
-            const sky = document.getElementById('sky');
+            const sky = document.getElementById('galaxy');
             // Rimuoviamo sia le stelle vecchie CHE le nebulose vecchie
             document.querySelectorAll('.star, .nebula-container').forEach(e => e.remove());
             
@@ -876,6 +934,28 @@
         
         function toggleMenu() { document.getElementById('sideMenu').classList.toggle('open'); }
         function toggleMusic() { const m=document.getElementById('bgMusic'); const b=document.querySelector('.btn-music'); if(m.paused){m.play();b.innerHTML='🎵';b.style.borderColor='#00ff00';}else{m.pause();b.innerHTML='🔇';b.style.borderColor='rgba(255,255,255,0.3)';} }
+        // --- GESTIONE TASTO PAUSA ---
+        let isRotationLocked = false;
+
+        function toggleRotation() {
+            isRotationLocked = !isRotationLocked;
+            const btn = document.getElementById('btnRotation');
+            
+            if (isRotationLocked) {
+                // BLOCCA TUTTO
+                document.body.classList.add('manual-pause');
+                btn.innerHTML = '▶️'; // Mostra icona Play per riprendere
+                btn.classList.add('active-lock'); // Lo illumina di rosso
+            } else {
+                // SBLOCCA (Riprende la logica smart)
+                document.body.classList.remove('manual-pause');
+                btn.innerHTML = '⏸️'; // Mostra icona Pausa
+                btn.classList.remove('active-lock');
+                
+                // Opzionale: simula un movimento mouse per riattivare il timer smart
+                handleUserActivity(); 
+            }
+        }
         function openWriter() { document.getElementById('entryModal').style.display = 'flex'; }
         function closeWriter() { 
             document.getElementById('entryModal').style.display = 'none'; 
@@ -1164,6 +1244,55 @@
                 el.style.boxShadow = ''; 
             });
         }
+
+
+        // --- GESTIONE ROTAZIONE SMART ---
+        let rotationTimer = null;
+        const interactionClass = 'user-interacting';
+
+        // Funzione per capire se c'è una finestra aperta (Modals)
+        function isAnyModalOpen() {
+            const modals = [
+                'entryModal', 
+                'viewModal', 
+                'statsModal', 
+                'tutorialModal', 
+                'constellationPanel' // Consideriamo anche il pannello modifica come "finestra"
+            ];
+            
+            // Se anche solo uno di questi è visibile (display != none), ritorna VERO
+            return modals.some(id => {
+                const el = document.getElementById(id);
+                return el && window.getComputedStyle(el).display !== 'none';
+            });
+        }
+
+        function handleUserActivity() {
+            // 1. L'utente si sta muovendo: PAUSA SUBITO
+            document.body.classList.add(interactionClass);
+
+            // 2. Resettiamo il timer precedente (se c'era)
+            if (rotationTimer) clearTimeout(rotationTimer);
+
+            // 3. Impostiamo il nuovo timer: se stai fermo per 2000ms (2 secondi)...
+            rotationTimer = setTimeout(() => {
+                // ...e SE non ci sono finestre aperte...
+                if (!isAnyModalOpen()) {
+                    // ...ALLORA riprendi a girare (togli la classe)
+                    document.body.classList.remove(interactionClass);
+                }
+            }, 2000);
+        }
+
+        // Ascoltiamo il movimento del mouse su tutto lo schermo
+        window.addEventListener('mousemove', handleUserActivity);
+        window.addEventListener('touchstart', handleUserActivity, {passive: true});
+        window.addEventListener('click', handleUserActivity);
+        
+        // Controllo extra: Se chiudo una finestra, voglio ripartire dopo 2 sec o subito?
+        // Per sicurezza, quando chiudi una finestra, il movimento del mouse riattiverà il ciclo.
+
+
     </script>
 </body>
 
