@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -7,9 +8,11 @@
     <style>
         /* --- STILE GENERALE --- */
         body {
-            margin: 0; padding: 0;
+            margin: 0;
+            padding: 0;
             background: radial-gradient(ellipse at center, #010105 0%, #000000 60%, #020c2b 100%);
-            height: 100vh; width: 100vw;
+            height: 100vh;
+            width: 100vw;
             overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
@@ -17,15 +20,22 @@
         }
 
         /* STILE RICERCA */
-        #searchInput::placeholder { color: rgba(255,255,255,0.5); }
-        
+        #searchInput::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
         /* Classe per le stelle che NON corrispondono alla ricerca */
         .star.dimmed {
-            opacity: 0.05 !important; /* Diventano quasi invisibili */
-            transform: scale(0.5) !important; /* Si rimpiccioliscono */
-            filter: grayscale(100%); /* Perdono colore */
-            transition: all 0.5s ease; /* Transizione morbida */
-            pointer-events: none; /* Non puoi cliccarle per sbaglio */
+            opacity: 0.05 !important;
+            /* Diventano quasi invisibili */
+            transform: scale(0.5) !important;
+            /* Si rimpiccioliscono */
+            filter: grayscale(100%);
+            /* Perdono colore */
+            transition: all 0.5s ease;
+            /* Transizione morbida */
+            pointer-events: none;
+            /* Non puoi cliccarle per sbaglio */
         }
 
         /* Le linee delle costellazioni devono sparire se cerchi */
@@ -34,152 +44,315 @@
             transition: opacity 0.5s;
         }
 
-        /* STILE TASTO STATISTICHE ESTERNO */
-        .btn-stats {
-            position: fixed;
-            top: 70px; /* 50px sotto il tasto Menu (che è a 20px) */
-            left: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%; /* Rotondo per coerenza con gli altri */
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-            transition: background 0.3s;
-        }
-        .btn-stats:hover { background: rgba(255, 255, 255, 0.3); }
-        
         /* STILI STATISTICHE */
-        .pie-container { display: flex; justify-content: center; margin: 20px 0; }
+        .pie-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
         .pie-chart {
-            width: 200px; height: 200px; border-radius: 50%;
-            background: conic-gradient(#333 0deg 360deg); /* Base vuota */
-            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(#333 0deg 360deg);
+            /* Base vuota */
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
             position: relative;
         }
-        
-        .stat-legend { display: flex; flex-direction: column; gap: 10px; }
-        .legend-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 5px; }
-        .legend-color { width: 15px; height: 15px; border-radius: 50%; margin-right: 10px; display: inline-block; }
-        
-        .tab-active { background: #2196F3 !important; border-color: #2196F3 !important; color: white !important; }
+
+        .stat-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        .tab-active {
+            background: #2196F3 !important;
+            border-color: #2196F3 !important;
+            color: white !important;
+        }
 
         /* IL CIELO */
         #skyContainer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            overflow: hidden; z-index: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
         }
+
         #sky {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            transform-origin: center center; transition: transform 0.1s linear; will-change: transform;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: center center;
+            transition: transform 0.1s linear;
+            will-change: transform;
         }
-        #skyContainer.grabbing { cursor: grabbing; }
-        #skyContainer.grab { cursor: grab; }
+
+        #skyContainer.grabbing {
+            cursor: grabbing;
+        }
+
+        #skyContainer.grab {
+            cursor: grab;
+        }
 
         /* LAYER SVG (Linee) */
         #constellationLayer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 0; pointer-events: none; overflow: visible; 
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: visible;
         }
+
         .constellation-line {
-            stroke: rgba(255, 255, 255, 0.3); stroke-width: 1px;
-            pointer-events: auto; cursor: crosshair; transition: stroke 0.3s;
+            stroke: rgba(255, 255, 255, 0.3);
+            stroke-width: 1px;
+            pointer-events: auto;
+            cursor: crosshair;
+            transition: stroke 0.3s;
             vector-effect: non-scaling-stroke;
         }
-        .constellation-line:hover { stroke: rgba(255, 255, 255, 0.8); stroke-width: 2px; }
+
+        .constellation-line:hover {
+            stroke: rgba(255, 255, 255, 0.8);
+            stroke-width: 2px;
+        }
 
         /* LAYER ETICHETTE */
         #labelsLayer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 5; pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
         }
+
         .constellation-label {
-            position: absolute; transform: translate(-50%, -50%);
+            position: absolute;
+            transform: translate(-50%, -50%);
             color: rgba(255, 255, 255, 0.6);
             font-family: 'Cinzel', 'Trajan Pro', serif;
-            font-size: 14px; letter-spacing: 2px; text-transform: uppercase;
-            text-shadow: 0 0 5px rgba(0,0,0,0.8);
-            pointer-events: auto; cursor: pointer;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+            pointer-events: auto;
+            cursor: pointer;
             transition: color 0.3s, font-size 0.3s;
-            white-space: nowrap; border-bottom: 1px solid transparent;
+            white-space: nowrap;
+            border-bottom: 1px solid transparent;
         }
+
         /* Effetto hover sull'etichetta per far capire che è cliccabile */
-        body.editing .constellation-label:hover { 
-            color: #00e5ff; border-bottom: 1px solid #00e5ff; 
-            font-size: 16px; z-index: 100; text-shadow: 0 0 10px #00e5ff;
+        body.editing .constellation-label:hover {
+            color: #00e5ff;
+            border-bottom: 1px solid #00e5ff;
+            font-size: 16px;
+            z-index: 100;
+            text-shadow: 0 0 10px #00e5ff;
         }
 
         /* --- STELLE --- */
         .star {
-            position: absolute; border-radius: 50%;
-            cursor: pointer; transition: box-shadow 0.3s;
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: box-shadow 0.3s;
             animation: twinkle 3s infinite ease-in-out alternate;
-            z-index: 10; transform: translate(-50%, -50%);
+            z-index: 10;
+            transform: translate(-50%, -50%);
         }
-        .star:hover { z-index: 20; box-shadow: 0 0 20px white; }
-        body.editing .star { animation: shake 0.5s infinite alternate; cursor: move; }
-        
-        /* Selezione normale (Verde) */
-        .star.selected-connect { border: 2px solid #00ff00; box-shadow: 0 0 15px #00ff00; }
-        
-        /* Selezione Gruppo (Ciano) */
-        .star.selected-group { border: 2px solid #00e5ff; box-shadow: 0 0 20px #00e5ff; transform: translate(-50%, -50%) scale(1.5); z-index: 60; }
 
-        @keyframes twinkle { from { opacity: 0.5; } to { opacity: 1; box-shadow: 0 0 15px #fff; } }
-        @keyframes shake { from { margin-left: -1px; } to { margin-left: 1px; } }
+        .star:hover {
+            z-index: 20;
+            box-shadow: 0 0 20px white;
+        }
+
+        body.editing .star {
+            animation: shake 0.5s infinite alternate;
+            cursor: move;
+        }
+
+        /* Selezione normale (Verde) */
+        .star.selected-connect {
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 15px #00ff00;
+        }
+
+        /* Selezione Gruppo (Ciano) */
+        .star.selected-group {
+            border: 2px solid #00e5ff;
+            box-shadow: 0 0 20px #00e5ff;
+            transform: translate(-50%, -50%) scale(1.5);
+            z-index: 60;
+        }
+
+        @keyframes twinkle {
+            from {
+                opacity: 0.5;
+            }
+
+            to {
+                opacity: 1;
+                box-shadow: 0 0 15px #fff;
+            }
+        }
+
+        @keyframes shake {
+            from {
+                margin-left: -1px;
+            }
+
+            to {
+                margin-left: 1px;
+            }
+        }
 
         /* Colori e Preferiti */
-        .star.white { background-color: #fff; box-shadow: 0 0 5px #fff, 0 0 10px #fff; }
-        .star.red { background-color: #ff5e5e; box-shadow: 0 0 5px #ff5e5e, 0 0 10px #ff2222; }
-        .star.blue { background-color: #5eaaff; box-shadow: 0 0 5px #5eaaff, 0 0 10px #2288ff; }
-        .star.yellow { background-color: #ffea5e; box-shadow: 0 0 5px #ffea5e, 0 0 10px #ffcc00; }
-        .star.orange { background-color: #ffaa33; box-shadow: 0 0 5px #ffaa33, 0 0 10px #ff8800; }
-        
-        .star.favorite { z-index: 50; animation: pulse-big 2s infinite ease-in-out alternate !important;min-width: 4px !important; min-height: 4px !important; }
-        .star.red.favorite { background-color: #ff0000 !important; box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000, 0 0 60px #ff0000; }
-        .star.blue.favorite { background-color: #5eaaff !important; box-shadow: 0 0 15px #5eaaff, 0 0 30px #5eaaff, 0 0 60px #5eaaff; }
-        .star.yellow.favorite { background-color: #ffea5e !important; box-shadow: 0 0 15px #ffea5e, 0 0 30px #ffea5e, 0 0 60px #ffea5e; }
-        .star.white.favorite { background-color: #ffffff !important; box-shadow: 0 0 15px #ffffff, 0 0 30px #ffffff, 0 0 60px #ffffff; }
-        .star.orange.favorite { background-color: #ff6600 !important; box-shadow: 0 0 15px #ff6600, 0 0 30px #ff6600, 0 0 60px #ff4500; }
+        .star.white {
+            background-color: #fff;
+            box-shadow: 0 0 5px #fff, 0 0 10px #fff;
+        }
 
-        @keyframes pulse-big { from { transform: translate(-50%, -50%) scale(2); opacity: 0.9; } to { transform: translate(-50%, -50%) scale(2.6); opacity: 1; filter: brightness(1.3); } }
-        .star.highlight { border: 3px solid #ff00ff; transform: translate(-50%, -50%) scale(3) !important; z-index: 100; transition: all 0.5s ease; }
+        .star.red {
+            background-color: #ff5e5e;
+            box-shadow: 0 0 5px #ff5e5e, 0 0 10px #ff2222;
+        }
+
+        .star.blue {
+            background-color: #5eaaff;
+            box-shadow: 0 0 5px #5eaaff, 0 0 10px #2288ff;
+        }
+
+        .star.yellow {
+            background-color: #ffea5e;
+            box-shadow: 0 0 5px #ffea5e, 0 0 10px #ffcc00;
+        }
+
+        .star.orange {
+            background-color: #ffaa33;
+            box-shadow: 0 0 5px #ffaa33, 0 0 10px #ff8800;
+        }
+
+        .star.favorite {
+            z-index: 50;
+            animation: pulse-big 2s infinite ease-in-out alternate !important;
+            min-width: 4px !important;
+            min-height: 4px !important;
+        }
+
+        .star.red.favorite {
+            background-color: #ff0000 !important;
+            box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000, 0 0 60px #ff0000;
+        }
+
+        .star.blue.favorite {
+            background-color: #5eaaff !important;
+            box-shadow: 0 0 15px #5eaaff, 0 0 30px #5eaaff, 0 0 60px #5eaaff;
+        }
+
+        .star.yellow.favorite {
+            background-color: #ffea5e !important;
+            box-shadow: 0 0 15px #ffea5e, 0 0 30px #ffea5e, 0 0 60px #ffea5e;
+        }
+
+        .star.white.favorite {
+            background-color: #ffffff !important;
+            box-shadow: 0 0 15px #ffffff, 0 0 30px #ffffff, 0 0 60px #ffffff;
+        }
+
+        .star.orange.favorite {
+            background-color: #ff6600 !important;
+            box-shadow: 0 0 15px #ff6600, 0 0 30px #ff6600, 0 0 60px #ff4500;
+        }
+
+        @keyframes pulse-big {
+            from {
+                transform: translate(-50%, -50%) scale(2);
+                opacity: 0.9;
+            }
+
+            to {
+                transform: translate(-50%, -50%) scale(2.6);
+                opacity: 1;
+                filter: brightness(1.3);
+            }
+        }
+
+        .star.highlight {
+            border: 3px solid #ff00ff;
+            transform: translate(-50%, -50%) scale(3) !important;
+            z-index: 100;
+            transition: all 0.5s ease;
+        }
 
         /* --- SATELLITE (ALLEGATO FOTO) --- */
         .satellite {
             position: absolute;
-            top: 50%; 
+            top: 50%;
             left: 50%;
-            width: 2px; 
+            width: 2px;
             height: 2px;
             background-color: white;
             border-radius: 50%;
             box-shadow: 0 0 4px #ffffff;
             pointer-events: none;
-            
+
             /* L'animazione magica */
             animation: satelliteOrbit 6s linear infinite;
         }
 
         /* Definisce il movimento circolare */
         @keyframes satelliteOrbit {
-            from { transform: rotate(0deg) translateX(16px); } /* 16px è la distanza dalla stella */
-            to   { transform: rotate(360deg) translateX(16px); }
+            from {
+                transform: rotate(0deg) translateX(16px);
+            }
+
+            /* 16px è la distanza dalla stella */
+            to {
+                transform: rotate(360deg) translateX(16px);
+            }
         }
 
         .nebula-container {
             position: absolute;
-            transform: translate(-50%, -50%); /* Centra esattamente come le stelle */
+            transform: translate(-50%, -50%);
+            /* Centra esattamente come le stelle */
             pointer-events: auto;
-            cursor: help; /* Il cursore diventa un punto interrogativo */
-            z-index: 10; /* Un po' sopra le stelle normali */
+            cursor: help;
+            /* Il cursore diventa un punto interrogativo */
+            z-index: 10;
+            /* Un po' sopra le stelle normali */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -189,103 +362,622 @@
         .nebula-particle {
             position: absolute;
             border-radius: 50%;
-            filter: blur(6px); /* L'effetto "gas" */
+            filter: blur(6px);
+            /* L'effetto "gas" */
             opacity: 0.5;
-            mix-blend-mode: screen; /* Le fa brillare quando si sovrappongono */
+            mix-blend-mode: screen;
+            /* Le fa brillare quando si sovrappongono */
             animation: pulseNebula 4s ease-in-out infinite alternate;
         }
 
         @keyframes pulseNebula {
-            0% { transform: scale(0.8); opacity: 0.3; }
-            100% { transform: scale(1.2); opacity: 0.7; }
+            0% {
+                transform: scale(0.8);
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
         }
 
         /* --- UI --- */
-        .btn-float { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background-color: #ffffff; color: #000; font-size: 30px; border: none; box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); cursor: pointer; z-index: 100; }
-        .btn-menu { position: fixed; top: 20px; left: 20px; background: transparent; color: white; font-size: 24px; border: none; cursor: pointer; z-index: 100; text-shadow: 0 0 5px black; }
-        .btn-music { position: fixed; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 24px; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        
-        .zoom-controls { position: fixed; bottom: 100px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
-        .btn-zoom { width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .btn-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            color: #000;
+            font-size: 30px;
+            border: none;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            z-index: 100;
+        }
 
-        .btn-edit { position: fixed; bottom: 20px; left: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; font-size: 20px; border: 1px solid rgba(255, 255, 255, 0.3); cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .btn-edit.active { background: linear-gradient(to right, #ff9966, #ff5e62); color: white; border: none; box-shadow: 0 0 15px #ff5e62; }
+        .btn-menu {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: transparent;
+            color: white;
+            font-size: 24px;
+            border: none;
+            cursor: pointer;
+            z-index: 100;
+            text-shadow: 0 0 5px black;
+        }
+
+        .btn-music {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .zoom-controls {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .btn-zoom {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+
+
+        .zoom-controls button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .btn-edit {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-edit.active {
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            color: white;
+            border: none;
+            box-shadow: 0 0 15px #ff5e62;
+        }
 
         /* PANNELLO COSTELLAZIONI */
         #constellationPanel {
-            position: fixed; bottom: 80px; left: 20px;
-            background: rgba(0, 0, 0, 0.85); border: 1px solid #444;
-            padding: 15px; border-radius: 10px; display: none;
-            flex-direction: column; gap: 10px; z-index: 95;
-            backdrop-filter: blur(10px); min-width: 200px;
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid #444;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 95;
+            backdrop-filter: blur(10px);
+            min-width: 200px;
         }
-        .btn-small { background: #444; color: white; border: 1px solid #666; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; margin-bottom: 5px; width: 100%; }
-        .btn-small.cyan { background: #00acc1; border-color: #00acc1; font-weight: bold; }
-        .btn-small.red { background: #d32f2f; border-color: #d32f2f; }
-        .btn-small:hover { opacity: 0.9; filter: brightness(1.2); }
+
+        .btn-small {
+            background: #444;
+            color: white;
+            border: 1px solid #666;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-bottom: 5px;
+            width: 100%;
+        }
+
+        .btn-small.cyan {
+            background: #00acc1;
+            border-color: #00acc1;
+            font-weight: bold;
+        }
+
+        .btn-small.red {
+            background: #d32f2f;
+            border-color: #d32f2f;
+        }
+
+        .btn-small:hover {
+            opacity: 0.9;
+            filter: brightness(1.2);
+        }
 
         /* Menu Laterale */
-        #sideMenu { position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: rgba(15, 32, 39, 0.98); border-right: 1px solid #333; transition: left 0.3s ease; z-index: 150; padding: 20px; box-sizing: border-box; overflow-y: auto; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
-        #sideMenu.open { left: 0; }
-        .close-menu { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: white; font-size: 30px; cursor: pointer; }
-        .menu-title { font-size: 22px; margin-bottom: 20px; margin-top: 10px; border-bottom: 1px solid #555; padding-bottom: 10px; }
-        .memory-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 14px; cursor: pointer; }
-        .btn-backup { display: block; width: 100%; padding: 10px; margin-bottom: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; text-align: left; font-size: 14px; font-weight: bold; transition: opacity 0.2s; }
-        
-        #entryModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; flex-direction: column; justify-content: center; align-items: center; }
-        #viewModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 400px; background: #222; padding: 20px; border-radius: 10px; box-shadow: 0 0 20px rgba(255,255,255,0.2); z-index: 300; text-align: center; }
-        
-        textarea { width: 90%; max-width: 500px; height: 200px; background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 10px; padding: 15px; font-family: 'Courier New', monospace; font-size: 16px; margin-bottom: 20px; resize: none; }
-        .btn-save { background: linear-gradient(45deg, #8e2de2, #4a00e0); box-shadow: 0 0 15px #8e2de2; border: none; color: white; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; margin: 5px; }
-        .color-selector { display: flex; gap: 15px; margin-bottom: 20px; }
-        .color-option { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
-        .color-option.selected { border: 2px solid white; transform: scale(1.2); }
-        .modal-btn { padding: 10px 20px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
-        .btn-cancel { background-color: #f44336; color: white; }
-        
-        #tutorialModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 500; justify-content: center; align-items: center; }
-        .tutorial-card { background: #1a1a1a; width: 90%; max-width: 350px; padding: 30px; border-radius: 15px; text-align: center; border: 1px solid #444; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
-        .tut-buttons { display: flex; justify-content: space-between; margin-top: 20px; }
-        .btn-tut { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; background: #444; color: white; }
-        .btn-tut.primary { background: #4CAF50; }
-        
-        #instructionText { font-size: 13px; color: #ccc; margin-bottom: 10px; line-height: 1.4; }
+        #sideMenu {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 300px;
+            height: 100%;
+            background: rgba(15, 32, 39, 0.98);
+            border-right: 1px solid #333;
+            transition: left 0.3s ease;
+            z-index: 150;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        #sideMenu.open {
+            left: 0;
+        }
+
+        .close-menu {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        .menu-title {
+            font-size: 22px;
+            margin-bottom: 20px;
+            margin-top: 10px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+        }
+
+        .memory-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-backup {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        #entryModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 200;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #viewModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 400px;
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            z-index: 300;
+            text-align: center;
+        }
+
+        textarea {
+            width: 90%;
+            max-width: 500px;
+            height: 200px;
+            background: #1a1a1a;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            margin-bottom: 20px;
+            resize: none;
+        }
+
+        .btn-save {
+            background: linear-gradient(45deg, #8e2de2, #4a00e0);
+            box-shadow: 0 0 15px #8e2de2;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .color-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .color-option.selected {
+            border: 2px solid white;
+            transform: scale(1.2);
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .btn-cancel {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #tutorialModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 500;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tutorial-card {
+            background: #1a1a1a;
+            width: 90%;
+            max-width: 350px;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid #444;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .tut-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn-tut {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            background: #444;
+            color: white;
+        }
+
+        .btn-tut.primary {
+            background: #4CAF50;
+        }
+
+        #instructionText {
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        /* --- STILI GARGANTUA V4 (Fixed Mask System) --- */
+
+        /* 1. L'ALONE DIFFUSO (Sfondo) */
+        #accretionDisk {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+
+            /* Background gestito da JS */
+
+            /* MASCHERA: Allargata fino all'85% per vederlo di più */
+            mask-image: radial-gradient(circle, black 30%, black 60%, transparent 85%);
+            -webkit-mask-image: radial-gradient(circle, black 30%, black 60%, transparent 85%);
+
+            filter: blur(8px);
+            /* Molto meno sfocato (era 20px) */
+            opacity: 0.9;
+            /* Quasi solido (era 0.6) */
+            z-index: 0;
+            animation: diskSpin 25s linear infinite;
+        }
+
+        /* 2. CONTENITORI DEGLI ANELLI (La "Finestra" Fissa) */
+        /* Questi div danno la forma, l'inclinazione 3D e il taglio (maschera). NON RUOTANO. */
+        .ring-container {
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            transform: rotateX(78deg);
+            /* Inclinazione fissa Gargantua */
+            pointer-events: none;
+        }
+
+        /* MASCHERA POSTERIORE (Mostra solo metà ALTA) */
+        .ring-container.back {
+            /* Taglia via la parte bassa E il buco centrale */
+            mask-image:
+                linear-gradient(to bottom, black 0%, black 55%, transparent 70%),
+                radial-gradient(circle, transparent 26%, black 28%);
+            /* Buco allargato a 26% */
+            -webkit-mask-image:
+                linear-gradient(to bottom, black 0%, black 55%, transparent 70%),
+                radial-gradient(circle, transparent 26%, black 28%);
+            mask-composite: intersect;
+            -webkit-mask-composite: source-in;
+        }
+
+        /* MASCHERA ANTERIORE (Mostra solo metà BASSA) */
+        .ring-container.front {
+            /* Taglia via la parte alta E il buco centrale */
+            mask-image:
+                linear-gradient(to top, black 0%, black 55%, transparent 70%),
+                radial-gradient(circle, transparent 26%, black 28%);
+            -webkit-mask-image:
+                linear-gradient(to top, black 0%, black 55%, transparent 70%),
+                radial-gradient(circle, transparent 26%, black 28%);
+            mask-composite: intersect;
+            -webkit-mask-composite: source-in;
+        }
+
+        /* 3. LA TEXTURE INTERNA (Il "Gas" che gira) */
+        /* Questo è il div interno che riceve il colore dal JS e RUOTA dentro la maschera ferma */
+        .ring-texture {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            filter: blur(2px);
+            /* Quasi nitido (era 6px) */
+            opacity: 1;
+            /* Opacità massima */
+            animation: spinTexture 25s linear infinite;
+        }
+
+        /* 4. IL VUOTO (Sfera Nera) */
+        .black-hole-void {
+            position: absolute;
+            width: 52px;
+            height: 52px;
+            background-color: #000;
+            border-radius: 50%;
+            box-shadow: 0 0 15px black;
+            z-index: 2;
+            pointer-events: auto !important;
+            /* Forza il click */
+            cursor: pointer;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            /* Rimbalzo elastico */
+        }
+
+        /* Effetto Hover: Il buco nero "respira" quando stai per cliccarlo */
+        .black-hole-void:hover {
+            transform: scale(1.3);
+            box-shadow: 0 0 30px #000, 0 0 10px rgba(255, 255, 255, 0.5);
+            /* Bagliore bianco sull'orizzonte */
+        }
+
+        /* Quando clicchi */
+        .black-hole-void:active {
+            transform: scale(0.9)
+        }
+
+        /* ANIMAZIONI */
+        @keyframes diskSpin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Nuova animazione semplice per la texture piatta */
+        @keyframes spinTexture {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* --- ICONA BUCO NERO PER TUTORIAL --- */
+        .tutorial-bh-icon {
+            display: inline-block;
+            position: relative;
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            /* Lo allinea al testo */
+            margin: 0 4px;
+            /* Un po' di spazio laterale */
+        }
+
+        /* La sfera centrale nera */
+        .tutorial-bh-icon::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            /* Sfera piccola */
+            background: black;
+            border-radius: 50%;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+            /* Leggero bagliore */
+            z-index: 2;
+        }
+
+        /* L'anello inclinato */
+        .tutorial-bh-icon::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            /* Stessa inclinazione 3D del buco nero vero */
+            transform: translate(-50%, -50%) rotateX(78deg);
+            width: 22px;
+            height: 22px;
+            /* Anello un po' più largo della sfera */
+            border-radius: 50%;
+            /* Colore neutro luminoso per l'anello */
+            background: conic-gradient(from 0deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.8));
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+            z-index: 1;
+        }
 
         /* --- ANIMAZIONE GALASSIA --- */
 
         /* 1. Il motore della rotazione (Il contenitore #galaxy) */
         @keyframes galaxySpin {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* 2. La contro-rotazione (Per tenere le stelle e i testi dritti) */
         @keyframes counterSpin {
-            from { transform: translate(-50%, -50%) rotate(360deg); }
-            to   { transform: translate(-50%, -50%) rotate(0deg); }
+            from {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+
+            to {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
         }
 
         /* Applichiamo la rotazione al nuovo contenitore */
         #galaxy {
-            animation: galaxySpin 120s linear infinite; /* 4 minuti per un giro completo */
+            animation: galaxySpin 120s linear infinite;
+            /* 4 minuti per un giro completo */
             transform-origin: 50% 50%;
         }
 
+        #galacticCenter {
+            /* Deve avere la stessa durata della galassia (120s nel tuo file) */
+            animation: counterSpin 120s linear infinite;
+
+            /* Queste proprietà servono perché l'animazione counterSpin usa translate(-50%,-50%) */
+            /* e dobbiamo assicurarci che parta dal centro esatto */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+        }
+
         /* Applichiamo la contro-rotazione agli oggetti */
-        .star, .constellation-label, .nebula-container {
-            animation: counterSpin 120s linear infinite !important; 
+        .star,
+        .constellation-label,
+        .nebula-container {
+            animation: counterSpin 120s linear infinite !important;
         }
 
         /* --- GESTIONE PAUSA INTELLIGENTE --- */
-        body.user-interacting #galaxy, body.manual-pause #galaxy,
-        body.user-interacting .star,   body.manual-pause .star,
-        body.user-interacting .constellation-label, body.manual-pause .constellation-label,
-        body.user-interacting .nebula-container,    body.manual-pause .nebula-container,
-        body.user-interacting .nebula-particle,     body.manual-pause .nebula-particle,
-        body.manual-pause .satellite {
+        body.user-interacting #galaxy,
+        body.manual-pause #galaxy,
+        body.user-interacting .star,
+        body.manual-pause .star,
+        body.user-interacting .constellation-label,
+        body.manual-pause .constellation-label,
+        body.user-interacting .nebula-container,
+        body.manual-pause .nebula-container,
+        body.user-interacting .nebula-particle,
+        body.manual-pause .nebula-particle,
+        body.user-interacting #galacticCenter,
+        body.manual-pause #galacticCenter {
             animation-play-state: paused !important;
         }
-        
+
+
         /* Stile per il tasto quando è attivo (Rosso/Acceso) */
         .btn-music.active-lock {
             background: rgba(255, 90, 90, 0.3);
@@ -293,9 +985,31 @@
             box-shadow: 0 0 10px #ff5a5a;
         }
 
+        /* --- SCROLLBAR SPAZIALE PERSONALIZZATA --- */
 
+        /* Larghezza della barra */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        /* Lo sfondo della barra (binario) */
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* La parte che si muove (il pollice) */
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        /* Quando ci passi sopra col mouse */
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
     </style>
 </head>
+
 <body>
 
     <audio id="bgMusic" loop>
@@ -305,12 +1019,26 @@
     <div id="skyContainer" class="grab">
         <div id="sky">
             <div id="galaxy" style="width:100%; height:100%; position:absolute; top:0; left:0;">
-                
+
                 <div id="galacticCenter" style="
                     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                    width: 150px; height: 150px; border-radius: 50%;
-                    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0) 70%);
-                    pointer-events: none; z-index: 0;">
+                    z-index: 0; pointer-events: none; 
+                    display: grid; place-items: center;
+                    width: 300px; height: 300px;
+                ">
+
+                    <div id="accretionDisk"></div>
+
+                    <div class="ring-container back" style="z-index: 1;">
+                        <div id="ringBack" class="ring-texture"></div>
+                    </div>
+
+                    <div class="black-hole-void" onclick="openStats()" title="Analizza l'Anima della Galassia"></div>
+
+                    <div class="ring-container front" style="z-index: 3;">
+                        <div id="ringFront" class="ring-texture"></div>
+                    </div>
+
                 </div>
 
 
@@ -322,41 +1050,48 @@
 
     <button class="btn-menu" onclick="toggleMenu()">☰ Ricordi</button>
     <button class="btn-music" onclick="toggleMusic()">🔇</button>
-    <button id="btnRotation" onclick="toggleRotation()" class="btn-music" style="top: 80px;" title="Blocca/Sblocca Rotazione">
+    <button id="btnRotation" onclick="toggleRotation()" class="btn-music" style="top: 80px;"
+        title="Blocca/Sblocca Rotazione">
         ⏸️
     </button>
-    <button class="btn-stats" onclick="openStats()" title="Statistiche">📊</button>
-    
+
     <div class="zoom-controls">
         <button class="btn-zoom" onclick="zoomIn()">+</button>
         <button class="btn-zoom" onclick="zoomOut()">-</button>
     </div>
 
     <button class="btn-edit" onclick="toggleEditMode()" title="Modalità Modifica">✏️</button>
-    
+
     <div id="constellationPanel">
         <div id="instructionText">Modo: <b>Sposta/Collega</b><br><small>Clicca 2 stelle per unire.</small></div>
-        
+
         <button class="btn-small cyan" id="btnGroupMode" onclick="toggleGroupMode()">✨ Crea Nuova Costellazione</button>
-        
+
         <div id="groupControls" style="display:none;">
-            <div id="groupStatus" style="font-size:12px; color:#00e5ff; margin-bottom:8px; border-bottom:1px solid #444; padding-bottom:5px;">
+            <div id="groupStatus"
+                style="font-size:12px; color:#00e5ff; margin-bottom:8px; border-bottom:1px solid #444; padding-bottom:5px;">
                 Seleziona stelle...
             </div>
-            <button class="btn-small" onclick="saveConstellationName()" style="background:#4CAF50; border-color:#4CAF50;">💾 Salva Gruppo</button>
-            <button class="btn-small red" id="btnDeleteGroup" onclick="deleteCurrentGroup()" style="display:none;">🗑 Elimina Gruppo</button>
-            <button class="btn-small" onclick="cancelGroupMode()" style="background:#f44336; border-color:#f44336;">Annulla</button>
+            <button class="btn-small" onclick="saveConstellationName()"
+                style="background:#4CAF50; border-color:#4CAF50;">💾 Salva Gruppo</button>
+            <button class="btn-small red" id="btnDeleteGroup" onclick="deleteCurrentGroup()" style="display:none;">🗑
+                Elimina Gruppo</button>
+            <button class="btn-small" onclick="cancelGroupMode()"
+                style="background:#f44336; border-color:#f44336;">Annulla</button>
         </div>
     </div>
 
-    <button class="btn-float" onclick="openWriter()">+</button>
+    <button class="btn-float" onclick="openWriter()">✒️</button>
 
-    <div id="searchContainer" style="position:fixed; top:20px; right:100px; z-index:100; display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
-        <div style="background:rgba(255,255,255,0.1); backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:5px 15px; display:flex; align-items:center;">
+    <div id="searchContainer"
+        style="position:fixed; top:20px; right:100px; z-index:100; display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+        <div
+            style="background:rgba(255,255,255,0.1); backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:5px 15px; display:flex; align-items:center;">
             <span style="font-size:18px; margin-right:10px;">🔭</span>
-            <input type="text" id="searchInput" placeholder="Cerca un ricordo..." onkeyup="searchStars()" 
-                   style="background:transparent; border:none; color:white; font-family:'Courier New', monospace; outline:none; width:150px;">
-            <span id="clearSearch" onclick="resetSearch()" style="cursor:pointer; display:none; color:#aaa; margin-left:5px;">✖</span>
+            <input type="text" id="searchInput" placeholder="Cerca un ricordo..." onkeyup="searchStars()"
+                style="background:transparent; border:none; color:white; font-family:'Courier New', monospace; outline:none; width:150px;">
+            <span id="clearSearch" onclick="resetSearch()"
+                style="cursor:pointer; display:none; color:#aaa; margin-left:5px;">✖</span>
         </div>
         <div id="searchCounter" style="color:#aaa; font-size:12px; margin-right:10px; display:none;"></div>
     </div>
@@ -369,9 +1104,12 @@
         <div id="memoryList"></div>
         <div style="margin-top: 30px; border-top: 1px solid #555; padding-top: 20px;">
             <div class="menu-title" style="font-size: 18px; border:none;">Gestione Dati</div>
-            <button class="btn-backup" onclick="exportData()" style="background: #4CAF50;">💾 Salva Backup (File App)</button>
-            <button class="btn-backup" onclick="exportText()" style="background: #2196F3;">📄 Scarica come Testo</button>
-            <button class="btn-backup" onclick="document.getElementById('importFile').click()" style="background: #ff9800;">📂 Importa Backup</button>
+            <button class="btn-backup" onclick="exportData()" style="background: #4CAF50;">💾 Salva Backup (File
+                App)</button>
+            <button class="btn-backup" onclick="exportText()" style="background: #2196F3;">📄 Scarica come
+                Testo</button>
+            <button class="btn-backup" onclick="document.getElementById('importFile').click()"
+                style="background: #ff9800;">📂 Importa Backup</button>
             <input type="file" id="importFile" style="display:none" onchange="importData(this)">
         </div>
     </div>
@@ -379,12 +1117,12 @@
     <div id="entryModal">
         <h2 style="color:white">Come ti senti oggi?</h2>
         <div style="position: relative; width: 90%; max-width: 500px; margin-bottom: 20px;">
-            <textarea id="journalInput" placeholder="Scrivi qui i tuoi pensieri..." 
-                      style="width: 100%; height: 200px; padding: 15px; padding-right: 40px; box-sizing: border-box; margin-bottom: 0;"></textarea>
-            
-            <span onclick="document.getElementById('fileInput').click()" 
-                  style="position: absolute; bottom: 15px; right: 15px; cursor: pointer; font-size: 24px; opacity: 0.7; z-index: 10;" 
-                  title="Allega una foto">
+            <textarea id="journalInput" placeholder="Scrivi qui i tuoi pensieri..."
+                style="width: 100%; height: 200px; padding: 15px; padding-right: 40px; box-sizing: border-box; margin-bottom: 0;"></textarea>
+
+            <span onclick="document.getElementById('fileInput').click()"
+                style="position: absolute; bottom: 15px; right: 15px; cursor: pointer; font-size: 24px; opacity: 0.7; z-index: 10;"
+                title="Allega una foto">
                 📎
             </span>
         </div>
@@ -392,39 +1130,49 @@
         <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="processImage(this)">
 
         <div id="imagePreviewContainer" style="display:none; margin-bottom: 20px; text-align: center;">
-            <img id="previewImg" src="" style="max-width: 120px; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5); transform: rotate(-2deg); border-radius: 2px;">
-            <span onclick="removeImage()" style="cursor:pointer; color:#ff5e5e; margin-left:15px; font-size: 20px; vertical-align: middle;">✖ Rimuovi foto</span>
+            <img id="previewImg" src=""
+                style="max-width: 120px; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5); transform: rotate(-2deg); border-radius: 2px;">
+            <span onclick="removeImage()"
+                style="cursor:pointer; color:#ff5e5e; margin-left:15px; font-size: 20px; vertical-align: middle;">✖
+                Rimuovi foto</span>
         </div>
 
         <div style="margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
             <label style="display: flex; align-items: center; color: #ccc; cursor: pointer; font-size: 14px;">
-                <input type="checkbox" id="capsuleCheckbox" style="margin-right: 10px;" onchange="toggleCapsuleDate(this.checked)">
+                <input type="checkbox" id="capsuleCheckbox" style="margin-right: 10px;"
+                    onchange="toggleCapsuleDate(this.checked)">
                 Trasforma in Nebulosa del Tempo (Capsula) ⏳
             </label>
-            
+
             <div id="capsuleDateContainer" style="display: none; margin-top: 10px; color: #ccc; font-size: 14px;">
-                Apri il giorno: 
-                <input type="date" id="capsuleDateInput" style="background: rgba(0,0,0,0.3); border: 1px solid #555; color: white; padding: 5px; border-radius: 4px; font-family: inherit; margin-left: 10px;">
+                Apri il giorno:
+                <input type="date" id="capsuleDateInput"
+                    style="background: rgba(0,0,0,0.3); border: 1px solid #555; color: white; padding: 5px; border-radius: 4px; font-family: inherit; margin-left: 10px;">
             </div>
         </div>
 
         <div class="color-selector">
-            <div class="color-option" style="background:white; border: 2px solid white;" onclick="selectColor('white', this)"></div>
+            <div class="color-option" style="background:white; border: 2px solid white;"
+                onclick="selectColor('white', this)"></div>
             <div class="color-option" style="background:#ff5e5e" onclick="selectColor('red', this)"></div>
             <div class="color-option" style="background:#5eaaff" onclick="selectColor('blue', this)"></div>
             <div class="color-option" style="background:#ffea5e" onclick="selectColor('yellow', this)"></div>
             <div class="color-option" style="background:#ffaa33" onclick="selectColor('orange', this)"></div>
         </div>
-        <div><button class="modal-btn btn-cancel" onclick="closeWriter()">Annulla</button><button class="modal-btn btn-save" onclick="saveEntry()">Accendi Stella</button></div>
+        <div><button class="modal-btn btn-cancel" onclick="closeWriter()">Annulla</button><button
+                class="modal-btn btn-save" onclick="saveEntry()">Accendi Stella</button></div>
     </div>
 
     <div id="viewModal">
         <h3 id="viewDate" style="margin-top:0; margin-bottom: 5px;"></h3>
         <div id="viewColorInfo"></div>
         <p id="viewText"></p>
-        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; border-top: 1px solid #444; padding-top: 15px;">
-            <button class="modal-btn" id="btnFav" onclick="toggleFavorite()" style="background:transparent; border:1px solid #666; color:white;">★ Preferito</button>
-            <button class="modal-btn" onclick="deleteMemory()" style="background:transparent; border:1px solid #ff5e5e; color:#ff5e5e;">🗑 Elimina</button>
+        <div
+            style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; border-top: 1px solid #444; padding-top: 15px;">
+            <button class="modal-btn" id="btnFav" onclick="toggleFavorite()"
+                style="background:transparent; border:1px solid #666; color:white;">★ Preferito</button>
+            <button class="modal-btn" onclick="deleteMemory()"
+                style="background:transparent; border:1px solid #ff5e5e; color:#ff5e5e;">🗑 Elimina</button>
         </div>
         <br><button class="modal-btn btn-cancel" onclick="closeViewer()">Chiudi</button>
     </div>
@@ -434,17 +1182,21 @@
             <span id="tutIcon" style="font-size:40px; display:block; margin-bottom:15px;"></span>
             <div id="tutTitle" style="font-size:22px; color:#ffd700; margin-bottom:10px;"></div>
             <div id="tutText" style="font-size:16px; color:#ccc; margin-bottom:20px;"></div>
-            <div class="tut-buttons"><button class="btn-tut" onclick="prevStep()" id="btnPrev">Indietro</button><button class="btn-tut primary" onclick="nextStep()" id="btnNext">Avanti</button></div>
+            <div class="tut-buttons"><button class="btn-tut" onclick="prevStep()" id="btnPrev">Indietro</button><button
+                    class="btn-tut primary" onclick="nextStep()" id="btnNext">Avanti</button></div>
         </div>
     </div>
 
-    <div id="statsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:400; flex-direction:column; align-items:center; overflow-y:auto;">
+    <div id="statsModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:400; flex-direction:column; align-items:center; overflow-y:auto;">
         <div style="width:90%; max-width:500px; margin-top:50px; padding-bottom:50px;">
             <h2 style="text-align:center; color:white;">Analisi del Cielo</h2>
-            
+
             <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
-                <button class="modal-btn" onclick="switchStatTab('time')" id="btnTabTime" style="background:#444; border:1px solid #666;">⏳ Tempo</button>
-                <button class="modal-btn" onclick="switchStatTab('const')" id="btnTabConst" style="background:#444; border:1px solid #666;">✨ Costellazioni</button>
+                <button class="modal-btn" onclick="switchStatTab('time')" id="btnTabTime"
+                    style="background:#444; border:1px solid #666;">⏳ Tempo</button>
+                <button class="modal-btn" onclick="switchStatTab('const')" id="btnTabConst"
+                    style="background:#444; border:1px solid #666;">✨ Costellazioni</button>
             </div>
 
             <div id="statTabTime">
@@ -455,11 +1207,11 @@
                     <button class="btn-small" onclick="renderTimeStats('all')">Sempre</button>
                 </div>
                 <h3 id="statTimeTitle" style="text-align:center; color:#ccc;">Ultimi 7 Giorni</h3>
-                
+
                 <div class="pie-container">
                     <div id="timePieChart" class="pie-chart"></div>
                 </div>
-                
+
                 <div id="timeLegend" class="stat-legend"></div>
             </div>
 
@@ -468,11 +1220,12 @@
                 <p style="text-align:center; font-size:12px; color:#888; margin-bottom:20px;">
                     Dettaglio mood per ogni costellazione creata.
                 </p>
-                
+
                 <div id="constListStats" style="display:flex; flex-direction:column; gap:20px;"></div>
             </div>
 
-            <button class="modal-btn btn-cancel" onclick="document.getElementById('statsModal').style.display='none'" style="width:100%; margin-top:30px;">Chiudi</button>
+            <button class="modal-btn btn-cancel" onclick="document.getElementById('statsModal').style.display='none'"
+                style="width:100%; margin-top:30px;">Chiudi</button>
         </div>
     </div>
 
@@ -493,14 +1246,22 @@
 
         let tempImageData = null;
 
+        function getRotationAngle(element) {
+            const style = window.getComputedStyle(element);
+            const matrix = style.transform || style.webkitTransform || style.mozTransform;
+            if (!matrix || matrix === 'none') return 0;
+            const values = matrix.split('(')[1].split(')')[0].split(',');
+            return Math.atan2(parseFloat(values[1]), parseFloat(values[0]));
+        }
+
         function processImage(input) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     const img = new Image();
                     img.src = e.target.result;
-                    img.onload = function() {
+                    img.onload = function () {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         // Ridimensiona a max 300px per non appesantire il backup
@@ -510,7 +1271,7 @@
                         canvas.height = img.height * scaleFactor;
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         tempImageData = canvas.toDataURL('image/jpeg', 0.7);
-                        
+
                         document.getElementById('previewImg').src = tempImageData;
                         document.getElementById('imagePreviewContainer').style.display = 'block';
                     };
@@ -528,7 +1289,7 @@
         function toggleCapsuleDate(checked) {
             const container = document.getElementById('capsuleDateContainer');
             container.style.display = checked ? 'block' : 'none';
-            
+
             // Se attivato, imposta la data a domani come default
             if (checked && !document.getElementById('capsuleDateInput').value) {
                 const tomorrow = new Date();
@@ -542,17 +1303,148 @@
         let editingConstellationId = null; // ID della costellazione che stiamo modificando (se null = nuova)
         let selectedForGroup = []; // Array ID stelle
 
-        window.onload = function() {
+        window.onload = function () {
             renderStars(); renderLines(); renderLabels(); renderList();
             checkTutorial(); setupSkyInteraction();
         };
 
+        function updateGalacticCore() {
+            const disk = document.getElementById('accretionDisk');
+            const textures = document.querySelectorAll('.ring-texture');
+
+            if (!disk || textures.length === 0) return;
+
+            // Default se vuoto
+            if (memories.length === 0) {
+                const emptyColor = 'rgba(255, 255, 255, 0.4)';
+                disk.style.background = emptyColor;
+                textures.forEach(t => {
+                    t.style.background = emptyColor;
+                    t.style.boxShadow = 'none';
+                });
+                return;
+            }
+
+            // Valori RGB
+            const colorValues = {
+                'white': { r: 255, g: 255, b: 255 },
+                'red': { r: 255, g: 50, b: 50 },
+                'blue': { r: 50, g: 100, b: 255 },
+                'yellow': { r: 255, g: 220, b: 60 },
+                'orange': { r: 255, g: 130, b: 0 }
+            };
+
+            let totalR = 0, totalG = 0, totalB = 0;
+            memories.forEach(m => {
+                const rgb = colorValues[m.color] || colorValues['white'];
+                totalR += rgb.r;
+                totalG += rgb.g;
+                totalB += rgb.b;
+            });
+
+            const count = memories.length;
+            const avgR = Math.round(totalR / count);
+            const avgG = Math.round(totalG / count);
+            const avgB = Math.round(totalB / count);
+            const baseC = `${avgR}, ${avgG}, ${avgB}`;
+
+            // --- QUI STA LA MAGIA DELLA ROTAZIONE VISIBILE ---
+
+            // 1. CONFIGURAZIONE ANELLI (Gargantua - Orizzontali)
+            const numStripesRing = 4; // <--- MODIFICA QUI IL NUMERO DI STRISCE! (es. 4, 6, 12...)
+
+            let ringGradient = "conic-gradient(from 0deg, ";
+            const stepRing = 360 / numStripesRing;
+
+            for (let i = 0; i < numStripesRing; i++) {
+                const start = i * stepRing;
+                const end = start + stepRing;
+                // Alterniamo Colore Pieno (start) -> Trasparente (mid) -> Colore Pieno (end)
+                // Usiamo template literals per costruire la stringa
+                ringGradient += `rgba(${baseC}, 1) ${start}deg, rgba(${baseC}, 0.1) ${start + (stepRing / 2)}deg, rgba(${baseC}, 1) ${end}deg, `;
+            }
+            ringGradient = ringGradient.slice(0, -2) + ")"; // Chiude la stringa
+
+            // 2. CONFIGURAZIONE SFONDO (Alone - Verticale)
+            const numStripesDisk = 4; // <--- MODIFICA QUI! (es. 1 per un fascio solo, 2 per due fasci...)
+
+            let diskGradient = "conic-gradient(from 0deg, ";
+            const stepDisk = 360 / numStripesDisk;
+
+            for (let i = 0; i < numStripesDisk; i++) {
+                const start = i * stepDisk;
+                const end = start + stepDisk;
+                diskGradient += `rgba(${baseC}, 0.8) ${start}deg, rgba(${baseC}, 0.05) ${start + (stepDisk / 2)}deg, rgba(${baseC}, 0.8) ${end}deg, `;
+            }
+            diskGradient = diskGradient.slice(0, -2) + ")";
+
+            // --- APPLICAZIONE ---
+            disk.style.background = diskGradient;
+
+            textures.forEach(t => {
+                t.style.background = ringGradient;
+                t.style.boxShadow = `0 0 30px rgba(${baseC}, 0.6)`;
+            });
+        }
+
+        /*function updateGalacticCore() {
+            // Selezioniamo i tre elementi da colorare
+            const disk = document.getElementById('accretionDisk');
+            const ringBack = document.getElementById('ringBack');
+            const ringFront = document.getElementById('ringFront');
+
+            if (!disk || !ringBack || !ringFront) return;
+
+            if (memories.length === 0) {
+                // Stile di default se vuoto
+                const emptyDisk = 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)';
+                const emptyRing = 'rgba(255, 255, 255, 0.4)';
+                disk.style.background = emptyDisk;
+                ringBack.style.background = emptyRing;
+                ringFront.style.background = emptyRing;
+                return;
+            }
+
+            // 1. Conta i colori (uguale a prima)
+            const counts = {};
+            memories.forEach(m => { counts[m.color] = (counts[m.color] || 0) + 1; });
+            const total = memories.length;
+
+            // 2. Colori brillanti (Gas) - Ho reso il bianco un po' più caldo
+            const gasColors = {
+                'white': 'rgba(230, 230, 255, 0.9)',
+                'red': 'rgba(255, 50, 50, 0.9)',
+                'blue': 'rgba(50, 100, 255, 0.9)',
+                'yellow': 'rgba(255, 200, 50, 0.9)',
+                'orange': 'rgba(255, 130, 0, 0.9)'
+            };
+
+            // 3. Crea il Gradiente (uguale a prima)
+            let gradient = "conic-gradient(from 0deg, ";
+            let currentPerc = 0;
+
+            Object.keys(counts).forEach(color => {
+                const perc = (counts[color] / total) * 100;
+                const colorVal = gasColors[color] || 'white';
+                gradient += `${colorVal} ${currentPerc}%, ${colorVal} ${currentPerc + perc}%, `;
+                currentPerc += perc;
+            });
+
+            gradient = gradient.slice(0, -2) + ")";
+
+            // 4. APPLICA IL GRADIENTE A TUTTI E TRE
+            disk.style.background = gradient;
+            ringBack.style.background = gradient;
+            ringFront.style.background = gradient;
+        }*/
+
         // --- RENDER ---
         function renderStars() {
+            updateGalacticCore();
             const sky = document.getElementById('galaxy');
             // Rimuoviamo sia le stelle vecchie CHE le nebulose vecchie
             document.querySelectorAll('.star, .nebula-container').forEach(e => e.remove());
-            
+
             const now = Date.now(); // Che ore sono adesso?
 
             memories.forEach(mem => {
@@ -564,32 +1456,32 @@
                     const nebula = document.createElement('div');
                     nebula.classList.add('nebula-container');
                     nebula.id = 'star-' + mem.id; // Id utile per il sistema
-                    nebula.style.left = mem.x + '%'; 
+                    nebula.style.left = mem.x + '%';
                     nebula.style.top = mem.y + '%';
                     // Le nebulose sono un po' più grandi delle stelle finali
-                    const nebulaSize = mem.size * 4; 
+                    const nebulaSize = mem.size * 4;
                     nebula.style.width = nebulaSize + 'px';
                     nebula.style.height = nebulaSize + 'px';
 
                     // Mappa dei colori RGB per l'effetto gas
-                    const colorsRgb = { 'white':'255,255,255', 'red':'255,90,90', 'blue':'90,150,255', 'yellow':'255,230,90', 'orange':'255,160,50' };
+                    const colorsRgb = { 'white': '255,255,255', 'red': '255,90,90', 'blue': '90,150,255', 'yellow': '255,230,90', 'orange': '255,160,50' };
                     const baseRgb = colorsRgb[mem.color] || '255,255,255';
 
                     // Creiamo 4 particelle di gas interne per dare volume
-                    for(let i=0; i<4; i++) {
+                    for (let i = 0; i < 4; i++) {
                         const p = document.createElement('div');
                         p.classList.add('nebula-particle');
                         p.style.backgroundColor = `rgba(${baseRgb}, 0.6)`;
                         // Posizione leggermente casuale dentro il contenitore
-                        p.style.left = (Math.random()*40 + 30) + '%';
-                        p.style.top = (Math.random()*40 + 30) + '%';
+                        p.style.left = (Math.random() * 40 + 30) + '%';
+                        p.style.top = (Math.random() * 40 + 30) + '%';
                         p.style.width = (mem.size * 2.5) + 'px';
                         p.style.height = (mem.size * 2.5) + 'px';
                         // Ritardo animazione casuale per non farle pulsare tutte insieme;
-                        p.style.animationDelay = (Math.random()*3)+'s';
+                        p.style.animationDelay = (Math.random() * 3) + 's';
                         nebula.appendChild(p);
                     }
-                    
+
                     // Click speciale per la nebulosa
                     nebula.onclick = (e) => {
                         e.stopPropagation();
@@ -607,7 +1499,7 @@
                     star.id = 'star-' + mem.id;
                     star.style.left = mem.x + '%'; star.style.top = mem.y + '%';
                     star.style.width = mem.size + 'px'; star.style.height = mem.size + 'px';
-                    star.style.animationDelay = (Math.random()*2) + 's';
+                    star.style.animationDelay = (Math.random() * 2) + 's';
                     setupStarInteraction(star, mem);
                     if (mem.image) {
                         const sat = document.createElement('div');
@@ -633,7 +1525,7 @@
                     el.setAttribute('x1', s.x + '%'); el.setAttribute('y1', s.y + '%');
                     el.setAttribute('x2', e.x + '%'); el.setAttribute('y2', e.y + '%');
                     el.classList.add('constellation-line');
-                    el.onclick = () => { if(isEditing && !isGroupMode && confirm("Cancellare collegamento?")) { lines.splice(index, 1); saveData(); renderLines(); } };
+                    el.onclick = () => { if (isEditing && !isGroupMode && confirm("Cancellare collegamento?")) { lines.splice(index, 1); saveData(); renderLines(); } };
                     svg.appendChild(el);
                 }
             });
@@ -646,21 +1538,21 @@
                 let totalX = 0, totalY = 0, count = 0;
                 c.stars.forEach(sid => {
                     const m = memories.find(x => x.id === sid);
-                    if(m) { totalX += m.x; totalY += m.y; count++; }
+                    if (m) { totalX += m.x; totalY += m.y; count++; }
                 });
 
-                if(count > 0) {
+                if (count > 0) {
                     const label = document.createElement('div');
                     label.className = 'constellation-label';
                     label.innerText = c.name;
                     label.style.left = (totalX / count) + '%';
                     label.style.top = (totalY / count) + '%';
-                    
+
                     // CLICK SU LABEL: Apre modifica se in Edit Mode
                     label.onclick = (e) => {
                         e.stopPropagation();
-                        if(isEditing) {
-                            if(isGroupMode) return; // Già editando
+                        if (isEditing) {
+                            if (isGroupMode) return; // Già editando
                             startEditingConstellation(c);
                         }
                     };
@@ -672,10 +1564,10 @@
         // --- GESTIONE MODIFICA COSTELLAZIONI ---
         function startEditingConstellation(constellation) {
             // Entriamo in modalità gruppo ma caricando i dati esistenti
-            toggleGroupMode(); 
+            toggleGroupMode();
             editingConstellationId = constellation.id;
             selectedForGroup = [...constellation.stars]; // Copia le stelle
-            
+
             // Aggiorna UI
             document.getElementById('instructionText').innerHTML = "Modifica: <b>" + constellation.name + "</b>";
             document.getElementById('groupStatus').innerHTML = selectedForGroup.length + " stelle selezionate";
@@ -690,15 +1582,15 @@
             isGroupMode = true;
             editingConstellationId = null; // Di base è nuova
             selectedForGroup = [];
-            
+
             document.getElementById('instructionText').innerHTML = "Modo: <b>Creazione Gruppo</b>";
             document.getElementById('groupStatus').innerHTML = "0 stelle selezionate";
-            
+
             document.getElementById('btnGroupMode').style.display = 'none';
             document.getElementById('groupControls').style.display = 'block';
             document.getElementById('btnDeleteGroup').style.display = 'none';
-            
-            connectStartId = null; 
+
+            connectStartId = null;
             document.querySelectorAll('.star').forEach(s => s.classList.remove('selected-connect'));
         }
 
@@ -706,11 +1598,11 @@
             isGroupMode = false;
             editingConstellationId = null;
             selectedForGroup = [];
-            
+
             document.getElementById('instructionText').innerHTML = "Modo: <b>Sposta/Collega</b><br><small>Clicca 2 stelle per unire.</small>";
             document.getElementById('btnGroupMode').style.display = 'block';
             document.getElementById('groupControls').style.display = 'none';
-            
+
             updateSelectionVisuals();
         }
 
@@ -724,14 +1616,14 @@
 
         function saveConstellationName() {
             if (selectedForGroup.length < 1) { alert("Seleziona almeno una stella!"); return; }
-            
+
             // Chiedi nome (precompilato se modifica)
             let defaultName = "";
             if (editingConstellationId) {
                 const existing = constellations.find(c => c.id === editingConstellationId);
-                if(existing) defaultName = existing.name;
+                if (existing) defaultName = existing.name;
             }
-            
+
             const name = prompt("Nome della Costellazione:", defaultName);
             if (!name || name.trim() === "") return;
 
@@ -756,12 +1648,12 @@
 
             // LOGICA LINEE AUTOMATICHE (Collega in sequenza di array)
             if (autoLines && selectedForGroup.length > 1) {
-                for(let i=0; i<selectedForGroup.length-1; i++) {
+                for (let i = 0; i < selectedForGroup.length - 1; i++) {
                     const from = selectedForGroup[i];
-                    const to = selectedForGroup[i+1];
+                    const to = selectedForGroup[i + 1];
                     // Evita duplicati
-                    const exists = lines.some(l => (l.from===from && l.to===to)||(l.from===to && l.to===from));
-                    if (!exists) lines.push({from, to});
+                    const exists = lines.some(l => (l.from === from && l.to === to) || (l.from === to && l.to === from));
+                    if (!exists) lines.push({ from, to });
                 }
             }
 
@@ -772,7 +1664,7 @@
         }
 
         function deleteCurrentGroup() {
-            if(editingConstellationId && confirm("Eliminare questo nome? (Le stelle resteranno)")) {
+            if (editingConstellationId && confirm("Eliminare questo nome? (Le stelle resteranno)")) {
                 constellations = constellations.filter(c => c.id !== editingConstellationId);
                 saveData();
                 renderLabels();
@@ -790,22 +1682,50 @@
                 e.stopPropagation(); isDragging = true;
                 const cX = e.clientX || e.touches[0].clientX; const cY = e.clientY || e.touches[0].clientY;
                 startX = cX; startY = cY; initialLeft = memData.x; initialTop = memData.y;
-                document.addEventListener('mousemove', moveDrag); document.addEventListener('touchmove', moveDrag, {passive:false});
+                document.addEventListener('mousemove', moveDrag); document.addEventListener('touchmove', moveDrag, { passive: false });
                 document.addEventListener('mouseup', stopDrag); document.addEventListener('touchend', stopDrag);
             }
 
             function moveDrag(e) {
-                if (!isDragging) return; e.preventDefault();
-                const cX = e.clientX || e.touches[0].clientX; const cY = e.clientY || e.touches[0].clientY;
-                memData.x = initialLeft + (((cX-startX)/currentZoom)/window.innerWidth)*100;
-                memData.y = initialTop + (((cY-startY)/currentZoom)/window.innerHeight)*100;
-                starElement.style.left = memData.x+'%'; starElement.style.top = memData.y+'%';
-                renderLines(); renderLabels();
+                if (!isDragging) return; 
+                e.preventDefault();
+                
+                // 1. Coordinate attuali del mouse/dito
+                const cX = e.clientX || e.touches[0].clientX; 
+                const cY = e.clientY || e.touches[0].clientY;
+
+                // 2. Calcoliamo lo spostamento grezzo in pixel (DELTA)
+                const rawDX = cX - startX;
+                const rawDY = cY - startY;
+
+                // 3. Otteniamo l'angolo attuale della galassia
+                const galaxy = document.getElementById('galaxy');
+                const angle = getRotationAngle(galaxy);
+
+                // 4. MAGIA MATEMATICA: Contro-ruotiamo il movimento del mouse
+                // Ruotiamo il vettore (rawDX, rawDY) dell'angolo opposto (-angle)
+                const cos = Math.cos(-angle);
+                const sin = Math.sin(-angle);
+
+                const rotatedDX = rawDX * cos - rawDY * sin;
+                const rotatedDY = rawDX * sin + rawDY * cos;
+
+                // 5. Applichiamo lo zoom e convertiamo in percentuale
+                // Usiamo i valori ruotati (rotatedDX/DY) invece di quelli grezzi
+                memData.x = initialLeft + (((rotatedDX / currentZoom) / window.innerWidth) * 100);
+                memData.y = initialTop + (((rotatedDY / currentZoom) / window.innerHeight) * 100);
+                
+                // 6. Applichiamo al CSS
+                starElement.style.left = memData.x + '%'; 
+                starElement.style.top = memData.y + '%';
+                
+                renderLines(); 
+                renderLabels();
             }
 
-            function stopDrag() { if(isDragging){ isDragging=false; document.removeEventListener('mousemove', moveDrag); document.removeEventListener('touchmove', moveDrag); document.removeEventListener('mouseup', stopDrag); document.removeEventListener('touchend', stopDrag); saveData(); } }
+            function stopDrag() { if (isDragging) { isDragging = false; document.removeEventListener('mousemove', moveDrag); document.removeEventListener('touchmove', moveDrag); document.removeEventListener('mouseup', stopDrag); document.removeEventListener('touchend', stopDrag); saveData(); } }
 
-            starElement.addEventListener('mousedown', startDrag); starElement.addEventListener('touchstart', startDrag, {passive:false});
+            starElement.addEventListener('mousedown', startDrag); starElement.addEventListener('touchstart', startDrag, { passive: false });
 
             starElement.onclick = (e) => {
                 if (isEditing) {
@@ -825,7 +1745,7 @@
                             connectStartId = memData.id; starElement.classList.add('selected-connect');
                         } else {
                             if (connectStartId !== memData.id) {
-                                const exists = lines.some(l => (l.from===connectStartId && l.to===memData.id)||(l.from===memData.id && l.to===connectStartId));
+                                const exists = lines.some(l => (l.from === connectStartId && l.to === memData.id) || (l.from === memData.id && l.to === connectStartId));
                                 if (!exists) { lines.push({ from: connectStartId, to: memData.id }); saveData(); renderLines(); }
                             }
                             document.querySelectorAll('.star').forEach(s => s.classList.remove('selected-connect'));
@@ -855,34 +1775,61 @@
             localStorage.setItem('stardiary_lines', JSON.stringify(lines));
             localStorage.setItem('stardiary_labels', JSON.stringify(constellations));
         }
-        
+
         function exportData() {
             const data = { memories, lines, labels: constellations };
-            const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+            const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
             const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'backup_diario.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
         function importData(input) {
-            const file = input.files[0]; if(!file) return;
+            const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     const d = JSON.parse(e.target.result);
-                    if(d.memories && confirm("Sovrascrivere tutto?")) {
+                    if (d.memories && confirm("Sovrascrivere tutto?")) {
                         memories = d.memories; lines = d.lines || []; constellations = d.labels || [];
                         saveData(); location.reload();
                     }
-                } catch(err) { alert("File non valido"); }
+                } catch (err) { alert("File non valido"); }
             };
             reader.readAsText(file);
         }
-        
+
         function saveEntry() {
             const t = document.getElementById('journalInput').value;
-            if(!t.trim() && !tempImageData) return;
-            
+            if (!t.trim() && !tempImageData) return;
+
             const now = new Date();
-            let x = 50+(Math.random()*20-10); let y = 50+(Math.random()*20-10);
+            const angle = Math.random() * Math.PI * 2;
+
+            const safeRadiusPx = 150;
+
+            // 2. Convertiamo i pixel in percentuale (%) rispetto alla larghezza dello schermo. Esempio: se lo schermo è 1000px, 150px diventano il 15%.
+            let minPerc = (safeRadiusPx / window.innerWidth) * 100;
+
+            // Limite massimo di distanza (45% del lato minore per restare visibili)
+            const maxPerc = 45;
+
+            // SICUREZZA PER SCHERMI PICCOLI (Cellulari)
+            // Se il buco nero occupa quasi tutto lo schermo (es. >40%), le stelle nasceranno proprio ai bordi estremi (min 42%).
+            if (minPerc > 40) minPerc = 42;
+
+            // Generiamo la distanza casuale partendo dalla zona sicura
+            const distance = minPerc + (Math.random() * (maxPerc - minPerc));
+
+            // 3. Calcolo Coordinate (X, Y)
+            let x = 50 + Math.cos(angle) * distance;
+            let y = 50 + Math.sin(angle) * distance;
+
+            // CORREZIONE PER MOBILE (Schermi verticali)
+            // Senza questo, su un telefono alto, il 30% di altezza è molto più pixel del 30% di larghezza.
+            // Questo calcolo "schiaccia" la Y per mantenere la zona di esclusione circolare in pixel reali.
+            if (window.innerHeight > window.innerWidth) {
+                const ratio = window.innerWidth / window.innerHeight;
+                y = 50 + (Math.sin(angle) * distance * ratio);
+            }
 
             // --- LOGICA NEBULOSA ---
             let unlockTimestamp = null;
@@ -895,52 +1842,74 @@
                 unlockDate.setHours(23, 59, 59);
                 unlockTimestamp = unlockDate.getTime();
             }
-            
-            memories.push({ 
-                id: Date.now(), 
-                text: t, 
-                date: now.toLocaleDateString()+' '+now.toLocaleTimeString(), 
-                x, y, 
-                size: Math.random()*3+2, 
-                color: selectedColor, 
+
+            memories.push({
+                id: Date.now(),
+                text: t,
+                date: now.toLocaleDateString() + ' ' + now.toLocaleTimeString(),
+                x, y,
+                size: Math.random() * 3 + 2,
+                color: selectedColor,
                 isFavorite: false,
                 image: tempImageData || null,
                 unlockDate: unlockTimestamp
             });
-            
+
             saveData(); closeWriter(); renderStars(); renderList();
-            currentZoom=1; panX=0; panY=0; updateSkyTransform();
+            currentZoom = 1; panX = 0; panY = 0; updateSkyTransform();
         }
-        
+
         function updateSkyTransform() { document.getElementById('sky').style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`; }
-        function zoomIn() { if(currentZoom<3) { currentZoom+=0.2; updateSkyTransform(); } }
-        function zoomOut() { if(currentZoom>0.5) { currentZoom-=0.2; updateSkyTransform(); } }
-        window.addEventListener('wheel', function(e) {
-            
+        function zoomIn() { if (currentZoom < 3) { currentZoom += 0.2; updateSkyTransform(); } }
+        function zoomOut() { if (currentZoom > 0.5) { currentZoom -= 0.2; updateSkyTransform(); } }
+        window.addEventListener('wheel', function (e) {
+            // 1. ELENCO ZONE SCORREVOLI
+            // Inserisci qui gli ID o le classi dei pannelli dove vuoi lo scroll normale
+            const scrollableSelectors = [
+                '#sideMenu',    // Il Menu Laterale dei Ricordi
+                '#memoryList',  // La lista specifica dentro il menu (per sicurezza)
+                '#statsModal',  // Il Pannello Statistiche
+                '.modal-content' // Classi generiche interne ai modali
+            ];
+
+            // 2. CONTROLLO "ZONA SICURA"
+            // Verifica se il mouse è sopra uno di questi elementi (o un loro figlio)
+            const isOverScrollable = scrollableSelectors.some(selector => e.target.closest(selector));
+
+            // 3. DECISIONE
+            if (isOverScrollable) {
+                // Se siamo sopra un pannello, NON fare nulla.
+                // Lascia che il browser gestisca lo scroll (NON chiamare preventDefault)
+                return;
+            }
+
+            // 4. COMPORTAMENTO STANDARD (ZOOM UNIVERSO)
+            // Se non siamo sopra un pannello, blocca lo scroll e zoomma
             e.preventDefault();
-            
+
             if (e.deltaY < 0) zoomIn();
             else zoomOut();
+
         }, { passive: false });
         function setupSkyInteraction() {
             const c = document.getElementById('skyContainer');
-            c.addEventListener('mousedown', e => { if(e.target.closest('.star')||e.target.tagName==='BUTTON')return; isPanning=true; startPanX=e.clientX-panX; startPanY=e.clientY-panY; c.classList.add('grabbing'); });
-            window.addEventListener('mousemove', e => { if(!isPanning)return; e.preventDefault(); panX=e.clientX-startPanX; panY=e.clientY-startPanY; updateSkyTransform(); });
-            window.addEventListener('mouseup', () => { isPanning=false; c.classList.remove('grabbing'); });
-            c.addEventListener('touchstart', e => { if(e.target.closest('.star')||e.target.tagName==='BUTTON')return; isPanning=true; startPanX=e.touches[0].clientX-panX; startPanY=e.touches[0].clientY-panY; }, {passive:false});
-            window.addEventListener('touchmove', e => { if(!isPanning)return; panX=e.touches[0].clientX-startPanX; panY=e.touches[0].clientY-startPanY; updateSkyTransform(); }, {passive:false});
-            window.addEventListener('touchend', () => isPanning=false);
+            c.addEventListener('mousedown', e => { if (e.target.closest('.star') || e.target.tagName === 'BUTTON') return; isPanning = true; startPanX = e.clientX - panX; startPanY = e.clientY - panY; c.classList.add('grabbing'); });
+            window.addEventListener('mousemove', e => { if (!isPanning) return; e.preventDefault(); panX = e.clientX - startPanX; panY = e.clientY - startPanY; updateSkyTransform(); });
+            window.addEventListener('mouseup', () => { isPanning = false; c.classList.remove('grabbing'); });
+            c.addEventListener('touchstart', e => { if (e.target.closest('.star') || e.target.tagName === 'BUTTON') return; isPanning = true; startPanX = e.touches[0].clientX - panX; startPanY = e.touches[0].clientY - panY; }, { passive: false });
+            window.addEventListener('touchmove', e => { if (!isPanning) return; panX = e.touches[0].clientX - startPanX; panY = e.touches[0].clientY - startPanY; updateSkyTransform(); }, { passive: false });
+            window.addEventListener('touchend', () => isPanning = false);
         }
-        
+
         function toggleMenu() { document.getElementById('sideMenu').classList.toggle('open'); }
-        function toggleMusic() { const m=document.getElementById('bgMusic'); const b=document.querySelector('.btn-music'); if(m.paused){m.play();b.innerHTML='🎵';b.style.borderColor='#00ff00';}else{m.pause();b.innerHTML='🔇';b.style.borderColor='rgba(255,255,255,0.3)';} }
+        function toggleMusic() { const m = document.getElementById('bgMusic'); const b = document.querySelector('.btn-music'); if (m.paused) { m.play(); b.innerHTML = '🎵'; b.style.borderColor = '#00ff00'; } else { m.pause(); b.innerHTML = '🔇'; b.style.borderColor = 'rgba(255,255,255,0.3)'; } }
         // --- GESTIONE TASTO PAUSA ---
         let isRotationLocked = false;
 
         function toggleRotation() {
             isRotationLocked = !isRotationLocked;
             const btn = document.getElementById('btnRotation');
-            
+
             if (isRotationLocked) {
                 // BLOCCA TUTTO
                 document.body.classList.add('manual-pause');
@@ -951,14 +1920,14 @@
                 document.body.classList.remove('manual-pause');
                 btn.innerHTML = '⏸️'; // Mostra icona Pausa
                 btn.classList.remove('active-lock');
-                
+
                 // Opzionale: simula un movimento mouse per riattivare il timer smart
-                handleUserActivity(); 
+                handleUserActivity();
             }
         }
         function openWriter() { document.getElementById('entryModal').style.display = 'flex'; }
-        function closeWriter() { 
-            document.getElementById('entryModal').style.display = 'none'; 
+        function closeWriter() {
+            document.getElementById('entryModal').style.display = 'none';
             document.getElementById('journalInput').value = '';
             removeImage(); // IMPORTANTE: Pulisce la foto se annulli o dopo aver salvato
             document.getElementById('capsuleCheckbox').checked = false;
@@ -966,50 +1935,68 @@
             document.getElementById('capsuleDateInput').value = '';
         }
         function closeViewer() { document.getElementById('viewModal').style.display = 'none'; }
-        function selectColor(c, el) { selectedColor=c; document.querySelectorAll('.color-option').forEach(e=>e.style.border='2px solid transparent'); el.style.border='2px solid white'; }
-        function viewMemory(m) { 
-            currentMemoryId = m.id; 
-            document.getElementById('viewDate').innerText = m.date; 
-            document.getElementById('viewColorInfo').innerText = "Colore: " + m.color; 
-            
+        function selectColor(c, el) { selectedColor = c; document.querySelectorAll('.color-option').forEach(e => e.style.border = '2px solid transparent'); el.style.border = '2px solid white'; }
+        function viewMemory(m) {
+            currentMemoryId = m.id;
+            document.getElementById('viewDate').innerText = m.date;
+            document.getElementById('viewColorInfo').innerText = "Colore: " + m.color;
+
             // COSTRUZIONE CONTENUTO (Testo + Foto)
             const textBox = document.getElementById('viewText');
             let content = `<p style="white-space: pre-wrap;">${m.text}</p>`;
-            
+
             if (m.image) {
                 content += `
                     <div style="margin-top:15px; text-align:center;">
                         <img src="${m.image}" style="max-width:100%; max-height:300px; border:4px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.5); transform: rotate(-1deg); border-radius:2px;">
                     </div>`;
             }
-            
+
             textBox.innerHTML = content; // Usa innerHTML per mostrare l'immagine
-            
-            const b = document.getElementById('btnFav'); 
-            if(m.isFavorite){ b.innerText='★ Preferito (Sì)'; } else { b.innerText='☆ Aggiungi a Preferiti'; } 
-            
-            document.getElementById('viewModal').style.display='block'; 
+
+            const b = document.getElementById('btnFav');
+            if (m.isFavorite) { b.innerText = '★ Preferito (Sì)'; } else { b.innerText = '☆ Aggiungi a Preferiti'; }
+
+            document.getElementById('viewModal').style.display = 'block';
         }
-        function toggleFavorite() { const m=memories.find(x=>x.id===currentMemoryId); if(m){m.isFavorite=!m.isFavorite; saveData(); viewMemory(m); renderStars(); renderList();} }
-        function deleteMemory() { if(confirm("Spegnere questa stella?")){ memories=memories.filter(x=>x.id!==currentMemoryId); lines=lines.filter(l=>l.from!==currentMemoryId && l.to!==currentMemoryId); constellations.forEach(c=>{c.stars=c.stars.filter(id=>id!==currentMemoryId)}); saveData(); closeViewer(); renderStars(); renderLines(); renderLabels(); renderList(); } }
-        function exportText() { let c="IL MIO DIARIO STELLARE\n\n"; [...memories].sort((a,b)=>a.id-b.id).forEach(m=>{c+=`DATA: ${m.date}\nCOLORE: ${m.color}\n${m.text}\n------------------\n`;}); const b=new Blob([c],{type:"text/plain"}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='diario.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
-        function renderList() { const l=document.getElementById('memoryList'); const f=document.getElementById('favList'); l.innerHTML=''; f.innerHTML=''; [...memories].reverse().forEach(m=>{ const i=document.createElement('div'); i.className='memory-item'; i.innerHTML=`<span class="color-dot" style="background:${m.color==='red'?'#ff5e5e':m.color==='blue'?'#5eaaff':m.color==='yellow'?'#ffea5e':m.color==='orange'?'#ffaa33':'white'}"></span> ${m.date} - ${m.text.substring(0,20)}...`; i.onclick=()=>{currentZoom=1;panX=0;panY=0;updateSkyTransform();viewMemory(m);setTimeout(()=>{document.getElementById('star-'+m.id).classList.add('highlight');setTimeout(()=>document.getElementById('star-'+m.id).classList.remove('highlight'),2000);},300);}; if(m.isFavorite)f.appendChild(i); else l.appendChild(i); }); if(f.innerHTML==='')f.innerHTML='<div style="font-size:12px; color:#666; padding:5px;">Nessun preferito</div>'; }
+        function toggleFavorite() { const m = memories.find(x => x.id === currentMemoryId); if (m) { m.isFavorite = !m.isFavorite; saveData(); viewMemory(m); renderStars(); renderList(); } }
+        function deleteMemory() { if (confirm("Spegnere questa stella?")) { memories = memories.filter(x => x.id !== currentMemoryId); lines = lines.filter(l => l.from !== currentMemoryId && l.to !== currentMemoryId); constellations.forEach(c => { c.stars = c.stars.filter(id => id !== currentMemoryId) }); saveData(); closeViewer(); renderStars(); renderLines(); renderLabels(); renderList(); } }
+        function exportText() { let c = "IL MIO DIARIO STELLARE\n\n";[...memories].sort((a, b) => a.id - b.id).forEach(m => { c += `DATA: ${m.date}\nCOLORE: ${m.color}\n${m.text}\n------------------\n`; }); const b = new Blob([c], { type: "text/plain" }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'diario.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+        function renderList() { const l = document.getElementById('memoryList'); const f = document.getElementById('favList'); l.innerHTML = ''; f.innerHTML = '';[...memories].reverse().forEach(m => { const i = document.createElement('div'); i.className = 'memory-item'; i.innerHTML = `<span class="color-dot" style="background:${m.color === 'red' ? '#ff5e5e' : m.color === 'blue' ? '#5eaaff' : m.color === 'yellow' ? '#ffea5e' : m.color === 'orange' ? '#ffaa33' : 'white'}"></span> ${m.date} - ${m.text.substring(0, 20)}...`; i.onclick = () => { currentZoom = 1; panX = 0; panY = 0; updateSkyTransform(); viewMemory(m); setTimeout(() => { document.getElementById('star-' + m.id).classList.add('highlight'); setTimeout(() => document.getElementById('star-' + m.id).classList.remove('highlight'), 2000); }, 300); }; if (m.isFavorite) f.appendChild(i); else l.appendChild(i); }); if (f.innerHTML === '') f.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">Nessun preferito</div>'; }
 
         // TUTORIAL NUOVO
         const tutorialSteps = [
             { icon: "👋", title: "Benvenut*", text: "Nello spazio nessuno può sentire i tuoi pensieri, ma potrai vederli brillare. In questo spazio sicuro, ogni tuo pensiero diventa una stella. Il cielo si riempirà col tempo." },
             { icon: "🔍", title: "Navigazione", text: "Usa la rotellina (o i tasti + e -) per Zoomare. Clicca e trascina lo sfondo nero per spostarti ed esplorare il cielo." },
-            { icon: "+", title: "Nuovo Ricordo", text: "Usa il tasto + in basso a destra per scrivere come ti senti. Puoi scegliere il colore della tua stella in base al tuo umore." },
+            { icon: "✒️", title: "Nuovo Ricordo", text: "Usa il tasto ✒️ in basso a destra per scrivere come ti senti. Puoi scegliere il colore della tua stella in base al tuo umore." },
             { icon: "☰", title: "I tuoi Ricordi", text: "Usa il menu Ricordi in alto a sinistra per rivedere tutti i tuoi pensieri ordinati o ritrovare i preferiti." },
             { icon: "✏️", title: "Costellazioni", text: "Clicca la matita. Puoi unire due stelle, oppure cliccare 'Crea Nuova Costellazione' per selezionare tante stelle e dare un nome unico." },
+            { icon: "<span class='tutorial-bh-icon' style='transform: scale(2);'></span>", title: "Il Buco Nero", text: "Al centro della galassia trovi il buco nero il cui colore cambia adattandosi al colore generale delle stelle. Cliccaci per vedere le statistiche" },
             { icon: "🔭", title: "Telescopio", text: "Clicca sulla barra di ricerca e inserisci la o le parole chiave che vuoi cercare nelle note. Rimarranno accese solo le stelle che le contengono." },
             { icon: "🎵", title: "Atmosfera", text: "Usa l'icona in alto a destra per attivare la musica di sottofondo." }
+
         ];
-        let currentStep=0;
-        function checkTutorial() { if(!localStorage.getItem('tutorial_seen_v6')) { document.getElementById('tutorialModal').style.display='flex'; showStep(0); } }
-        function showStep(i) { currentStep=i; const s=tutorialSteps[i]; document.getElementById('tutIcon').innerText=s.icon; document.getElementById('tutTitle').innerText=s.title; document.getElementById('tutText').innerText=s.text; document.getElementById('btnPrev').style.visibility=i===0?'hidden':'visible'; document.getElementById('btnNext').innerText=i===tutorialSteps.length-1?'Inizia':'Avanti'; }
-        function nextStep() { if(currentStep<tutorialSteps.length-1)showStep(currentStep+1); else { document.getElementById('tutorialModal').style.display='none'; localStorage.setItem('tutorial_seen_v6','true'); } }
-        function prevStep() { if(currentStep>0)showStep(currentStep-1); }
+        let currentStep = 0;
+        function checkTutorial() { if (!localStorage.getItem('tutorial_seen_v6')) { document.getElementById('tutorialModal').style.display = 'flex'; showStep(0); } }
+        function showStep(i) {
+            currentStep = i;
+            const s = tutorialSteps[i];
+
+            // Uusa innerHTML per interpretare lo <span> e le emoji
+            document.getElementById('tutIcon').innerHTML = s.icon;
+
+            // Usa innerHTML per permettere formattazione nel titolo (opzionale, ma comodo)
+            document.getElementById('tutTitle').innerHTML = s.title;
+
+            // Usa innerHTML per interpretare <strong>, <br> e le icone nel testo
+            document.getElementById('tutText').innerHTML = s.text;
+
+            // Gestione bottoni (rimane uguale)
+            document.getElementById('btnPrev').style.visibility = i === 0 ? 'hidden' : 'visible';
+            document.getElementById('btnNext').innerText = i === tutorialSteps.length - 1 ? 'Inizia' : 'Avanti';
+        }
+        function nextStep() { if (currentStep < tutorialSteps.length - 1) showStep(currentStep + 1); else { document.getElementById('tutorialModal').style.display = 'none'; localStorage.setItem('tutorial_seen_v6', 'true'); } }
+        function prevStep() { if (currentStep > 0) showStep(currentStep - 1); }
 
         // --- FUNZIONI STATISTICHE ---
 
@@ -1049,7 +2036,7 @@
                 filtered = memories.filter(m => {
                     // Convertiamo la data italiana dd/mm/yyyy in oggetto Date
                     const parts = m.date.split(' ')[0].split('/');
-                    const memDate = new Date(parts[2], parts[1]-1, parts[0]);
+                    const memDate = new Date(parts[2], parts[1] - 1, parts[0]);
                     return memDate >= oneWeekAgo;
                 });
                 title = "Ultimi 7 Giorni";
@@ -1071,11 +2058,11 @@
             drawPieChart(filtered, 'timePieChart', 'timeLegend');
         }
 
-       // NUOVA FUNZIONE STATISTICHE COSTELLAZIONI (Dettagliata)
+        // NUOVA FUNZIONE STATISTICHE COSTELLAZIONI (Dettagliata)
         function renderConstStats() {
             const listDiv = document.getElementById('constListStats');
             listDiv.innerHTML = ''; // Pulisci lista
-            
+
             if (constellations.length === 0) {
                 listDiv.innerHTML = '<p style="text-align:center; color:#666;">Nessuna costellazione creata.</p>';
                 return;
@@ -1085,11 +2072,11 @@
             constellations.forEach((c, index) => {
                 // Recupera le memorie di questa costellazione
                 const cMemories = memories.filter(m => c.stars.includes(m.id));
-                
+
                 // Crea il contenitore della scheda
                 const card = document.createElement('div');
                 card.style.cssText = "background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; border:1px solid #444;";
-                
+
                 // Genera ID unici per grafico e legenda
                 const chartId = 'chart-const-' + index;
                 const legendId = 'legend-const-' + index;
@@ -1104,7 +2091,7 @@
                         <div id="${legendId}" style="flex-grow:1; font-size:11px; display:flex; flex-direction:column; gap:3px;"></div>
                     </div>
                 `;
-                
+
                 listDiv.appendChild(card);
 
                 // Disegna il grafico specifico per questa costellazione
@@ -1139,9 +2126,9 @@
                 'yellow': '#ffcc00', // Giallo Oro
                 'orange': '#ff6600'  // Arancione Vivido
             };
-            
+
             // Etichette (solo per versione grande)
-            const labelMap = { 'white':'Bianco','red':'Rosso','blue':'Blu','yellow':'Giallo','orange':'Arancione' };
+            const labelMap = { 'white': 'Bianco', 'red': 'Rosso', 'blue': 'Blu', 'yellow': 'Giallo', 'orange': 'Arancione' };
 
             let gradientStr = "";
             let currentDeg = 0;
@@ -1151,11 +2138,11 @@
                 const deg = (count / total) * 360;
                 const cssColor = colorMap[color] || '#ccc';
                 gradientStr += `${cssColor} ${currentDeg}deg ${currentDeg + deg}deg, `;
-                
+
                 const perc = Math.round((count / total) * 100);
-                
+
                 // Legenda Diversa se è Compatta (Costellazioni) o Full (Tempo)
-                if(isCompact) {
+                if (isCompact) {
                     // Solo pallino e percentuale per risparmiare spazio
                     legend.innerHTML += `
                         <div style="display:flex; align-items:center; justify-content:space-between;">
@@ -1222,9 +2209,9 @@
 
             // Aggiorna contatore
             counter.style.display = 'block';
-            counter.innerText = foundCount === 0 ? "Nessuna stella trovata" : 
-                                foundCount === 1 ? "1 stella trovata" : 
-                                `${foundCount} stelle trovate`;
+            counter.innerText = foundCount === 0 ? "Nessuna stella trovata" :
+                foundCount === 1 ? "1 stella trovata" :
+                    `${foundCount} stelle trovate`;
         }
 
         function resetSearch() {
@@ -1241,7 +2228,7 @@
             document.querySelectorAll('.star').forEach(el => {
                 el.classList.remove('dimmed');
                 // Resetta box-shadow (rimuovendo l'inline style così torna a quello del CSS)
-                el.style.boxShadow = ''; 
+                el.style.boxShadow = '';
             });
         }
 
@@ -1253,13 +2240,13 @@
         // Funzione per capire se c'è una finestra aperta (Modals)
         function isAnyModalOpen() {
             const modals = [
-                'entryModal', 
-                'viewModal', 
-                'statsModal', 
-                'tutorialModal', 
+                'entryModal',
+                'viewModal',
+                'statsModal',
+                'tutorialModal',
                 'constellationPanel' // Consideriamo anche il pannello modifica come "finestra"
             ];
-            
+
             // Se anche solo uno di questi è visibile (display != none), ritorna VERO
             return modals.some(id => {
                 const el = document.getElementById(id);
@@ -1286,9 +2273,9 @@
 
         // Ascoltiamo il movimento del mouse su tutto lo schermo
         window.addEventListener('mousemove', handleUserActivity);
-        window.addEventListener('touchstart', handleUserActivity, {passive: true});
+        window.addEventListener('touchstart', handleUserActivity, { passive: true });
         window.addEventListener('click', handleUserActivity);
-        
+
         // Controllo extra: Se chiudo una finestra, voglio ripartire dopo 2 sec o subito?
         // Per sicurezza, quando chiudi una finestra, il movimento del mouse riattiverà il ciclo.
 
