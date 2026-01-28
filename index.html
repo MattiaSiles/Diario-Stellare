@@ -1230,10 +1230,24 @@
     </div>
 
     <script>
+
+        // --- RICONOSCIMENTO FILE ---
+        // Capisce se siamo su forGemini o no
+        const isDev = window.location.pathname.includes('ForGemini');
+
+        // --- CHIAVI DI MEMORIA DINAMICHE ---
+        // Se siamo su forGemini usa le chiavi "_DEV", altrimenti quelle normali
+        const KEY_MEMORIES = isDev ? 'stardiary_memories_DEV' : 'stardiary_memories';
+        const KEY_LINES = isDev ? 'stardiary_lines_DEV' : 'stardiary_lines';
+        const KEY_LABELS = isDev ? 'stardiary_labels_DEV' : 'stardiary_labels';
+        const KEY_TUTORIAL = isDev ? 'tutorial_seen_DEV' : 'tutorial_seen_v6';
+
+        console.log("Modalità Sviluppo:", isDev); // Ti conferma in console se ha capito
+
         // --- DATI ---
-        let memories = JSON.parse(localStorage.getItem('stardiary_memories')) || [];
-        let lines = JSON.parse(localStorage.getItem('stardiary_lines')) || [];
-        let constellations = JSON.parse(localStorage.getItem('stardiary_labels')) || [];
+        let memories = JSON.parse(localStorage.getItem(KEY_MEMORIES)) || [];
+        let lines = JSON.parse(localStorage.getItem(KEY_LINES)) || [];
+        let constellations = JSON.parse(localStorage.getItem(KEY_LABELS)) || [];
 
         let selectedColor = 'white';
         let currentMemoryId = null;
@@ -1687,11 +1701,11 @@
             }
 
             function moveDrag(e) {
-                if (!isDragging) return; 
+                if (!isDragging) return;
                 e.preventDefault();
-                
+
                 // 1. Coordinate attuali del mouse/dito
-                const cX = e.clientX || e.touches[0].clientX; 
+                const cX = e.clientX || e.touches[0].clientX;
                 const cY = e.clientY || e.touches[0].clientY;
 
                 // 2. Calcoliamo lo spostamento grezzo in pixel (DELTA)
@@ -1714,12 +1728,12 @@
                 // Usiamo i valori ruotati (rotatedDX/DY) invece di quelli grezzi
                 memData.x = initialLeft + (((rotatedDX / currentZoom) / window.innerWidth) * 100);
                 memData.y = initialTop + (((rotatedDY / currentZoom) / window.innerHeight) * 100);
-                
+
                 // 6. Applichiamo al CSS
-                starElement.style.left = memData.x + '%'; 
+                starElement.style.left = memData.x + '%';
                 starElement.style.top = memData.y + '%';
-                
-                renderLines(); 
+
+                renderLines();
                 renderLabels();
             }
 
@@ -1771,9 +1785,9 @@
         }
 
         function saveData() {
-            localStorage.setItem('stardiary_memories', JSON.stringify(memories));
-            localStorage.setItem('stardiary_lines', JSON.stringify(lines));
-            localStorage.setItem('stardiary_labels', JSON.stringify(constellations));
+            localStorage.setItem(KEY_MEMORIES, JSON.stringify(memories));
+            localStorage.setItem(KEY_LINES, JSON.stringify(lines));
+            localStorage.setItem(KEY_LABELS, JSON.stringify(constellations));
         }
 
         function exportData() {
@@ -1977,7 +1991,12 @@
 
         ];
         let currentStep = 0;
-        function checkTutorial() { if (!localStorage.getItem('tutorial_seen_v6')) { document.getElementById('tutorialModal').style.display = 'flex'; showStep(0); } }
+        function checkTutorial() {
+            if (!localStorage.getItem(KEY_TUTORIAL)) { // Qui usa la variabile
+                document.getElementById('tutorialModal').style.display = 'flex';
+                showStep(0);
+            }
+        }
         function showStep(i) {
             currentStep = i;
             const s = tutorialSteps[i];
