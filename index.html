@@ -671,8 +671,9 @@
         }
 
         .color-option.selected {
-            border: 2px solid white;
+            border: 4px solid black !important;
             transform: scale(1.2);
+            box-shadow: 0 0 0 2px #ffffff;
         }
 
         .modal-btn {
@@ -1949,7 +1950,18 @@
             document.getElementById('capsuleDateInput').value = '';
         }
         function closeViewer() { document.getElementById('viewModal').style.display = 'none'; }
-        function selectColor(c, el) { selectedColor = c; document.querySelectorAll('.color-option').forEach(e => e.style.border = '2px solid transparent'); el.style.border = '2px solid white'; }
+        function selectColor(c, el) {
+            selectedColor = c;
+
+            // Rimuove la classe .selected e i vecchi bordi manuali da tutti
+            document.querySelectorAll('.color-option').forEach(e => {
+                e.classList.remove('selected');
+                e.style.border = ''; // Importante: pulisce vecchi stili manuali
+            });
+
+            // Aggiunge la classe .selected a quello cliccato
+            el.classList.add('selected');
+        }
         function viewMemory(m) {
             currentMemoryId = m.id;
             document.getElementById('viewDate').innerText = m.date;
