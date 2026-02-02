@@ -1103,6 +1103,25 @@
         <div id="favList"></div>
         <div class="menu-title">Tutti i Ricordi</div>
         <div id="memoryList"></div>
+        <div
+            style="margin-top: 30px 0; border-top: 1px solid #555; padding-top: 25px; padding-bottom: 10px; text-align: center;">
+            <button onclick="setupDailyReminder()" style="
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05); 
+            color: #e0e0e0; 
+            border: 1px solid #666; 
+            padding: 10px; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px;
+            transition: all 0.3s ease;">
+                📅 Imposta promemoria giornaliero
+            </button>
+        </div>
         <div style="margin-top: 30px; border-top: 1px solid #555; padding-top: 20px;">
             <div class="menu-title" style="font-size: 18px; border:none;">Gestione Dati</div>
             <button class="btn-backup" onclick="exportData()" style="background: #4CAF50;">💾 Salva Backup (File
@@ -2300,6 +2319,21 @@
                     document.body.classList.remove(interactionClass);
                 }
             }, 2000);
+        }
+
+        // --- FUNZIONE PROMEMORIA CALENDARIO ---
+        function setupDailyReminder() {
+            // Chiede conferma e spiega come funziona
+            const userConfirm = confirm("Stai per aprire Google Calendar per impostare un promemoria giornaliero.\n\nPotrai modificare o cancellare l'avviso solamente dal tuo calendario.\n\nVuoi procedere?");
+
+            if (userConfirm) {
+                const title = "✨ Tempo per il Diario Stellare";
+                const description = "Prenditi un momento per aggiungere una stella...";
+                const location = "Nel tuo Universo";
+                const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}&recur=RRULE:FREQ=DAILY`;
+
+                window.open(googleUrl, '_blank');
+            }
         }
 
         // Ascoltiamo il movimento del mouse su tutto lo schermo
