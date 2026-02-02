@@ -1013,6 +1013,8 @@
 
 <body>
 
+
+
     <audio id="bgMusic" loop>
         <source src="musica.mp3" type="audio/mpeg">
     </audio>
@@ -1099,12 +1101,59 @@
 
     <div id="sideMenu">
         <button class="close-menu" onclick="toggleMenu()">×</button>
+
+        <div id="userSection" style="
+        text-align: center; 
+        margin-bottom: 5px;   /* RIDOTTO (era 20px) per avvicinare ai preferiti */
+        padding-bottom: 10px; /* RIDOTTO (era 15px) per avvicinare la linea al bottone */
+        border-bottom: 1px solid #333;">
+
+            <button id="btnLogin" onclick="loginGoogle()" style="
+            background: white; 
+            color: black; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 14px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+            transition: transform 0.2s;">
+                🔑 Accedi con Google
+            </button>
+
+            <div id="userInfo" style="display: none; color: #ccc;">
+                <div style="font-size: 12px; color: #888; margin-bottom: 5px;">BENTORNATO</div>
+                <div id="userName" style="font-size: 16px; color: white; font-weight: bold; margin-bottom: 5px;">
+                    Viaggiatore</div>
+                <div style="font-size: 11px; color: #4CAF50; margin-bottom: 10px;">● Sincronizzato col Cloud</div>
+
+                <button onclick="logoutGoogle()" style="
+                background: transparent; 
+                border: 1px solid #555; 
+                color: #aaa; 
+                padding: 5px 12px; 
+                border-radius: 10px; 
+                cursor: pointer; 
+                font-size: 11px;">
+                    Disconnetti
+                </button>
+            </div>
+        </div>
+
         <div class="menu-title" style="color: #ffd700;">★ Preferiti</div>
         <div id="favList"></div>
+
         <div class="menu-title">Tutti i Ricordi</div>
         <div id="memoryList"></div>
-        <div
-            style="margin-top: 30px 0; border-top: 1px solid #555; padding-top: 25px; padding-bottom: 10px; text-align: center;">
+
+        <div style="
+        margin-top: 20px; 
+        border-top: 1px solid #555; 
+        padding-top: 20px;    /* Distanza SOPRA il bottone */
+        padding-bottom: 20px; /* Distanza SOTTO il bottone (uguale a sopra) */
+        text-align: center;">
+
             <button onclick="setupDailyReminder()" style="
             width: 100%;
             background: rgba(255, 255, 255, 0.05); 
@@ -1122,7 +1171,8 @@
                 📅 Imposta promemoria giornaliero
             </button>
         </div>
-        <div style="margin-top: 30px; border-top: 1px solid #555; padding-top: 20px;">
+
+        <div style="margin-top: 0px; border-top: 1px solid #555; padding-top: 20px;">
             <div class="menu-title" style="font-size: 18px; border:none;">Gestione Dati</div>
             <button class="btn-backup" onclick="exportData()" style="background: #4CAF50;">💾 Salva Backup (File
                 App)</button>
@@ -1249,6 +1299,137 @@
         </div>
     </div>
 
+
+    <script type="module">
+        // 1. Importiamo Firebase usando gli indirizzi WEB (giusti per HTML semplice)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // 2. LA TUA CONFIGURAZIONE (Copiata dalla tua immagine)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnq1n_8bO4ZquP8dzpzaILEs2DKqyWg0o",
+            authDomain: "diario-stellare.firebaseapp.com",
+            projectId: "diario-stellare",
+            storageBucket: "diario-stellare.firebasestorage.app",
+            messagingSenderId: "81958146968",
+            appId: "1:81958146968:web:ab066dab212cbea35f91ed"
+        };
+
+        // 3. Avviamo i motori
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // 4. FUNZIONI GLOBALI (Il ponte tra Firebase e il tuo Diario)
+
+        // --- LOGIN ---
+        window.loginGoogle = async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                console.log("Login effettuato:", user.displayName);
+                alert("Benvenuto " + user.displayName + "! Carico il tuo universo...");
+                window.loadFromCloud();
+            } catch (error) {
+                console.error("Errore Login:", error);
+                alert("Errore login: " + error.message);
+            }
+        };
+
+        // --- LOGOUT ---
+        window.logoutGoogle = () => {
+            signOut(auth).then(() => {
+                alert("Disconnesso. Ora stai usando la memoria locale.");
+                location.reload();
+            });
+        };
+
+        // --- SALVA TUTTO (Stelle + Linee + Costellazioni) ---
+        window.saveToCloud = async (m, l, c) => {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            try {
+                // Salviamo un oggetto unico che contiene tutto
+                await setDoc(doc(db, "users", user.uid), {
+                    data_stars: JSON.stringify(m),
+                    data_lines: JSON.stringify(l),
+                    data_constellations: JSON.stringify(c),
+                    last_update: new Date().toISOString() // Utile per sapere quando è stato salvato
+                });
+                console.log("☁️ Salvataggio completo (Stelle, Linee, Costellazioni)!");
+            } catch (e) {
+                console.error("Errore salvataggio cloud:", e);
+            }
+        };
+
+        // --- CARICA TUTTO ---
+        window.loadFromCloud = async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const docRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+
+                // 1. Aggiorniamo le variabili globali del gioco
+                window.memories = JSON.parse(data.data_stars || "[]");
+                window.lines = JSON.parse(data.data_lines || "[]");
+                window.constellations = JSON.parse(data.data_constellations || "[]");
+
+                // 2. Aggiorniamo anche la memoria locale (così se vai offline hai gli ultimi dati)
+                // Nota: Uso le chiavi stringa fisse per sicurezza, ma corrisponderanno alle tue costanti
+                localStorage.setItem('galaxy_memories', JSON.stringify(window.memories));
+                localStorage.setItem('galaxy_lines', JSON.stringify(window.lines));
+                localStorage.setItem('galaxy_labels', JSON.stringify(window.constellations));
+
+                // 3. Ridisegniamo tutto
+                if (window.renderStars) window.renderStars();
+                if (window.renderLines) window.renderLines();
+                if (window.updateStats) window.updateStats();
+
+                console.log("☁️ Universo completo scaricato!");
+            } else {
+                console.log("Primo accesso: Nessun dato sul cloud.");
+            }
+        };
+
+        // 5. CONTROLLO AUTOMATICO STATO UTENTE
+        onAuthStateChanged(auth, (user) => {
+            const btnLogin = document.getElementById('btnLogin');
+            const userInfo = document.getElementById('userInfo');
+            const userName = document.getElementById('userName');
+
+            if (user) {
+                // UTENTE LOGGATO
+                window.currentUser = user;
+                console.log("Utente connesso:", user.displayName);
+
+                // Aggiorna la grafica del menu
+                if (btnLogin) btnLogin.style.display = 'none';
+                if (userInfo) userInfo.style.display = 'block';
+                if (userName) userName.innerText = user.displayName;
+
+                // Carica i dati
+                window.loadFromCloud();
+            } else {
+                // UTENTE DISCONNESSO
+                window.currentUser = null;
+
+                // Ripristina grafica menu
+                if (btnLogin) btnLogin.style.display = 'inline-block';
+                if (userInfo) userInfo.style.display = 'none';
+            }
+        });
+
+    </script>
+
+
+
     <script>
 
         // --- RICONOSCIMENTO FILE ---
@@ -1265,9 +1446,9 @@
         console.log("Modalità Sviluppo:", isDev); // Ti conferma in console se ha capito
 
         // --- DATI ---
-        let memories = JSON.parse(localStorage.getItem(KEY_MEMORIES)) || [];
-        let lines = JSON.parse(localStorage.getItem(KEY_LINES)) || [];
-        let constellations = JSON.parse(localStorage.getItem(KEY_LABELS)) || [];
+        var memories = JSON.parse(localStorage.getItem(KEY_MEMORIES)) || [];
+        var lines = JSON.parse(localStorage.getItem(KEY_LINES)) || [];
+        var constellations = JSON.parse(localStorage.getItem(KEY_LABELS)) || [];
 
         let selectedColor = 'white';
         let currentMemoryId = null;
@@ -1808,6 +1989,12 @@
             localStorage.setItem(KEY_MEMORIES, JSON.stringify(memories));
             localStorage.setItem(KEY_LINES, JSON.stringify(lines));
             localStorage.setItem(KEY_LABELS, JSON.stringify(constellations));
+
+            // 2. SALVATAGGIO CLOUD (Nuovo!)
+            // Se l'utente è loggato, spediamo tutti e 3 i dati a Firebase
+            if (window.currentUser) {
+                window.saveToCloud(memories, lines, constellations);
+            }
         }
 
         function exportData() {
@@ -2319,21 +2506,6 @@
                     document.body.classList.remove(interactionClass);
                 }
             }, 2000);
-        }
-
-        // --- FUNZIONE PROMEMORIA CALENDARIO ---
-        function setupDailyReminder() {
-            // Chiede conferma e spiega come funziona
-            const userConfirm = confirm("Stai per aprire Google Calendar per impostare un promemoria giornaliero.\n\nPotrai modificare o cancellare l'avviso solamente dal tuo calendario.\n\nVuoi procedere?");
-
-            if (userConfirm) {
-                const title = "✨ Tempo per il Diario Stellare";
-                const description = "Prenditi un momento per aggiungere una stella...";
-                const location = "Nel tuo Universo";
-                const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}&recur=RRULE:FREQ=DAILY`;
-
-                window.open(googleUrl, '_blank');
-            }
         }
 
         // Ascoltiamo il movimento del mouse su tutto lo schermo
