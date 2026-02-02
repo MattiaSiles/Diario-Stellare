@@ -1371,30 +1371,50 @@
             if (!user) return;
 
             const docRef = doc(db, "users", user.uid);
-            const docSnap = await getDoc(docRef);
 
-            if (docSnap.exists()) {
-                const data = docSnap.data();
+            try {
+                const docSnap = await getDoc(docRef);
 
-                // 1. Aggiorniamo le variabili globali del gioco
-                window.memories = JSON.parse(data.data_stars || "[]");
-                window.lines = JSON.parse(data.data_lines || "[]");
-                window.constellations = JSON.parse(data.data_constellations || "[]");
+                if (docSnap.exists()) {
+                    // --- CASO 1: UTENTE CON DATI NEL CLOUD (SCARICA) ---
+                    const data = docSnap.data();
 
-                // 2. Aggiorniamo anche la memoria locale (così se vai offline hai gli ultimi dati)
-                // Nota: Uso le chiavi stringa fisse per sicurezza, ma corrisponderanno alle tue costanti
-                localStorage.setItem('galaxy_memories', JSON.stringify(window.memories));
-                localStorage.setItem('galaxy_lines', JSON.stringify(window.lines));
-                localStorage.setItem('galaxy_labels', JSON.stringify(window.constellations));
+                    // 1. Aggiorniamo le variabili globali (usando i tuoi nomi corretti)
+                    window.memories = JSON.parse(data.data_stars || "[]");
+                    window.lines = JSON.parse(data.data_lines || "[]");
+                    window.constellations = JSON.parse(data.data_constellations || "[]");
 
-                // 3. Ridisegniamo tutto
-                if (window.renderStars) window.renderStars();
-                if (window.renderLines) window.renderLines();
-                if (window.updateStats) window.updateStats();
+                    // 2. Aggiorniamo la memoria locale
+                    localStorage.setItem('galaxy_memories', JSON.stringify(window.memories));
+                    localStorage.setItem('galaxy_lines', JSON.stringify(window.lines));
+                    localStorage.setItem('galaxy_labels', JSON.stringify(window.constellations));
 
-                console.log("☁️ Universo completo scaricato!");
-            } else {
-                console.log("Primo accesso: Nessun dato sul cloud.");
+                    // 3. Ridisegniamo tutto
+                    if (window.renderStars) window.renderStars();
+                    if (window.renderLines) window.renderLines();
+                    if (window.updateStats) window.updateStats();
+
+                    console.log("☁️ Universo completo scaricato!");
+
+                } else {
+                    // --- CASO 2: CLOUD VUOTO (PRIMO ACCESSO) ---
+                    console.log("Primo accesso: Nessun dato sul cloud.");
+
+                    // CONTROLLO FORZATO: Se ho dati locali, li salvo subito sul cloud!
+                    // Nota: Qui uso 'window.memories' perché è così che chiami le stelle nel tuo codice
+                    if (window.memories && window.memories.length > 0) {
+                        console.log("Trovati dati locali! Eseguo il PRIMO SALVATAGGIO forzato.");
+
+                        // Richiamo la tua funzione di salvataggio
+                        if (window.saveData) {
+                            window.saveData();
+                        } else {
+                            console.error("Errore: Funzione saveData non trovata!");
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Errore durante il caricamento dal cloud:", error);
             }
         };
 
