@@ -1773,7 +1773,11 @@
 
         function renderLabels() {
             const layer = document.getElementById('labelsLayer');
-            layer.innerHTML = '';
+            // NON usiamo più innerHTML = '' per non resettare l'animazione CSS
+
+            // Teniamo traccia degli ID che stiamo per disegnare
+            const activeLabelIds = [];
+
             constellations.filter(c => c.stars.length > 0).forEach((c) => {
                 let totalX = 0, totalY = 0, count = 0;
                 c.stars.forEach(sid => {
@@ -1782,21 +1786,47 @@
                 });
 
                 if (count > 0) {
-                    const label = document.createElement('div');
-                    label.className = 'constellation-label';
-                    label.innerText = c.name;
-                    label.style.left = (totalX / count) + '%';
-                    label.style.top = (totalY / count) + '%';
+                    const posX = (totalX / count) + '%';
+                    const posY = (totalY / count) + '%';
 
-                    // CLICK SU LABEL: Apre modifica se in Edit Mode
-                    label.onclick = (e) => {
-                        e.stopPropagation();
-                        if (isEditing) {
-                            if (isGroupMode) return; // Già editando
-                            startEditingConstellation(c);
-                        }
-                    };
-                    layer.appendChild(label);
+                    // Creiamo un ID unico per l'elemento DOM
+                    const labelId = 'label-' + c.id;
+                    activeLabelIds.push(labelId);
+
+                    // Cerchiamo se esiste già
+                    let label = document.getElementById(labelId);
+
+                    if (!label) {
+                        // SE NON ESISTE: Lo creiamo (solo la prima volta)
+                        label = document.createElement('div');
+                        label.id = labelId;
+                        label.className = 'constellation-label';
+                        label.innerText = c.name;
+
+                        // Evento click (identico al tuo codice originale)
+                        label.onclick = (e) => {
+                            e.stopPropagation();
+                            if (isEditing) {
+                                if (isGroupMode) return;
+                                startEditingConstellation(c);
+                            }
+                        };
+                        layer.appendChild(label);
+                    } else {
+                        // SE ESISTE: Aggiorniamo solo il testo (se cambiato)
+                        if (label.innerText !== c.name) label.innerText = c.name;
+                    }
+
+                    // AGGIORNIAMO SEMPRE LA POSIZIONE (Senza rompere l'animazione)
+                    label.style.left = posX;
+                    label.style.top = posY;
+                }
+            });
+
+            // PULIZIA: Rimuoviamo le etichette che non esistono più (es. gruppi cancellati)
+            Array.from(layer.children).forEach(child => {
+                if (!activeLabelIds.includes(child.id)) {
+                    child.remove();
                 }
             });
         }
