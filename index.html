@@ -2576,7 +2576,7 @@
             // --- TOUCH (Modificato per gestire 1 o 2 dita) ---
 
             c.addEventListener('touchstart', e => {
-                if (e.target.closest('.star') || e.target.tagName === 'BUTTON') return;
+                if (e.target.closest('.star') || e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
 
                 if (e.touches.length === 1) {
                     // CASO 1: Un dito -> PAN (Spostamento)
@@ -2587,7 +2587,6 @@
                 else if (e.touches.length === 2) {
                     // CASO 2: Due dita -> ZOOM (Pinch)
                     isPanning = false; // Fermiamo lo spostamento per evitare conflitti
-
                     // Calcoliamo la distanza tra le due dita (Ipotenusa)
                     const dist = Math.hypot(
                         e.touches[0].clientX - e.touches[1].clientX,
@@ -2600,6 +2599,7 @@
             }, { passive: false });
 
             window.addEventListener('touchmove', e => {
+                if (e.target.tagName === 'INPUT') return;
                 // Impediamo lo scroll della pagina nativa
                 e.preventDefault();
 
