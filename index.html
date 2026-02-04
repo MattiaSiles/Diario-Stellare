@@ -1342,6 +1342,49 @@
                 bottom: 20px;
             }
 
+            /* Su mobile mostriamo il bottone */
+            #btnTimeToggle {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 100;
+            }
+
+            /* STATO CHIUSO (Default): Nascondiamo la barra spingendola GIÙ o rendendola invisibile */
+            /* TRUCCO: Spostiamo la barra SOTTO il bottone e la nascondiamo */
+            #timelineContent {
+                height: 0;
+                opacity: 0;
+                padding: 0;
+                overflow: hidden;
+                border: none;
+                transform: translateY(20px);
+                /* Parte un po' più giù */
+            }
+
+            /* STATO APERTO (Classe 'open' aggiunta da JS) */
+            #timelineWrapper.open #timelineContent {
+                height: auto;
+                opacity: 1;
+                padding: 10px 20px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                transform: translateY(0);
+                margin-top: 10px;
+                /* Spazio tra bottone e barra */
+            }
+
+            /* Quando aperto, l'intero blocco sale un po' per non stare troppo in basso */
+            #timelineWrapper.open {
+                bottom: 40px;
+            }
+
+            /* Il bottone cambia colore quando attivo */
+            #timelineWrapper.open #btnTimeToggle {
+                background: #00e5ff;
+                color: black;
+                box-shadow: 0 0 20px #00e5ff;
+            }
+
             /* Quando è aperta, la data deve vedersi bene */
             #timelineDateDisplay {
                 font-size: 12px !important;
