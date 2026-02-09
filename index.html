@@ -2150,13 +2150,14 @@
 
         function renderLabels() {
             const layer = document.getElementById('labelsLayer');
-            // NON usiamo più innerHTML = '' per non resettare l'animazione CSS
 
-            // Teniamo traccia degli ID che stiamo per disegnare
+            // Lista degli ID che devono esistere in questo ciclo di disegno
             const activeLabelIds = [];
 
             constellations.filter(c => c.stars.length > 0).forEach((c) => {
                 let totalX = 0, totalY = 0, count = 0;
+
+                // Calcoliamo il centro geometrico della costellazione
                 c.stars.forEach(sid => {
                     const m = memories.find(x => x.id === sid);
                     if (m) { totalX += m.x; totalY += m.y; count++; }
@@ -2166,21 +2167,27 @@
                     const posX = (totalX / count) + '%';
                     const posY = (totalY / count) + '%';
 
-                    // Creiamo un ID unico per l'elemento DOM
+                    // Creiamo un ID unico per l'etichetta
                     const labelId = 'label-' + c.id;
                     activeLabelIds.push(labelId);
 
-                    // Cerchiamo se esiste già
+                    // Cerchiamo se l'etichetta esiste già nel DOM (per non distruggerla)
                     let label = document.getElementById(labelId);
 
                     if (!label) {
-                        // SE NON ESISTE: Lo creiamo (solo la prima volta)
+                        // SE NON ESISTE: La creiamo da zero
                         label = document.createElement('div');
                         label.id = labelId;
                         label.className = 'constellation-label';
                         label.innerText = c.name;
 
-                        // Evento click (identico al tuo codice originale)
+                        // --- PUNTO CRUCIALE PER LA TIMELINE ---
+                        // Scriviamo dentro l'HTML quali stelle compongono questo gruppo.
+                        // Lo slider leggerà questo dato per sapere se nascondere il nome.
+                        label.dataset.stars = JSON.stringify(c.stars);
+                        // --------------------------------------
+
+                        // Click per modificare
                         label.onclick = (e) => {
                             e.stopPropagation();
                             if (isEditing) {
@@ -2190,17 +2197,20 @@
                         };
                         layer.appendChild(label);
                     } else {
-                        // SE ESISTE: Aggiorniamo solo il testo (se cambiato)
+                        // SE ESISTE: Aggiorniamo solo i dati che possono cambiare
                         if (label.innerText !== c.name) label.innerText = c.name;
+
+                        // Aggiorniamo sempre la lista stelle (magari ne hai aggiunta una nuova)
+                        label.dataset.stars = JSON.stringify(c.stars);
                     }
 
-                    // AGGIORNIAMO SEMPRE LA POSIZIONE (Senza rompere l'animazione)
+                    // Aggiorniamo la posizione (senza rompere l'animazione di rotazione)
                     label.style.left = posX;
                     label.style.top = posY;
                 }
             });
 
-            // PULIZIA: Rimuoviamo le etichette che non esistono più (es. gruppi cancellati)
+            // PULIZIA: Rimuoviamo le etichette di gruppi che sono stati cancellati
             Array.from(layer.children).forEach(child => {
                 if (!activeLabelIds.includes(child.id)) {
                     child.remove();
@@ -3036,40 +3046,89 @@
 
             if (min === 0 || memories.length === 0) return;
 
-            // Calcolo data selezionata
+            // --- CALCOLO TEMPO (ARROTONDATO A FINE GIORNATA) ---
             const range = max - min;
-            const selectedTime = min + (range * (val / 100));
+            const rawTime = min + (range * (val / 100));
 
-            // 1. Aggiorna testo data
-            if (val >= 99) {
-                display.innerText = "OGGI";
+            // Creiamo la data e impostiamo l'orario alla fine assoluta del giorno (23:59:59)
+            // Così facendo includiamo tutte le stelle create in quel giorno, indipendentemente dall'ora.
+            const selectedDate = new Date(rawTime);
+            selectedDate.setHours(23, 59, 59, 999);
+
+            const limitTimestamp = selectedDate.getTime();
+
+            // --- GESTIONE ETICHETTA "OGGI" ---
+            const today = new Date();
+            // Controllo se il giorno selezionato è lo stesso di oggi
+            const isToday = selectedDate.getDate() === today.getDate() &&
+                selectedDate.getMonth() === today.getMonth() &&
+                selectedDate.getFullYear() === today.getFullYear();
+
+            const dateString = selectedDate.toLocaleDateString();
+
+            if (isToday) {
+                // Se è oggi, mostra sempre la scritta OGGI fissa
+                display.innerText = `OGGI (${dateString})`;
             } else {
-                const d = new Date(selectedTime);
-                display.innerText = d.toLocaleDateString();
+                display.innerText = dateString;
             }
 
-            // 2. Filtra Stelle
+            // --- FILTRO VISIBILITÀ ---
             let visibleCount = 0;
+            const visibleStarIds = new Set(); // Lista rapida per controlli incrociati
+
+            // 1. STELLE
             memories.forEach(mem => {
                 const starEl = document.getElementById('star-' + mem.id);
                 if (!starEl) return;
 
-                if (mem.id > selectedTime) {
+                // Rimuoviamo transizione momentaneamente per fluidità nello scroll
+                starEl.style.transition = 'none';
+
+                if (mem.id > limitTimestamp) {
                     starEl.style.opacity = '0';
                     starEl.style.pointerEvents = 'none';
-                    starEl.classList.add('future-hidden');
                 } else {
                     starEl.style.opacity = '1';
                     starEl.style.pointerEvents = 'auto';
-                    starEl.classList.remove('future-hidden');
+                    visibleStarIds.add(mem.id); // Aggiungiamo alla lista dei "vivi"
                     visibleCount++;
+                }
+
+                // Ripristino transizione (in un timeout 0 per applicarlo al prossimo frame)
+                setTimeout(() => { starEl.style.transition = ''; }, 0);
+            });
+
+            display.innerText += ` (${visibleCount} stelle)`;
+
+            // 2. LINEE (Nascondi se manca una stella)
+            const allLines = document.querySelectorAll('.constellation-line');
+            allLines.forEach(lineEl => {
+                const fromId = parseInt(lineEl.dataset.from);
+                const toId = parseInt(lineEl.dataset.to);
+
+                // Mostra solo se ENTRAMBE le stelle collegate sono visibili
+                if (visibleStarIds.has(fromId) && visibleStarIds.has(toId)) {
+                    lineEl.style.display = 'block';
+                } else {
+                    lineEl.style.display = 'none';
                 }
             });
 
-            if (val < 99) display.innerText += ` (${visibleCount})`;
+            // 3. ETICHETTE COSTELLAZIONI (Nascondi se manca una stella del gruppo)
+            const allLabels = document.querySelectorAll('.constellation-label');
+            allLabels.forEach(lbl => {
+                const starsInGroup = JSON.parse(lbl.dataset.stars || "[]");
 
-            // 3. Ridisegna le linee filtrando quelle future
-            renderLinesFiltered();
+                // Controlla se TUTTE le stelle del gruppo sono nella lista visibile
+                const isGroupVisible = starsInGroup.every(id => visibleStarIds.has(id));
+
+                if (isGroupVisible && starsInGroup.length > 0) {
+                    lbl.style.display = 'block';
+                } else {
+                    lbl.style.display = 'none';
+                }
+            });
         }
 
         // Funzione speciale per le linee durante il time travel
