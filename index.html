@@ -745,6 +745,29 @@
             line-height: 1.4;
         }
 
+        /* --- STILE MODALITÀ ZOOM (ORO) --- */
+
+        /* La barra di scorrimento diventa dorata */
+        #timeSlider.gold-mode {
+            background: rgba(255, 215, 0, 0.3);
+        }
+
+        /* Il pallino diventa Oro */
+        #timeSlider.gold-mode::-webkit-slider-thumb {
+            background: #ffd700 !important;
+            box-shadow: 0 0 15px #ffd700, 0 0 30px #ffaa00 !important;
+            transform: scale(1.2);
+            /* Leggermente più grande per indicare precisione */
+        }
+
+        /* Il tasto Zoom quando è attivo */
+        #btnTimeZoom.active {
+            background: #ffd700 !important;
+            color: black !important;
+            border-color: #ffd700 !important;
+            box-shadow: 0 0 10px #ffd700;
+        }
+
         /* --- STILI GARGANTUA V4 (Fixed Mask System) --- */
 
         /* 1. L'ALONE DIFFUSO (Sfondo) */
@@ -983,13 +1006,14 @@
             animation-play-state: paused !important;
         }
 
-
         /* Stile per il tasto quando è attivo (Rosso/Acceso) */
         .btn-music.active-lock {
             background: rgba(255, 90, 90, 0.3);
             border-color: #ff5a5a;
             box-shadow: 0 0 10px #ff5a5a;
         }
+
+
 
         /* --- SCROLLBAR SPAZIALE PERSONALIZZATA --- */
 
@@ -1127,7 +1151,6 @@
         }
 
         /* --- TIMELINE SLIDER (Macchina del Tempo) --- */
-
         #timelineWrapper {
             position: fixed;
             bottom: 20px;
@@ -1263,10 +1286,12 @@
                 /* Evita che vada a capo */
             }
 
-            /* 3. MODALE SCRITTURA (Fix Tastiera) */
+            /* 3. MODALE SCRITTURA (Fix Tastiera e Centratura) */
             #entryModal {
-                align-items: flex-start !important;
-                padding-top: 20px;
+                justify-content: flex-start !important; /* Spinge in verticale verso l'ALTO */
+                align-items: center !important;         /* Spinge in orizzontale al CENTRO */
+                
+                padding-top: 50px; /* Un po' più di aria in alto */
                 overflow-y: auto;
             }
 
@@ -1390,6 +1415,72 @@
                 font-size: 12px !important;
             }
         }
+
+        /* --- STILE FILTRI COLORE (Lenti del Telescopio) --- */
+
+        #colorFilterContainer {
+            display: flex;
+            gap: 8px;
+            margin-left: 15px;
+            margin-right: 5px;
+            align-items: center;
+        }
+
+        .filter-lens {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            /* Bordo trasparente di base per non cambiare dimensione quando attivo */
+            border: 2px solid transparent;
+            opacity: 0.6;
+            /* Leggermente spenti di default */
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+            /* Effetto lente concava */
+        }
+
+        .filter-lens:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* Stato ATTIVO (Quando una lente è selezionata) */
+        .filter-lens.active {
+            opacity: 1;
+            border-color: white;
+            /* Bordo bianco luminoso */
+            /* Un alone luminoso che prende il colore della lente stessa (currentColor) */
+            box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+            transform: scale(1.15);
+        }
+
+        /* --- AGGIORNAMENTO CSS MOBILE (Per farci stare tutto) --- */
+        @media screen and (max-width: 768px) {
+            #searchContainer>div {
+                /* Permettiamo agli elementi di andare a capo se necessario su schermi piccolissimi */
+                flex-wrap: wrap;
+                padding: 10px !important;
+            }
+
+            #searchInput {
+                /* Su mobile l'input prende la sua riga se c'è poco spazio */
+                flex-grow: 1;
+                margin-bottom: 5px;
+            }
+
+            #colorFilterContainer {
+                /* Su mobile i filtri si spostano un po' per allinearsi */
+                margin-left: 5px;
+                margin-top: 5px;
+            }
+
+            .filter-lens {
+                /* Leggermente più grandi su mobile per il touch */
+                width: 26px;
+                height: 26px;
+            }
+        }
     </style>
 </head>
 
@@ -1470,14 +1561,28 @@
 
     <div id="searchContainer"
         style="position:fixed; top:20px; right:100px; z-index:100; display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+
         <div
-            style="background:rgba(255,255,255,0.1); backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:5px 15px; display:flex; align-items:center;">
+            style="background:rgba(255,255,255,0.1); backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:5px 15px; display:flex; align-items:center; height: 34px;">
+
             <span style="font-size:18px; margin-right:10px;">🔭</span>
-            <input type="text" id="searchInput" placeholder="Cerca un ricordo..." onkeyup="searchStars()"
+
+            <input type="text" id="searchInput" placeholder="Cerca un ricordo..." onkeyup="performSearch()"
                 style="background:transparent; border:none; color:white; font-family:'Courier New', monospace; outline:none; width:150px;">
+
             <span id="clearSearch" onclick="resetSearch()"
-                style="cursor:pointer; display:none; color:#aaa; margin-left:5px;">✖</span>
+                style="cursor:pointer; display:none; color:#aaa; font-size:16px; margin-left: 5px;">✖</span>
         </div>
+
+        <div id="colorFilterContainer" style="
+        display:flex; 
+        gap: 8px; 
+        padding: 5px 10px; 
+        background: rgba(0,0,0,0.3); 
+        border-radius: 20px; 
+        backdrop-filter: blur(2px);">
+        </div>
+
         <div id="searchCounter" style="color:#aaa; font-size:12px; margin-right:10px; display:none;"></div>
     </div>
 
@@ -1733,15 +1838,18 @@
             const user = auth.currentUser;
             if (!user) return;
 
+            // SE sono in modalità DEV, uso una collezione diversa ("users_test")
+            const collectionName = isDev ? "users_test" : "users";
+
             try {
                 // Salviamo un oggetto unico che contiene tutto
-                await setDoc(doc(db, "users", user.uid), {
+                await setDoc(doc(db, collectionName, user.uid), {
                     data_stars: JSON.stringify(m),
                     data_lines: JSON.stringify(l),
                     data_constellations: JSON.stringify(c),
                     last_update: new Date().toISOString() // Utile per sapere quando è stato salvato
                 });
-                console.log("☁️ Salvataggio completo (Stelle, Linee, Costellazioni)!");
+                console.log("☁️ Salvataggio su ${collectionName} completo!");
             } catch (e) {
                 console.error("Errore salvataggio cloud:", e);
             }
@@ -1752,7 +1860,10 @@
             const user = auth.currentUser;
             if (!user) return;
 
-            const docRef = doc(db, "users", user.uid);
+            // SE sono in modalità DEV, leggo dalla collezione di test
+            const collectionName = isDev ? "users_test" : "users";
+
+            const docRef = doc(db, collectionName, user.uid);
 
             try {
                 const docSnap = await getDoc(docRef);
@@ -1851,7 +1962,9 @@
         var memories = JSON.parse(localStorage.getItem(KEY_MEMORIES)) || [];
         var lines = JSON.parse(localStorage.getItem(KEY_LINES)) || [];
         var constellations = JSON.parse(localStorage.getItem(KEY_LABELS)) || [];
-
+        const colorPalette = ['white', 'red', 'blue', 'yellow', 'orange'];
+        let selectedSearchColor = null;
+        let timelineDates = [];
         let selectedColor = 'white';
         let currentMemoryId = null;
         let isEditing = false;
@@ -1860,8 +1973,83 @@
         let currentZoom = 1; let panX = 0; let panY = 0;
         let isPanning = false; let startPanX = 0, startPanY = 0;
 
-
         let tempImageData = null;
+
+        let isZoomedMode = false; // False = Galassia (Salti), True = Mese (Giorni)
+
+        function toggleTimeZoom() {
+            const slider = document.getElementById('timeSlider');
+            const btn = document.getElementById('btnTimeZoom');
+
+            // Se non ci sono ricordi, inutile zoomare
+            if (!memories || memories.length === 0) return;
+
+            if (!isZoomedMode) {
+                // --- ENTRIAMO IN ZOOM (Focus Mese) ---
+                isZoomedMode = true;
+
+                // 1. Capiamo in che data siamo ORA (dalla modalità step)
+                // timelineDates è l'array che abbiamo creato nello step precedente
+                const currentIndex = parseInt(slider.value);
+                const currentDateTimestamp = timelineDates[currentIndex];
+                const dateObj = new Date(currentDateTimestamp);
+
+                // 2. Calcoliamo Inizio e Fine del MESE di quella data
+                const year = dateObj.getFullYear();
+                const month = dateObj.getMonth(); // 0-11
+
+                const firstDay = new Date(year, month, 1).getTime();
+                // Giorno 0 del mese successivo = Ultimo giorno del mese corrente
+                const lastDay = new Date(year, month + 1, 0).getTime();
+
+                // 3. Riconfiguriamo lo Slider per lavorare con i TIMESTAMP (Millisecondi)
+                slider.min = firstDay;
+                slider.max = lastDay;
+                // Step di un giorno (86400000 ms)
+                slider.step = 86400000;
+
+                // Posizioniamo il pallino sul giorno in cui eravamo
+                slider.value = currentDateTimestamp;
+
+                // 4. Effetti Grafici (ORO)
+                slider.classList.add('gold-mode');
+                btn.classList.add('active');
+                btn.innerHTML = "🔙 GALASSIA"; // Tasto per tornare indietro
+
+            } else {
+                // --- USCIAMO DALLO ZOOM (Torniamo alla Galassia) ---
+                isZoomedMode = false;
+
+                // 1. Dobbiamo ritrovare l'indice "Step" più vicino alla data dove eravamo col pallino
+                const currentTimestamp = parseInt(slider.value);
+
+                // Cerchiamo nell'array timelineDates l'indice della data più vicina
+                let closestIndex = 0;
+                let minDiff = Infinity;
+
+                timelineDates.forEach((date, index) => {
+                    const diff = Math.abs(date - currentTimestamp);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestIndex = index;
+                    }
+                });
+
+                // 2. Riconfiguriamo lo Slider per lavorare con gli STEP (Indici)
+                slider.min = 0;
+                slider.max = timelineDates.length - 1;
+                slider.step = 1;
+                slider.value = closestIndex;
+
+                // 3. Rimuovi Effetti Grafici
+                slider.classList.remove('gold-mode');
+                btn.classList.remove('active');
+                btn.innerHTML = "🔍 ZOOM";
+            }
+
+            // Aggiorna subito la visualizzazione
+            updateTimeTravel();
+        }
 
         function getRotationAngle(element) {
             const style = window.getComputedStyle(element);
@@ -1922,7 +2110,7 @@
 
         window.onload = function () {
             renderStars(); renderLines(); renderLabels(); renderList();
-            checkTutorial(); setupSkyInteraction();
+            checkTutorial(); setupSkyInteraction(); setupColorFilters();
         };
 
         function updateGalacticCore() {
@@ -2004,57 +2192,6 @@
             });
         }
 
-        /*function updateGalacticCore() {
-            // Selezioniamo i tre elementi da colorare
-            const disk = document.getElementById('accretionDisk');
-            const ringBack = document.getElementById('ringBack');
-            const ringFront = document.getElementById('ringFront');
-
-            if (!disk || !ringBack || !ringFront) return;
-
-            if (memories.length === 0) {
-                // Stile di default se vuoto
-                const emptyDisk = 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)';
-                const emptyRing = 'rgba(255, 255, 255, 0.4)';
-                disk.style.background = emptyDisk;
-                ringBack.style.background = emptyRing;
-                ringFront.style.background = emptyRing;
-                return;
-            }
-
-            // 1. Conta i colori (uguale a prima)
-            const counts = {};
-            memories.forEach(m => { counts[m.color] = (counts[m.color] || 0) + 1; });
-            const total = memories.length;
-
-            // 2. Colori brillanti (Gas) - Ho reso il bianco un po' più caldo
-            const gasColors = {
-                'white': 'rgba(230, 230, 255, 0.9)',
-                'red': 'rgba(255, 50, 50, 0.9)',
-                'blue': 'rgba(50, 100, 255, 0.9)',
-                'yellow': 'rgba(255, 200, 50, 0.9)',
-                'orange': 'rgba(255, 130, 0, 0.9)'
-            };
-
-            // 3. Crea il Gradiente (uguale a prima)
-            let gradient = "conic-gradient(from 0deg, ";
-            let currentPerc = 0;
-
-            Object.keys(counts).forEach(color => {
-                const perc = (counts[color] / total) * 100;
-                const colorVal = gasColors[color] || 'white';
-                gradient += `${colorVal} ${currentPerc}%, ${colorVal} ${currentPerc + perc}%, `;
-                currentPerc += perc;
-            });
-
-            gradient = gradient.slice(0, -2) + ")";
-
-            // 4. APPLICA IL GRADIENTE A TUTTI E TRE
-            disk.style.background = gradient;
-            ringBack.style.background = gradient;
-            ringFront.style.background = gradient;
-        }*/
-
         // --- RENDER ---
         function renderStars() {
             updateGalacticCore();
@@ -2128,7 +2265,7 @@
                     sky.appendChild(star);
                 }
             });
-            renderLines(); renderLabels(); updateSelectionVisuals(); updateTimelineRange();
+            renderLines(); renderLabels(); updateSelectionVisuals(); updateTimelineRange(); updateTimeTravel();
         }
 
         function renderLines() {
@@ -2142,6 +2279,9 @@
                     el.setAttribute('x1', s.x + '%'); el.setAttribute('y1', s.y + '%');
                     el.setAttribute('x2', e.x + '%'); el.setAttribute('y2', e.y + '%');
                     el.classList.add('constellation-line');
+                    el.dataset.from = line.from;
+                    el.dataset.to = line.to;
+
                     el.onclick = () => { if (isEditing && !isGroupMode && confirm("Cancellare collegamento?")) { lines.splice(index, 1); saveData(); renderLines(); } };
                     svg.appendChild(el);
                 }
@@ -2413,6 +2553,44 @@
                     viewMemory(memData);
                 }
             };
+        }
+
+        // Inizializza i filtri colore nella barra di ricerca
+        function setupColorFilters() {
+            const container = document.getElementById('colorFilterContainer');
+            container.innerHTML = ''; // Pulisci
+
+            colorPalette.forEach(color => {
+                const lens = document.createElement('div');
+                lens.className = 'filter-lens';
+                lens.style.backgroundColor = color;
+                // Usiamo la variabile CSS currentColor per l'effetto alone
+                lens.style.color = color;
+                lens.dataset.color = color; // Memorizziamo il colore nel DOM
+
+                lens.onclick = () => { toggleColorFilter(color, lens); };
+                container.appendChild(lens);
+            });
+        }
+
+        // Gestisce il click su una lente colorata
+        function toggleColorFilter(color, lensElement) {
+            // 1. Gestione Stato
+            if (selectedSearchColor === color) {
+                // Se clicco sul colore già attivo -> LO DISATTIVO
+                selectedSearchColor = null;
+                lensElement.classList.remove('active');
+            } else {
+                // Se clicco su un colore nuovo -> LO ATTIVO
+                selectedSearchColor = color;
+                // Rimuovi 'active' da tutte le altre lenti
+                document.querySelectorAll('.filter-lens').forEach(el => el.classList.remove('active'));
+                // Aggiungi 'active' solo a quella cliccata
+                lensElement.classList.add('active');
+            }
+
+            // 2. Lancia la ricerca immediatamente
+            performSearch();
         }
 
         // --- SISTEMA UI E CORE ---
@@ -2730,6 +2908,41 @@
         function deleteMemory() { if (confirm("Spegnere questa stella?")) { memories = memories.filter(x => x.id !== currentMemoryId); lines = lines.filter(l => l.from !== currentMemoryId && l.to !== currentMemoryId); constellations.forEach(c => { c.stars = c.stars.filter(id => id !== currentMemoryId) }); saveData(); closeViewer(); renderStars(); renderLines(); renderLabels(); renderList(); } }
         function exportText() { let c = "IL MIO DIARIO STELLARE\n\n";[...memories].sort((a, b) => a.id - b.id).forEach(m => { c += `DATA: ${m.date}\nCOLORE: ${m.color}\n${m.text}\n------------------\n`; }); const b = new Blob([c], { type: "text/plain" }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'diario.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
         function renderList() { const l = document.getElementById('memoryList'); const f = document.getElementById('favList'); l.innerHTML = ''; f.innerHTML = '';[...memories].reverse().forEach(m => { const i = document.createElement('div'); i.className = 'memory-item'; i.innerHTML = `<span class="color-dot" style="background:${m.color === 'red' ? '#ff5e5e' : m.color === 'blue' ? '#5eaaff' : m.color === 'yellow' ? '#ffea5e' : m.color === 'orange' ? '#ffaa33' : 'white'}"></span> ${m.date} - ${m.text.substring(0, 20)}...`; i.onclick = () => { currentZoom = 1; panX = 0; panY = 0; updateSkyTransform(); viewMemory(m); setTimeout(() => { document.getElementById('star-' + m.id).classList.add('highlight'); setTimeout(() => document.getElementById('star-' + m.id).classList.remove('highlight'), 2000); }, 300); }; if (m.isFavorite) f.appendChild(i); else l.appendChild(i); }); if (f.innerHTML === '') f.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">Nessun preferito</div>'; }
+        // Crea i bottoni colorati (lenti) nel telescopio
+        function setupColorFilters() {
+            const container = document.getElementById('colorFilterContainer');
+            if (!container) return; // Sicurezza
+
+            container.innerHTML = '';
+
+            colorPalette.forEach(color => {
+                const lens = document.createElement('div');
+                lens.className = 'filter-lens';
+                lens.style.backgroundColor = color === 'white' ? '#ddd' : color; // Il bianco lo facciamo grigetto per vederlo
+                lens.style.color = color; // Serve per l'effetto alone
+
+                // Gestione click
+                lens.onclick = () => { toggleColorFilter(color, lens); };
+
+                container.appendChild(lens);
+            });
+        }
+
+        // Gestisce il click su una lente (Accende/Spegne il filtro)
+        function toggleColorFilter(color, lensElement) {
+            if (selectedSearchColor === color) {
+                // Disattiva
+                selectedSearchColor = null;
+                lensElement.classList.remove('active');
+            } else {
+                // Attiva
+                selectedSearchColor = color;
+                document.querySelectorAll('.filter-lens').forEach(el => el.classList.remove('active'));
+                lensElement.classList.add('active');
+            }
+            // Avvia la ricerca subito
+            performSearch();
+        }
 
         // TUTORIAL NUOVO
         const tutorialSteps = [
@@ -2939,51 +3152,70 @@
 
         // --- FUNZIONI TELESCOPIO (RICERCA) ---
 
-        function searchStars() {
+        function performSearch() {
             const input = document.getElementById('searchInput');
-            const filter = input.value.toLowerCase();
-            const counter = document.getElementById('searchCounter');
+            const query = input.value.toLowerCase();
             const clearBtn = document.getElementById('clearSearch');
-            const sky = document.getElementById('sky');
 
-            // Gestione visiva tasto X e classe body
-            if (filter.length > 0) {
+            // Mostra il tasto X se c'è testo O se c'è un colore selezionato
+            if (query.length > 0 || selectedSearchColor !== null) {
                 clearBtn.style.display = 'block';
-                document.body.classList.add('searching'); // Utile per nascondere costellazioni
+                document.body.classList.add('searching');
             } else {
                 resetSearch();
                 return;
             }
 
             let foundCount = 0;
+            const visibleStarIds = new Set();
 
-            // Scorre tutti i ricordi
             memories.forEach(mem => {
-                const starEl = document.getElementById(`star-${mem.id}`);
+                const starEl = document.getElementById('star-' + mem.id);
                 if (!starEl) return;
 
-                // Cerca nel testo e nella data
-                const textMatch = mem.text.toLowerCase().includes(filter);
-                const dateMatch = mem.date.includes(filter);
+                // --- FILTRO TESTO ---
+                const matchesText = query === '' || mem.text.toLowerCase().includes(query) || mem.date.includes(query);
 
-                if (textMatch || dateMatch) {
-                    // TROVATO: Rimuovi oscuramento
-                    starEl.classList.remove('dimmed');
-                    // Aggiungi un leggero bagliore extra per evidenziarla
-                    starEl.style.boxShadow = `0 0 15px ${starEl.style.backgroundColor}`;
+                // --- FILTRO COLORE ---
+                // Usiamo un confronto sicuro (gestisce anche il caso null)
+                const matchesColor = selectedSearchColor === null || mem.color === selectedSearchColor;
+
+                // --- RISULTATO ---
+                if (matchesText && matchesColor) {
+                    // MOSTRA LA STELLA
+                    starEl.classList.remove('dimmed'); // Rimuove la classe che la nascondeva
+                    starEl.style.opacity = '1';        // Forza l'opacità al massimo
+                    starEl.style.pointerEvents = 'auto'; // La rende cliccabile
+
+                    // Effetto bagliore colorato
+                    starEl.style.boxShadow = `0 0 15px ${mem.color === 'white' ? 'white' : mem.color}`;
+
+                    visibleStarIds.add(mem.id);
                     foundCount++;
                 } else {
-                    // NON TROVATO: Oscura
+                    // NASCONDI LA STELLA
                     starEl.classList.add('dimmed');
+                    starEl.style.opacity = '0.05';
+                    starEl.style.pointerEvents = 'none';
                     starEl.style.boxShadow = 'none';
                 }
             });
 
             // Aggiorna contatore
+            const counter = document.getElementById('searchCounter');
             counter.style.display = 'block';
-            counter.innerText = foundCount === 0 ? "Nessuna stella trovata" :
-                foundCount === 1 ? "1 stella trovata" :
-                    `${foundCount} stelle trovate`;
+            counter.innerText = foundCount === 0 ? "Nessun risultato" : `${foundCount} stelle trovate`;
+
+            // Nascondi le linee che collegano stelle invisibili
+            document.querySelectorAll('.constellation-line').forEach(line => {
+                const from = parseInt(line.dataset.from);
+                const to = parseInt(line.dataset.to);
+                if (visibleStarIds.has(from) && visibleStarIds.has(to)) {
+                    line.style.opacity = '1';
+                } else {
+                    line.style.opacity = '0';
+                }
+            });
         }
 
         function resetSearch() {
@@ -2991,17 +3223,43 @@
             const counter = document.getElementById('searchCounter');
             const clearBtn = document.getElementById('clearSearch');
 
+            // 1. Resetta le variabili
             input.value = '';
+            selectedSearchColor = null;
+
+            // 2. Nascondi UI di ricerca
             clearBtn.style.display = 'none';
             counter.style.display = 'none';
             document.body.classList.remove('searching');
 
-            // Riporta tutte le stelle alla normalità
-            document.querySelectorAll('.star').forEach(el => {
-                el.classList.remove('dimmed');
-                // Resetta box-shadow (rimuovendo l'inline style così torna a quello del CSS)
-                el.style.boxShadow = '';
+            // 3. Spegni le lenti colorate
+            document.querySelectorAll('.filter-lens').forEach(el => {
+                el.classList.remove('active');
             });
+
+            // 4. RESET BRUTALE DI TUTTE LE STELLE (Risolve il problema delle blu bloccate)
+            // Usiamo querySelectorAll per prenderle tutte, anche quelle con ID duplicati
+            const allStars = document.querySelectorAll('.star');
+            allStars.forEach(el => {
+                el.classList.remove('dimmed');
+                el.style.opacity = '1';
+                el.style.pointerEvents = 'auto';
+                el.style.boxShadow = ''; // Rimuovi alone ricerca
+                el.style.transform = ''; // Rimuovi ridimensionamento dimmed
+                el.style.filter = '';    // Rimuovi bianco e nero
+            });
+
+            // 5. Resetta le linee
+            document.querySelectorAll('.constellation-line').forEach(line => {
+                line.style.opacity = '1';
+                line.style.display = 'block';
+            });
+
+            // 6. IMPORTANTE: Rilancia il controllo Timeline
+            // (Altrimenti il reset mostra anche le stelle future che dovrebbero essere nascoste!)
+            if (typeof updateTimeTravel === 'function') {
+                updateTimeTravel();
+            }
         }
 
         // --- TIMELINE SLIDER (CODICE NUOVO) ---
@@ -3020,20 +3278,39 @@
             }
         }
 
-        // Calcola data minima e massima in base ai ricordi
         function updateTimelineRange() {
-            // Se non ci sono ricordi o ce n'è solo uno, non ha senso la timeline
-            if (!memories || memories.length < 2) return;
-
-            const sorted = [...memories].sort((a, b) => a.id - b.id);
-            const minTime = sorted[0].id;
-            const maxTime = Date.now();
-
             const slider = document.getElementById('timeSlider');
-            if (slider) {
-                slider.dataset.min = minTime;
-                slider.dataset.max = maxTime;
+            if (!memories || memories.length === 0) {
+                slider.disabled = true;
+                return;
             }
+
+            // 1. Raccogliamo tutte le date uniche (ignorando l'ora)
+            const uniqueDays = new Set();
+
+            memories.forEach(m => {
+                const d = new Date(m.id);
+                d.setHours(0, 0, 0, 0); // Resetta l'orario a mezzanotte
+                uniqueDays.add(d.getTime());
+            });
+
+            // 2. Aggiungiamo sempre la data di OGGI (per poter tornare al presente)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            uniqueDays.add(today.getTime());
+
+            // 3. Convertiamo in array e ordiniamo dal più vecchio al più recente
+            timelineDates = Array.from(uniqueDays).sort((a, b) => a - b);
+
+            // 4. Configuriamo lo slider per avere tanti "scatti" quanti sono i giorni
+            slider.disabled = false;
+            slider.min = 0; // Primo indice (Giorno più vecchio)
+            slider.max = timelineDates.length - 1; // Ultimo indice (Oggi)
+            slider.step = 1; // Uno scatto alla volta
+            slider.value = timelineDates.length - 1; // Parte sempre alla fine (Oggi)
+
+            // Aggiorniamo la visualizzazione iniziale
+            updateTimeTravel();
         }
 
         // Funzione chiamata quando muovi lo slider
@@ -3041,96 +3318,126 @@
             const slider = document.getElementById('timeSlider');
             const display = document.getElementById('timelineDateDisplay');
 
-            const min = parseInt(slider.dataset.min || 0);
-            const max = parseInt(slider.dataset.max || Date.now());
+            if (val === undefined) val = slider.value;
+            val = parseInt(val); // Assicuriamoci sia numero
 
-            if (min === 0 || memories.length === 0) return;
-
-            // --- CALCOLO TEMPO (ARROTONDATO A FINE GIORNATA) ---
-            const range = max - min;
-            const rawTime = min + (range * (val / 100));
-
-            // Creiamo la data e impostiamo l'orario alla fine assoluta del giorno (23:59:59)
-            // Così facendo includiamo tutte le stelle create in quel giorno, indipendentemente dall'ora.
-            const selectedDate = new Date(rawTime);
-            selectedDate.setHours(23, 59, 59, 999);
-
-            const limitTimestamp = selectedDate.getTime();
-
-            // --- GESTIONE ETICHETTA "OGGI" ---
-            const today = new Date();
-            // Controllo se il giorno selezionato è lo stesso di oggi
-            const isToday = selectedDate.getDate() === today.getDate() &&
-                selectedDate.getMonth() === today.getMonth() &&
-                selectedDate.getFullYear() === today.getFullYear();
-
-            const dateString = selectedDate.toLocaleDateString();
-
-            if (isToday) {
-                // Se è oggi, mostra sempre la scritta OGGI fissa
-                display.innerText = `OGGI (${dateString})`;
-            } else {
-                display.innerText = dateString;
+            // Se non ci sono dati
+            if (!timelineDates || timelineDates.length === 0) {
+                display.innerText = "Nessun ricordo";
+                return;
             }
 
-            // --- FILTRO VISIBILITÀ ---
-            let visibleCount = 0;
-            const visibleStarIds = new Set(); // Lista rapida per controlli incrociati
+            // --- CALCOLO DELLA DATA LIMITE ---
+            let limitTimestamp;
 
-            // 1. STELLE
+            if (isZoomedMode) {
+                // MODALITÀ ZOOM: Il valore dello slider È GIÀ un timestamp (ms)
+                // Aggiungiamo 23:59:59 per vedere tutto quel giorno
+                const d = new Date(val);
+                d.setHours(23, 59, 59, 999);
+                limitTimestamp = d.getTime();
+            } else {
+                // MODALITÀ GALASSIA: Il valore è un INDICE dell'array timelineDates
+                const dateFromStep = timelineDates[val];
+                const d = new Date(dateFromStep);
+                d.setHours(23, 59, 59, 999);
+                limitTimestamp = d.getTime();
+            }
+
+            // --- GESTIONE TESTO (CORRETTA) ---
+            const checkDate = new Date(limitTimestamp);
+
+            // 1. Creiamo due date "pure" (senza orario) per il confronto
+            const todayPure = new Date();
+            todayPure.setHours(0, 0, 0, 0); // Oggi a mezzanotte (00:00:00)
+
+            const checkPure = new Date(checkDate);
+            checkPure.setHours(0, 0, 0, 0); // La data selezionata a mezzanotte
+
+            const dateString = checkDate.toLocaleDateString();
+            let labelText = dateString; // Default: mostra solo la data
+
+            // 2. Confrontiamo i giorni
+            if (checkPure.getTime() > todayPure.getTime()) {
+                // È STRETTAMENTE DOMANI O DOPO (Futuro)
+                labelText = "🌑 ZONA IGNOTA";
+                // Opzionale: fai tremare leggermente il testo o cambia colore
+                display.style.color = "#666";
+            }
+            else if (checkPure.getTime() === todayPure.getTime()) {
+                // È ESATTAMENTE OGGI
+                labelText = `OGGI (${dateString})`;
+                display.style.opacity = "1";
+                // Ripristina i colori corretti in base alla modalità
+                display.style.color = isZoomedMode ? '#ffd700' : '#00e5ff';
+            }
+            else {
+                // È IL PASSATO
+                labelText = dateString;
+                display.style.opacity = "1";
+                display.style.color = isZoomedMode ? '#ffd700' : '#00e5ff';
+            }
+
+            // Colore del testo: Ciano in Galaxy, Oro in Zoom
+            display.style.color = isZoomedMode ? '#ffd700' : '#00e5ff';
+            display.style.textShadow = isZoomedMode ? '0 0 10px #ffd700' : '0 0 5px #00e5ff';
+
+            // --- FILTRO VISIBILITÀ (uguale a prima) ---
+            let visibleCount = 0;
+            const visibleStarIds = new Set();
+
             memories.forEach(mem => {
                 const starEl = document.getElementById('star-' + mem.id);
                 if (!starEl) return;
 
-                // Rimuoviamo transizione momentaneamente per fluidità nello scroll
                 starEl.style.transition = 'none';
 
                 if (mem.id > limitTimestamp) {
-                    starEl.style.opacity = '0';
+                    starEl.style.display = 'none';
                     starEl.style.pointerEvents = 'none';
                 } else {
-                    starEl.style.opacity = '1';
-                    starEl.style.pointerEvents = 'auto';
-                    visibleStarIds.add(mem.id); // Aggiungiamo alla lista dei "vivi"
+                    starEl.style.display = 'block';
+                    if (!starEl.classList.contains('dimmed')) {
+                        starEl.style.opacity = '1';
+                        starEl.style.pointerEvents = 'auto';
+                    }
+                    visibleStarIds.add(mem.id);
                     visibleCount++;
                 }
-
-                // Ripristino transizione (in un timeout 0 per applicarlo al prossimo frame)
                 setTimeout(() => { starEl.style.transition = ''; }, 0);
             });
 
-            display.innerText += ` (${visibleCount} stelle)`;
+            display.innerText = `${labelText} (${visibleCount})`;
 
-            // 2. LINEE (Nascondi se manca una stella)
-            const allLines = document.querySelectorAll('.constellation-line');
-            allLines.forEach(lineEl => {
-                const fromId = parseInt(lineEl.dataset.from);
-                const toId = parseInt(lineEl.dataset.to);
+            // Aggiorna Linee e Etichette (Uguale a prima)
+            updateLinesVisibility(visibleStarIds); // Ho creato una funzione helper prima, o usa il codice esteso
+            updateLabelsVisibility(visibleStarIds);
+        }
 
-                // Mostra solo se ENTRAMBE le stelle collegate sono visibili
-                if (visibleStarIds.has(fromId) && visibleStarIds.has(toId)) {
-                    lineEl.style.display = 'block';
+        // Helper per pulizia codice (se non li hai già separati)
+        function updateLinesVisibility(visibleSet) {
+            document.querySelectorAll('.constellation-line').forEach(line => {
+                const from = parseInt(line.dataset.from);
+                const to = parseInt(line.dataset.to);
+                if (visibleSet.has(from) && visibleSet.has(to)) {
+                    line.style.display = 'block';
+                    if (line.style.opacity !== '0') line.style.opacity = '1';
                 } else {
-                    lineEl.style.display = 'none';
+                    line.style.display = 'none';
                 }
             });
+        }
 
-            // 3. ETICHETTE COSTELLAZIONI (Nascondi se manca una stella del gruppo)
-            const allLabels = document.querySelectorAll('.constellation-label');
-            allLabels.forEach(lbl => {
-                const starsInGroup = JSON.parse(lbl.dataset.stars || "[]");
-
-                // Controlla se TUTTE le stelle del gruppo sono nella lista visibile
-                const isGroupVisible = starsInGroup.every(id => visibleStarIds.has(id));
-
-                if (isGroupVisible && starsInGroup.length > 0) {
+        function updateLabelsVisibility(visibleSet) {
+            document.querySelectorAll('.constellation-label').forEach(lbl => {
+                const stars = JSON.parse(lbl.dataset.stars || "[]");
+                if (stars.length > 0 && stars.every(id => visibleSet.has(id))) {
                     lbl.style.display = 'block';
                 } else {
                     lbl.style.display = 'none';
                 }
             });
         }
-
         // Funzione speciale per le linee durante il time travel
         function renderLinesFiltered() {
             const svg = document.getElementById('constellationLayer');
@@ -3228,7 +3535,16 @@
         <button id="btnTimeToggle" onclick="toggleTimelineMobile()">🕰️</button>
 
         <div id="timelineContent">
-            <div id="timelineDateDisplay">OGGI</div>
+            <div id="timelineHeader"
+                style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 5px;">
+                <div id="timelineDateDisplay" style="font-weight: bold; text-shadow: 0 0 5px currentColor;">OGGI</div>
+
+                <button id="btnTimeZoom" onclick="toggleTimeZoom()"
+                    style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 15px; cursor: pointer; padding: 2px 8px; font-size: 12px; transition: all 0.3s;">
+                    🔍 ZOOM
+                </button>
+            </div>
+
             <input type="range" id="timeSlider" min="0" max="100" value="100" oninput="updateTimeTravel(this.value)">
         </div>
     </div>
