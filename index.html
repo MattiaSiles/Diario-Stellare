@@ -1042,202 +1042,6 @@
         @media screen and (max-width: 768px) {
 
             /* 1. RISOLUZIONE SOVRAPPOSIZIONE BARRA RICERCA */
-            #searchContainer {
-                top: 80px !important;
-                right: 10px !important;
-                left: 10px !important;
-                align-items: center !important;
-                pointer-events: none;
-            }
-
-            #searchContainer>div {
-                pointer-events: auto;
-                width: 100% !important;
-                background: rgba(0, 0, 0, 0.6) !important;
-                justify-content: space-between !important;
-            }
-
-            #searchInput {
-                width: 100% !important;
-                font-size: 16px !important;
-            }
-
-            /* 2. MENU PIÙ COMPATTO */
-            .btn-menu {
-                font-size: 18px !important;
-                padding: 5px 10px !important;
-                background: rgba(0, 0, 0, 0.5);
-                border-radius: 15px;
-            }
-
-            /* 3. MODALE SCRITTURA (Fix Tastiera) */
-            #entryModal {
-                align-items: flex-start !important;
-                padding-top: 20px;
-                overflow-y: auto;
-            }
-
-            #entryModal textarea {
-                height: 150px !important;
-            }
-
-            /* 4. BOTTONI PIÙ GRANDI */
-            .btn-zoom,
-            .btn-edit,
-            .btn-float,
-            .btn-music {
-                width: 50px !important;
-                height: 50px !important;
-            }
-
-            .zoom-controls {
-                bottom: 120px !important;
-            }
-
-            /* 5. SIDE MENU A TUTTO SCHERMO */
-            #sideMenu {
-                width: 85% !important;
-                left: -90% !important;
-            }
-
-            #sideMenu.open {
-                left: 0 !important;
-            }
-
-            /* --- 6. RIDUZIONE BUCO NERO (GARGANTUA MINI) --- */
-            /* Riduciamo tutto di circa il 40% per lasciare spazio alle stelle */
-
-            /* Il contenitore generale */
-            #galacticCenter {
-                width: 180px !important;
-                height: 180px !important;
-            }
-
-            /* Gli anelli (La struttura 3D) */
-            .ring-container {
-                width: 150px !important;
-                /* Era 260px */
-                height: 150px !important;
-                /* Era 260px */
-            }
-
-            /* L'alone di sfondo */
-            #accretionDisk {
-                width: 110px !important;
-                /* Era 180px */
-                height: 110px !important;
-                /* Era 180px */
-            }
-
-            /* La sfera nera centrale */
-            .black-hole-void {
-                width: 32px !important;
-                /* Era 52px */
-                height: 32px !important;
-                /* Era 52px */
-            }
-
-            /* Aggiustiamo l'animazione del satellite (orbita più stretta) */
-            @keyframes satelliteOrbit {
-                from {
-                    transform: rotate(0deg) translateX(8px);
-                }
-
-                /* Era 16px */
-                to {
-                    transform: rotate(360deg) translateX(8px);
-                }
-            }
-        }
-
-        /* --- TIMELINE SLIDER (Macchina del Tempo) --- */
-        #timelineWrapper {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 90;
-            /* Sotto i popup ma sopra le stelle */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 400px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            /* Effetto rimbalzo fluido */
-        }
-
-        /* IL PULSANTE OROLOGIO (Maniglia) */
-        #btnTimeToggle {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid #00e5ff;
-            color: #00e5ff;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
-            backdrop-filter: blur(4px);
-            display: none;
-            /* Su PC è nascosto di default (o statico) */
-        }
-
-        /* IL CONTENUTO (Barra + Data) */
-        #timelineContent {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 20px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            text-align: center;
-            opacity: 1;
-            transition: opacity 0.3s;
-        }
-
-        /* LA DATA FLUTTUANTE */
-        #timelineDateDisplay {
-            color: #00e5ff;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            margin-bottom: 5px;
-            text-shadow: 0 0 5px #00e5ff;
-            font-weight: bold;
-        }
-
-        /* LO SLIDER VERO E PROPRIO (Input Range) */
-        #timeSlider {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        /* Il pallino dello slider (Thumb) */
-        #timeSlider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #00e5ff;
-            box-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        #timeSlider::-webkit-slider-thumb:hover {
-            transform: scale(1.3);
-        }
-
-        /* --- OTTIMIZZAZIONI MOBILE (RESPONSIVE) --- */
-        @media screen and (max-width: 768px) {
-
-            /* 1. RISOLUZIONE SOVRAPPOSIZIONE BARRA RICERCA */
             /* Ora si posiziona ESATTAMENTE tra il tasto menu e i tasti a destra */
             #searchContainer {
                 top: 24px !important;
@@ -1310,7 +1114,7 @@
             }
 
             .zoom-controls {
-                bottom: 120px !important;
+                bottom: none !important;
             }
 
             /* Spostiamo un po' più giù il tasto rotazione per sicurezza */
@@ -1415,6 +1219,92 @@
                 font-size: 12px !important;
             }
         }
+
+        /* --- TIMELINE SLIDER (Macchina del Tempo) --- */
+        #timelineWrapper {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 90;
+            /* Sotto i popup ma sopra le stelle */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 400px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            /* Effetto rimbalzo fluido */
+        }
+
+        /* IL PULSANTE OROLOGIO (Maniglia) */
+        #btnTimeToggle {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00e5ff;
+            color: #00e5ff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+            backdrop-filter: blur(4px);
+            display: none;
+            /* Su PC è nascosto di default (o statico) */
+        }
+
+        /* IL CONTENUTO (Barra + Data) */
+        #timelineContent {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+
+        /* LA DATA FLUTTUANTE */
+        #timelineDateDisplay {
+            color: #00e5ff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px #00e5ff;
+            font-weight: bold;
+        }
+
+        /* LO SLIDER VERO E PROPRIO (Input Range) */
+        #timeSlider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Il pallino dello slider (Thumb) */
+        #timeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00e5ff;
+            box-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        #timeSlider::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
+
+        
 
         /* --- STILE FILTRI COLORE (Lenti del Telescopio) --- */
 
