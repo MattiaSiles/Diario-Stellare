@@ -1038,6 +1038,27 @@
             background: rgba(255, 255, 255, 0.4);
         }
 
+        /* --- BADGE OFFLINE --- */
+        #offlineBadge {
+            display: none; /* Nascosto di default */
+            position: fixed;
+            top: 20px;     /* Distanza dal top su PC */
+            left: 50%;
+            transform: translateX(-50%); /* Centrato perfettamente */
+            background: rgba(255, 90, 90, 0.85);
+            border: 1px solid #ff5a5a;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 9999; /* Sta sopra a TUTTO (modali, menu, ecc.) */
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 15px rgba(255, 90, 90, 0.5);
+            white-space: nowrap; /* Evita che il testo vada a capo */
+            transition: all 0.3s ease;
+        }
+
         /* --- OTTIMIZZAZIONI MOBILE (RESPONSIVE) --- */
         @media screen and (max-width: 768px) {
 
@@ -1091,7 +1112,7 @@
             }
 
             .zoom-controls {
-                bottom: 120px !important;
+                display: none !important;
             }
 
             /* 5. SIDE MENU A TUTTO SCHERMO */
@@ -1147,6 +1168,13 @@
                 to {
                     transform: rotate(360deg) translateX(8px);
                 }
+            }
+            
+            /* ADATTAMENTO BADGE OFFLINE PER MOBILE */
+            #offlineBadge {
+                top: 75px !important; /* Si sposta PIÙ GIÙ, sotto la barra di ricerca! */
+                font-size: 12px;
+                padding: 6px 14px;
             }
         }
 
@@ -1310,7 +1338,7 @@
             }
 
             .zoom-controls {
-                bottom: 120px !important;
+                display: none !important;
             }
 
             /* Spostiamo un po' più giù il tasto rotazione per sicurezza */
@@ -1486,7 +1514,9 @@
 
 <body>
 
-
+    <div id="offlineBadge">
+        🛰️ Segnale perso (Salvataggio locale)
+    </div>
 
     <audio id="bgMusic" loop>
         <source src="musica.mp3" type="audio/mpeg">
@@ -1790,7 +1820,7 @@
     <script type="module">
         // 1. Importiamo Firebase usando gli indirizzi WEB (giusti per HTML semplice)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         // 2. LA TUA CONFIGURAZIONE (Copiata dalla tua immagine)
@@ -1806,6 +1836,9 @@
         // 3. Avviamo i motori
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        enableIndexedDbPersistence(db).catch((err) => {
+            console.warn("Errore persistenza offline:", err.code);
+        });
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
@@ -3548,6 +3581,16 @@
             <input type="range" id="timeSlider" min="0" max="100" value="100" oninput="updateTimeTravel(this.value)">
         </div>
     </div>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('🌌 Maggiordomo Offline (SW) attivato!', reg.scope))
+                .catch(err => console.log('❌ Errore Service Worker:', err));
+            });
+        }
+    </script>
+
 
 </body>
 
