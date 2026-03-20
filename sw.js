@@ -2,11 +2,11 @@ const CACHE_NAME = 'diario-stellare-v1';
 
 // Questa è la lista delle cose da "scaricare" per far funzionare l'app offline
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/musica.mp3',   // Sostituisci o aggiungi altri nomi se la musica si chiama diversamente
-  '/icon-192.png'  // Assicurati che l'icona si chiami così
+  './',
+  './index.html',
+  './manifest.json',
+     // Sostituisci o aggiungi altri nomi se la musica si chiama diversamente
+  './icon-192.png'  // Assicurati che l'icona si chiami così
 ];
 
 // 1. INSTALLAZIONE: Il maggiordomo scarica i file
