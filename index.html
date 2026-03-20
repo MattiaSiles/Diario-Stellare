@@ -3562,6 +3562,25 @@
             }
         });
 
+        // --- GESTIONE STATO CONNESSIONE (ONLINE/OFFLINE) ---
+        function updateConnectionStatus() {
+            const badge = document.getElementById('offlineBadge');
+            if (navigator.onLine) {
+                // È tornata la connessione
+                badge.style.display = 'none';
+            } else {
+                // Connessione persa
+                badge.style.display = 'block';
+            }
+        }
+
+        // Ascolta i cambiamenti di rete in tempo reale
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+        
+        // Controlla lo stato appena si apre l'app
+        window.addEventListener('load', updateConnectionStatus);
+
     </script>
 
     <div id="timelineWrapper">
