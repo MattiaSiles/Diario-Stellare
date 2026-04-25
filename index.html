@@ -625,12 +625,25 @@
             transform: translate(-50%, -50%);
             width: 80%;
             max-width: 400px;
+            max-height: 85vh; /* Altezza massima all'85% dello schermo */
+            flex-direction: column;
             background: #222;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
             z-index: 300;
             text-align: center;
+        }
+
+        /* Regola specifica per l'area del testo */
+        #viewText {
+            overflow-y: auto; /* Crea la barra di scorrimento se serve */
+            flex-grow: 1; /* Prende tutto lo spazio centrale disponibile */
+            margin: 15px 0;
+            padding-right: 5px;
+            text-align: left; /* Testo lungo è meglio leggerlo a sinistra */
+            font-size: 15px;
+            line-height: 1.4;
         }
 
         textarea {
@@ -2821,8 +2834,16 @@
             }, { passive: false });
 
             window.addEventListener('touchmove', e => {
+                // --- 🚀 FIX TOUCH SCROLLING MENU ---
+                // Se il dito si sta muovendo sopra un menu o un popup, LASCIA SCORRERE normalmente!
+                const scrollableSelectors = ['#sideMenu', '#statsModal', '#viewModal', '#entryModal', '#constellationPanel'];
+                if (scrollableSelectors.some(selector => e.target.closest(selector))) {
+                    return; // Esce e non blocca nulla
+                }
+
                 if (e.target.tagName === 'INPUT') return;
-                // Impediamo lo scroll della pagina nativa
+                
+                // Se siamo nel cielo, blocca lo scroll della pagina
                 e.preventDefault();
 
                 if (e.touches.length === 1 && isPanning) {
@@ -2837,16 +2858,10 @@
                         e.touches[0].clientX - e.touches[1].clientX,
                         e.touches[0].clientY - e.touches[1].clientY
                     );
-
-                    // Calcolo del rapporto: se la nuova distanza è maggiore, stiamo allargando
                     const pixelDiff = dist - initialPinchDistance;
-
-                    // Sensibilità dello zoom (dividi per un numero più alto per rallentarlo)
                     const zoomSpeed = 0.005;
-
                     let newZoom = initialZoom + (pixelDiff * zoomSpeed);
 
-                    // Limiti min e max dello zoom (uguali ai tuoi limiti attuali)
                     if (newZoom < 0.5) newZoom = 0.5;
                     if (newZoom > 3.0) newZoom = 3.0;
 
@@ -2936,12 +2951,45 @@
             const b = document.getElementById('btnFav');
             if (m.isFavorite) { b.innerText = '★ Preferito (Sì)'; } else { b.innerText = '☆ Aggiungi a Preferiti'; }
 
-            document.getElementById('viewModal').style.display = 'block';
+            document.getElementById('viewModal').style.display = 'flex';
         }
         function toggleFavorite() { const m = memories.find(x => x.id === currentMemoryId); if (m) { m.isFavorite = !m.isFavorite; saveData(); viewMemory(m); renderStars(); renderList(); } }
         function deleteMemory() { if (confirm("Spegnere questa stella?")) { memories = memories.filter(x => x.id !== currentMemoryId); lines = lines.filter(l => l.from !== currentMemoryId && l.to !== currentMemoryId); constellations.forEach(c => { c.stars = c.stars.filter(id => id !== currentMemoryId) }); saveData(); closeViewer(); renderStars(); renderLines(); renderLabels(); renderList(); } }
         function exportText() { let c = "IL MIO DIARIO STELLARE\n\n";[...memories].sort((a, b) => a.id - b.id).forEach(m => { c += `DATA: ${m.date}\nCOLORE: ${m.color}\n${m.text}\n------------------\n`; }); const b = new Blob([c], { type: "text/plain" }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'diario.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
-        function renderList() { const l = document.getElementById('memoryList'); const f = document.getElementById('favList'); l.innerHTML = ''; f.innerHTML = '';[...memories].reverse().forEach(m => { const i = document.createElement('div'); i.className = 'memory-item'; i.innerHTML = `<span class="color-dot" style="background:${m.color === 'red' ? '#ff5e5e' : m.color === 'blue' ? '#5eaaff' : m.color === 'yellow' ? '#ffea5e' : m.color === 'orange' ? '#ffaa33' : 'white'}"></span> ${m.date} - ${m.text.substring(0, 20)}...`; i.onclick = () => { currentZoom = 1; panX = 0; panY = 0; updateSkyTransform(); viewMemory(m); setTimeout(() => { document.getElementById('star-' + m.id).classList.add('highlight'); setTimeout(() => document.getElementById('star-' + m.id).classList.remove('highlight'), 2000); }, 300); }; if (m.isFavorite) f.appendChild(i); else l.appendChild(i); }); if (f.innerHTML === '') f.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">Nessun preferito</div>'; }
+        function renderList() { 
+            const l = document.getElementById('memoryList'); 
+            const f = document.getElementById('favList'); 
+            if(!l || !f) return;
+            
+            l.innerHTML = ''; 
+            f.innerHTML = '';
+            
+            [...memories].reverse().forEach(m => { 
+                const i = document.createElement('div'); 
+                i.className = 'memory-item'; 
+                
+                // GESTIONE TESTO SICURA: Se non c'è testo, scrive "Ricordo visivo"
+                const safeText = m.text ? m.text : "📸 Ricordo visivo...";
+                const shortText = safeText.substring(0, 20) + (safeText.length > 20 ? "..." : "");
+
+                i.innerHTML = `<span style="background:${m.color === 'red' ? '#ff5e5e' : m.color === 'blue' ? '#5eaaff' : m.color === 'yellow' ? '#ffea5e' : m.color === 'orange' ? '#ffaa33' : 'white'}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px; box-shadow: 0 0 5px currentColor;"></span> ${m.date.split(' ')[0]} - ${shortText}`; 
+                
+                i.onclick = () => { 
+                    currentZoom = 1; panX = 0; panY = 0; updateSkyTransform(); 
+                    viewMemory(m); 
+                    setTimeout(() => { 
+                        document.getElementById('star-' + m.id).classList.add('highlight'); 
+                        setTimeout(() => document.getElementById('star-' + m.id).classList.remove('highlight'), 2000); 
+                    }, 300); 
+                }; 
+                
+                if (m.isFavorite) f.appendChild(i); 
+                else l.appendChild(i); 
+            }); 
+            
+            if (f.innerHTML === '') f.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">Nessun preferito</div>'; 
+            if (l.innerHTML === '') l.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">Nessun ricordo nel cielo</div>';
+        }
         // Crea i bottoni colorati (lenti) nel telescopio
         function setupColorFilters() {
             const container = document.getElementById('colorFilterContainer');
