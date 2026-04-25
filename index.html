@@ -625,7 +625,8 @@
             transform: translate(-50%, -50%);
             width: 80%;
             max-width: 400px;
-            max-height: 85vh; /* Altezza massima all'85% dello schermo */
+            max-height: 85vh;
+            /* Altezza massima all'85% dello schermo */
             flex-direction: column;
             background: #222;
             padding: 20px;
@@ -637,11 +638,14 @@
 
         /* Regola specifica per l'area del testo */
         #viewText {
-            overflow-y: auto; /* Crea la barra di scorrimento se serve */
-            flex-grow: 1; /* Prende tutto lo spazio centrale disponibile */
+            overflow-y: auto;
+            /* Crea la barra di scorrimento se serve */
+            flex-grow: 1;
+            /* Prende tutto lo spazio centrale disponibile */
             margin: 15px 0;
             padding-right: 5px;
-            text-align: left; /* Testo lungo è meglio leggerlo a sinistra */
+            text-align: left;
+            /* Testo lungo è meglio leggerlo a sinistra */
             font-size: 15px;
             line-height: 1.4;
         }
@@ -1053,11 +1057,14 @@
 
         /* --- BADGE OFFLINE --- */
         #offlineBadge {
-            display: none; /* Nascosto di default */
+            display: none;
+            /* Nascosto di default */
             position: fixed;
-            top: 20px;     /* Distanza dal top su PC */
+            top: 20px;
+            /* Distanza dal top su PC */
             left: 50%;
-            transform: translateX(-50%); /* Centrato perfettamente */
+            transform: translateX(-50%);
+            /* Centrato perfettamente */
             background: rgba(255, 90, 90, 0.85);
             border: 1px solid #ff5a5a;
             color: white;
@@ -1065,10 +1072,12 @@
             border-radius: 20px;
             font-size: 14px;
             font-weight: bold;
-            z-index: 9999; /* Sta sopra a TUTTO (modali, menu, ecc.) */
+            z-index: 9999;
+            /* Sta sopra a TUTTO (modali, menu, ecc.) */
             backdrop-filter: blur(5px);
             box-shadow: 0 0 15px rgba(255, 90, 90, 0.5);
-            white-space: nowrap; /* Evita che il testo vada a capo */
+            white-space: nowrap;
+            /* Evita che il testo vada a capo */
             transition: all 0.3s ease;
         }
 
@@ -1182,10 +1191,11 @@
                     transform: rotate(360deg) translateX(8px);
                 }
             }
-            
+
             /* ADATTAMENTO BADGE OFFLINE PER MOBILE */
             #offlineBadge {
-                top: 75px !important; /* Si sposta PIÙ GIÙ, sotto la barra di ricerca! */
+                top: 75px !important;
+                /* Si sposta PIÙ GIÙ, sotto la barra di ricerca! */
                 font-size: 12px;
                 padding: 6px 14px;
             }
@@ -1329,10 +1339,13 @@
 
             /* 3. MODALE SCRITTURA (Fix Tastiera e Centratura) */
             #entryModal {
-                justify-content: flex-start !important; /* Spinge in verticale verso l'ALTO */
-                align-items: center !important;         /* Spinge in orizzontale al CENTRO */
-                
-                padding-top: 50px; /* Un po' più di aria in alto */
+                justify-content: flex-start !important;
+                /* Spinge in verticale verso l'ALTO */
+                align-items: center !important;
+                /* Spinge in orizzontale al CENTRO */
+
+                padding-top: 50px;
+                /* Un po' più di aria in alto */
                 overflow-y: auto;
             }
 
@@ -1771,6 +1784,10 @@
             style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; border-top: 1px solid #444; padding-top: 15px;">
             <button class="modal-btn" id="btnFav" onclick="toggleFavorite()"
                 style="background:transparent; border:1px solid #666; color:white;">★ Preferito</button>
+
+            <button class="modal-btn" onclick="openEditMode()"
+                style="background:transparent; border:1px solid #00e5ff; color:#00e5ff;">✏️ Modifica</button>
+
             <button class="modal-btn" onclick="deleteMemory()"
                 style="background:transparent; border:1px solid #ff5e5e; color:#ff5e5e;">🗑 Elimina</button>
         </div>
@@ -2023,6 +2040,8 @@
         let tempImageData = null;
 
         let isZoomedMode = false; // False = Galassia (Salti), True = Mese (Giorni)
+
+        let isEditingExisting = false; // Ci dice se stiamo modificando
 
         function toggleTimeZoom() {
             const slider = document.getElementById('timeSlider');
@@ -2689,62 +2708,73 @@
             const t = document.getElementById('journalInput').value;
             if (!t.trim() && !tempImageData) return;
 
-            const now = new Date();
-            const angle = Math.random() * Math.PI * 2;
+            if (isEditingExisting) {
+                // --- MODALITÀ MODIFICA (Aggiorna stella esistente) ---
+                const idx = memories.findIndex(x => x.id === currentMemoryId);
+                if (idx !== -1) {
+                    memories[idx].text = t;
+                    memories[idx].color = selectedColor;
+                    memories[idx].image = tempImageData || null; 
+                    // Non tocchiamo data, posizione (x, y) o lo stato di nebulosa!
+                }
+            } else {
+                // --- MODALITÀ NUOVA STELLA (Il tuo codice originale) ---
+                const now = new Date();
+                const angle = Math.random() * Math.PI * 2;
 
-            const safeRadiusPx = 150;
+                const safeRadiusPx = 150;
+                let minPerc = (safeRadiusPx / window.innerWidth) * 100;
+                const maxPerc = 45;
 
-            // 2. Convertiamo i pixel in percentuale (%) rispetto alla larghezza dello schermo. Esempio: se lo schermo è 1000px, 150px diventano il 15%.
-            let minPerc = (safeRadiusPx / window.innerWidth) * 100;
+                if (minPerc > 40) minPerc = 42;
 
-            // Limite massimo di distanza (45% del lato minore per restare visibili)
-            const maxPerc = 45;
+                const distance = minPerc + (Math.random() * (maxPerc - minPerc));
 
-            // SICUREZZA PER SCHERMI PICCOLI (Cellulari)
-            // Se il buco nero occupa quasi tutto lo schermo (es. >40%), le stelle nasceranno proprio ai bordi estremi (min 42%).
-            if (minPerc > 40) minPerc = 42;
+                let x = 50 + Math.cos(angle) * distance;
+                let y = 50 + Math.sin(angle) * distance;
 
-            // Generiamo la distanza casuale partendo dalla zona sicura
-            const distance = minPerc + (Math.random() * (maxPerc - minPerc));
+                if (window.innerHeight > window.innerWidth) {
+                    const ratio = window.innerWidth / window.innerHeight;
+                    y = 50 + (Math.sin(angle) * distance * ratio);
+                }
 
-            // 3. Calcolo Coordinate (X, Y)
-            let x = 50 + Math.cos(angle) * distance;
-            let y = 50 + Math.sin(angle) * distance;
+                // --- LOGICA NEBULOSA ---
+                let unlockTimestamp = null;
+                const isCapsule = document.getElementById('capsuleCheckbox').checked;
+                const dateValue = document.getElementById('capsuleDateInput').value;
 
-            // CORREZIONE PER MOBILE (Schermi verticali)
-            // Senza questo, su un telefono alto, il 30% di altezza è molto più pixel del 30% di larghezza.
-            // Questo calcolo "schiaccia" la Y per mantenere la zona di esclusione circolare in pixel reali.
-            if (window.innerHeight > window.innerWidth) {
-                const ratio = window.innerWidth / window.innerHeight;
-                y = 50 + (Math.sin(angle) * distance * ratio);
+                if (isCapsule && dateValue) {
+                    const unlockDate = new Date(dateValue);
+                    unlockDate.setHours(23, 59, 59);
+                    unlockTimestamp = unlockDate.getTime();
+                }
+
+                memories.push({
+                    id: Date.now(),
+                    text: t,
+                    date: now.toLocaleDateString() + ' ' + now.toLocaleTimeString(),
+                    x, y,
+                    size: Math.random() * 3 + 2,
+                    color: selectedColor,
+                    isFavorite: false,
+                    image: tempImageData || null,
+                    unlockDate: unlockTimestamp
+                });
             }
 
-            // --- LOGICA NEBULOSA ---
-            let unlockTimestamp = null;
-            const isCapsule = document.getElementById('capsuleCheckbox').checked;
-            const dateValue = document.getElementById('capsuleDateInput').value;
+            // --- SALVATAGGIO E AGGIORNAMENTO GRAFICO (Comune a entrambe le modalità) ---
+            saveData(); 
+            closeWriter(); 
+            renderStars(); 
+            renderList();
+            currentZoom = 1; 
+            panX = 0; 
+            panY = 0; 
+            updateSkyTransform();
 
-            if (isCapsule && dateValue) {
-                // Crea la data di sblocco (impostandola alla fine di quel giorno)
-                const unlockDate = new Date(dateValue);
-                unlockDate.setHours(23, 59, 59);
-                unlockTimestamp = unlockDate.getTime();
-            }
-
-            memories.push({
-                id: Date.now(),
-                text: t,
-                date: now.toLocaleDateString() + ' ' + now.toLocaleTimeString(),
-                x, y,
-                size: Math.random() * 3 + 2,
-                color: selectedColor,
-                isFavorite: false,
-                image: tempImageData || null,
-                unlockDate: unlockTimestamp
-            });
-
-            saveData(); closeWriter(); renderStars(); renderList();
-            currentZoom = 1; panX = 0; panY = 0; updateSkyTransform();
+            // --- RESET POST-MODIFICA ---
+            isEditingExisting = false;
+            document.querySelector('#entryModal .btn-save').innerText = "Accendi Stella";
         }
 
         function updateSkyTransform() { document.getElementById('sky').style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`; }
@@ -2842,7 +2872,7 @@
                 }
 
                 if (e.target.tagName === 'INPUT') return;
-                
+
                 // Se siamo nel cielo, blocca lo scroll della pagina
                 e.preventDefault();
 
@@ -2912,11 +2942,50 @@
         function closeWriter() {
             document.getElementById('entryModal').style.display = 'none';
             document.getElementById('journalInput').value = '';
-            removeImage(); // IMPORTANTE: Pulisce la foto se annulli o dopo aver salvato
+            removeImage(); 
             document.getElementById('capsuleCheckbox').checked = false;
             toggleCapsuleDate(false);
             document.getElementById('capsuleDateInput').value = '';
+            
+            // AGGIUNGI QUESTE DUE RIGHE ALLA FINE DI CLOSEWRITER:
+            isEditingExisting = false;
+            document.querySelector('#entryModal .btn-save').innerText = "Accendi Stella";
         }
+
+        function openEditMode() {
+            const m = memories.find(x => x.id === currentMemoryId);
+            if (!m) return;
+
+            isEditingExisting = true; // Attiviamo la modalità modifica
+
+            // 1. Popoliamo il testo e il colore
+            document.getElementById('journalInput').value = m.text;
+            selectedColor = m.color;
+
+            // 2. Selezioniamo visivamente il cerchietto del colore giusto
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.remove('selected');
+                // Usiamo il background come riferimento per trovare quello giusto
+                if (opt.style.background.includes(m.color) || (m.color === 'white' && opt.style.background.includes('white'))) {
+                    opt.classList.add('selected');
+                }
+            });
+
+            // 3. Gestiamo l'immagine (se presente, la mostriamo in preview)
+            if (m.image) {
+                tempImageData = m.image;
+                document.getElementById('previewImg').src = m.image;
+                document.getElementById('imagePreviewContainer').style.display = 'block';
+            }
+
+            // 4. Cambiamo il testo del bottone nel modale di scrittura
+            document.querySelector('#entryModal .btn-save').innerText = "Aggiorna Stella";
+
+            // 5. Chiudiamo il visualizzatore e apriamo lo scrittore
+            closeViewer();
+            openWriter();
+        }
+
         function closeViewer() { document.getElementById('viewModal').style.display = 'none'; }
         function selectColor(c, el) {
             selectedColor = c;
@@ -2956,38 +3025,38 @@
         function toggleFavorite() { const m = memories.find(x => x.id === currentMemoryId); if (m) { m.isFavorite = !m.isFavorite; saveData(); viewMemory(m); renderStars(); renderList(); } }
         function deleteMemory() { if (confirm("Spegnere questa stella?")) { memories = memories.filter(x => x.id !== currentMemoryId); lines = lines.filter(l => l.from !== currentMemoryId && l.to !== currentMemoryId); constellations.forEach(c => { c.stars = c.stars.filter(id => id !== currentMemoryId) }); saveData(); closeViewer(); renderStars(); renderLines(); renderLabels(); renderList(); } }
         function exportText() { let c = "IL MIO DIARIO STELLARE\n\n";[...memories].sort((a, b) => a.id - b.id).forEach(m => { c += `DATA: ${m.date}\nCOLORE: ${m.color}\n${m.text}\n------------------\n`; }); const b = new Blob([c], { type: "text/plain" }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'diario.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
-        function renderList() { 
-            const l = document.getElementById('memoryList'); 
-            const f = document.getElementById('favList'); 
-            if(!l || !f) return;
-            
-            l.innerHTML = ''; 
+        function renderList() {
+            const l = document.getElementById('memoryList');
+            const f = document.getElementById('favList');
+            if (!l || !f) return;
+
+            l.innerHTML = '';
             f.innerHTML = '';
-            
-            [...memories].reverse().forEach(m => { 
-                const i = document.createElement('div'); 
-                i.className = 'memory-item'; 
-                
+
+            [...memories].reverse().forEach(m => {
+                const i = document.createElement('div');
+                i.className = 'memory-item';
+
                 // GESTIONE TESTO SICURA: Se non c'è testo, scrive "Ricordo visivo"
                 const safeText = m.text ? m.text : "📸 Ricordo visivo...";
                 const shortText = safeText.substring(0, 20) + (safeText.length > 20 ? "..." : "");
 
-                i.innerHTML = `<span style="background:${m.color === 'red' ? '#ff5e5e' : m.color === 'blue' ? '#5eaaff' : m.color === 'yellow' ? '#ffea5e' : m.color === 'orange' ? '#ffaa33' : 'white'}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px; box-shadow: 0 0 5px currentColor;"></span> ${m.date.split(' ')[0]} - ${shortText}`; 
-                
-                i.onclick = () => { 
-                    currentZoom = 1; panX = 0; panY = 0; updateSkyTransform(); 
-                    viewMemory(m); 
-                    setTimeout(() => { 
-                        document.getElementById('star-' + m.id).classList.add('highlight'); 
-                        setTimeout(() => document.getElementById('star-' + m.id).classList.remove('highlight'), 2000); 
-                    }, 300); 
-                }; 
-                
-                if (m.isFavorite) f.appendChild(i); 
-                else l.appendChild(i); 
-            }); 
-            
-            if (f.innerHTML === '') f.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">Nessun preferito</div>'; 
+                i.innerHTML = `<span style="background:${m.color === 'red' ? '#ff5e5e' : m.color === 'blue' ? '#5eaaff' : m.color === 'yellow' ? '#ffea5e' : m.color === 'orange' ? '#ffaa33' : 'white'}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px; box-shadow: 0 0 5px currentColor;"></span> ${m.date.split(' ')[0]} - ${shortText}`;
+
+                i.onclick = () => {
+                    currentZoom = 1; panX = 0; panY = 0; updateSkyTransform();
+                    viewMemory(m);
+                    setTimeout(() => {
+                        document.getElementById('star-' + m.id).classList.add('highlight');
+                        setTimeout(() => document.getElementById('star-' + m.id).classList.remove('highlight'), 2000);
+                    }, 300);
+                };
+
+                if (m.isFavorite) f.appendChild(i);
+                else l.appendChild(i);
+            });
+
+            if (f.innerHTML === '') f.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">Nessun preferito</div>';
             if (l.innerHTML === '') l.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">Nessun ricordo nel cielo</div>';
         }
         // Crea i bottoni colorati (lenti) nel telescopio
@@ -3626,7 +3695,7 @@
         // Ascolta i cambiamenti di rete in tempo reale
         window.addEventListener('online', updateConnectionStatus);
         window.addEventListener('offline', updateConnectionStatus);
-        
+
         // Controlla lo stato appena si apre l'app
         window.addEventListener('load', updateConnectionStatus);
 
@@ -3653,8 +3722,8 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('🌌 Maggiordomo Offline (SW) attivato!', reg.scope))
-                .catch(err => console.log('❌ Errore Service Worker:', err));
+                    .then(reg => console.log('🌌 Maggiordomo Offline (SW) attivato!', reg.scope))
+                    .catch(err => console.log('❌ Errore Service Worker:', err));
             });
         }
     </script>
