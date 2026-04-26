@@ -1,0 +1,1524 @@
+/* --- STILE GENERALE --- */
+body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(ellipse at center, #010105 0%, #000000 60%, #020c2b 100%);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    user-select: none;
+}
+
+/* STILE RICERCA */
+#searchInput::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Classe per le stelle che NON corrispondono alla ricerca */
+.star.dimmed {
+    opacity: 0.05 !important;
+    /* Diventano quasi invisibili */
+    transform: scale(0.5) !important;
+    /* Si rimpiccioliscono */
+    filter: grayscale(100%);
+    /* Perdono colore */
+    transition: all 0.5s ease;
+    /* Transizione morbida */
+    pointer-events: none;
+    /* Non puoi cliccarle per sbaglio */
+}
+
+/* Le linee delle costellazioni devono sparire se cerchi */
+.searching #constellationLayer {
+    opacity: 0.1;
+    transition: opacity 0.5s;
+}
+
+/* STILI STATISTICHE */
+.pie-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.pie-chart {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: conic-gradient(#333 0deg 360deg);
+    /* Base vuota */
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.stat-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.legend-color {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.tab-active {
+    background: #2196F3 !important;
+    border-color: #2196F3 !important;
+    color: white !important;
+}
+
+/* IL CIELO */
+#skyContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+}
+
+#sky {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-origin: center center;
+    transition: transform 0.1s linear;
+    will-change: transform;
+}
+
+#skyContainer.grabbing {
+    cursor: grabbing;
+}
+
+#skyContainer.grab {
+    cursor: grab;
+}
+
+/* LAYER SVG (Linee) */
+#constellationLayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.constellation-line {
+    stroke: rgba(255, 255, 255, 0.3);
+    stroke-width: 1px;
+    pointer-events: auto;
+    cursor: crosshair;
+    transition: stroke 0.3s;
+    vector-effect: non-scaling-stroke;
+}
+
+.constellation-line:hover {
+    stroke: rgba(255, 255, 255, 0.8);
+    stroke-width: 2px;
+}
+
+/* LAYER ETICHETTE */
+#labelsLayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.constellation-label {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Cinzel', 'Trajan Pro', serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+    pointer-events: auto;
+    cursor: pointer;
+    transition: color 0.3s, font-size 0.3s;
+    white-space: nowrap;
+    border-bottom: 1px solid transparent;
+}
+
+/* Effetto hover sull'etichetta per far capire che è cliccabile */
+body.editing .constellation-label:hover {
+    color: #00e5ff;
+    border-bottom: 1px solid #00e5ff;
+    font-size: 16px;
+    z-index: 100;
+    text-shadow: 0 0 10px #00e5ff;
+}
+
+/* --- STELLE --- */
+.star {
+    position: absolute;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: box-shadow 0.3s;
+    animation: twinkle 3s infinite ease-in-out alternate;
+    z-index: 10;
+    transform: translate(-50%, -50%);
+}
+
+.star:hover {
+    z-index: 20;
+    box-shadow: 0 0 20px white;
+}
+
+body.editing .star {
+    animation: shake 0.5s infinite alternate;
+    cursor: move;
+}
+
+/* Selezione normale (Verde) */
+.star.selected-connect {
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 15px #00ff00;
+}
+
+/* Selezione Gruppo (Ciano) */
+.star.selected-group {
+    border: 2px solid #00e5ff;
+    box-shadow: 0 0 20px #00e5ff;
+    transform: translate(-50%, -50%) scale(1.5);
+    z-index: 60;
+}
+
+@keyframes twinkle {
+    from {
+        opacity: 0.5;
+    }
+
+    to {
+        opacity: 1;
+        box-shadow: 0 0 15px #fff;
+    }
+}
+
+@keyframes shake {
+    from {
+        margin-left: -1px;
+    }
+
+    to {
+        margin-left: 1px;
+    }
+}
+
+/* Colori e Preferiti */
+.star.white {
+    background-color: #fff;
+    box-shadow: 0 0 5px #fff, 0 0 10px #fff;
+}
+
+.star.red {
+    background-color: #ff5e5e;
+    box-shadow: 0 0 5px #ff5e5e, 0 0 10px #ff2222;
+}
+
+.star.blue {
+    background-color: #5eaaff;
+    box-shadow: 0 0 5px #5eaaff, 0 0 10px #2288ff;
+}
+
+.star.yellow {
+    background-color: #ffea5e;
+    box-shadow: 0 0 5px #ffea5e, 0 0 10px #ffcc00;
+}
+
+.star.orange {
+    background-color: #ffaa33;
+    box-shadow: 0 0 5px #ffaa33, 0 0 10px #ff8800;
+}
+
+.star.favorite {
+    z-index: 50;
+    animation: pulse-big 2s infinite ease-in-out alternate !important;
+    min-width: 4px !important;
+    min-height: 4px !important;
+}
+
+.star.red.favorite {
+    background-color: #ff0000 !important;
+    box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000, 0 0 60px #ff0000;
+}
+
+.star.blue.favorite {
+    background-color: #5eaaff !important;
+    box-shadow: 0 0 15px #5eaaff, 0 0 30px #5eaaff, 0 0 60px #5eaaff;
+}
+
+.star.yellow.favorite {
+    background-color: #ffea5e !important;
+    box-shadow: 0 0 15px #ffea5e, 0 0 30px #ffea5e, 0 0 60px #ffea5e;
+}
+
+.star.white.favorite {
+    background-color: #ffffff !important;
+    box-shadow: 0 0 15px #ffffff, 0 0 30px #ffffff, 0 0 60px #ffffff;
+}
+
+.star.orange.favorite {
+    background-color: #ff6600 !important;
+    box-shadow: 0 0 15px #ff6600, 0 0 30px #ff6600, 0 0 60px #ff4500;
+}
+
+@keyframes pulse-big {
+    from {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0.9;
+    }
+
+    to {
+        transform: translate(-50%, -50%) scale(2.6);
+        opacity: 1;
+        filter: brightness(1.3);
+    }
+}
+
+.star.highlight {
+    border: 3px solid #ff00ff;
+    transform: translate(-50%, -50%) scale(3) !important;
+    z-index: 100;
+    transition: all 0.5s ease;
+}
+
+/* --- SATELLITE (ALLEGATO FOTO) --- */
+.satellite {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 2px;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 0 4px #ffffff;
+    pointer-events: none;
+
+    /* L'animazione magica */
+    animation: satelliteOrbit 6s linear infinite;
+}
+
+/* Definisce il movimento circolare */
+@keyframes satelliteOrbit {
+    from {
+        transform: rotate(0deg) translateX(16px);
+    }
+
+    /* 16px è la distanza dalla stella */
+    to {
+        transform: rotate(360deg) translateX(16px);
+    }
+}
+
+.nebula-container {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    /* Centra esattamente come le stelle */
+    pointer-events: auto;
+    cursor: help;
+    /* Il cursore diventa un punto interrogativo */
+    z-index: 10;
+    /* Un po' sopra le stelle normali */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Le particelle di gas che formano la nube */
+.nebula-particle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(6px);
+    /* L'effetto "gas" */
+    opacity: 0.5;
+    mix-blend-mode: screen;
+    /* Le fa brillare quando si sovrappongono */
+    animation: pulseNebula 4s ease-in-out infinite alternate;
+}
+
+@keyframes pulseNebula {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+
+    100% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+}
+
+/* --- UI --- */
+.btn-float {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    color: #000;
+    font-size: 30px;
+    border: none;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    z-index: 100;
+}
+
+.btn-menu {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: transparent;
+    color: white;
+    font-size: 24px;
+    border: none;
+    cursor: pointer;
+    z-index: 100;
+    text-shadow: 0 0 5px black;
+}
+
+.btn-music {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+}
+
+.zoom-controls {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+}
+
+.btn-zoom {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+}
+
+
+
+.zoom-controls button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.btn-edit {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+}
+
+.btn-edit.active {
+    background: linear-gradient(to right, #ff9966, #ff5e62);
+    color: white;
+    border: none;
+    box-shadow: 0 0 15px #ff5e62;
+}
+
+/* PANNELLO COSTELLAZIONI */
+#constellationPanel {
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid #444;
+    padding: 15px;
+    border-radius: 10px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 95;
+    backdrop-filter: blur(10px);
+    min-width: 200px;
+}
+
+.btn-small {
+    background: #444;
+    color: white;
+    border: 1px solid #666;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.btn-small.cyan {
+    background: #00acc1;
+    border-color: #00acc1;
+    font-weight: bold;
+}
+
+.btn-small.red {
+    background: #d32f2f;
+    border-color: #d32f2f;
+}
+
+.btn-small:hover {
+    opacity: 0.9;
+    filter: brightness(1.2);
+}
+
+/* Menu Laterale */
+#sideMenu {
+    position: fixed;
+    top: 0;
+    left: -320px;
+    width: 300px;
+    height: 100%;
+    background: rgba(15, 32, 39, 0.98);
+    border-right: 1px solid #333;
+    transition: left 0.3s ease;
+    z-index: 150;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+}
+
+#sideMenu.open {
+    left: 0;
+}
+
+.close-menu {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.menu-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+    border-bottom: 1px solid #555;
+    padding-bottom: 10px;
+}
+
+.memory-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-backup {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+    font-weight: bold;
+    transition: opacity 0.2s;
+}
+
+#entryModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 200;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#viewModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 400px;
+    max-height: 85vh;
+    /* Altezza massima all'85% dello schermo */
+    flex-direction: column;
+    background: #222;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    z-index: 300;
+    text-align: center;
+}
+
+/* Regola specifica per l'area del testo */
+#viewText {
+    overflow-y: auto;
+    /* Crea la barra di scorrimento se serve */
+    flex-grow: 1;
+    /* Prende tutto lo spazio centrale disponibile */
+    margin: 15px 0;
+    padding-right: 5px;
+    text-align: left;
+    /* Testo lungo è meglio leggerlo a sinistra */
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+textarea {
+    width: 90%;
+    max-width: 500px;
+    height: 200px;
+    background: #1a1a1a;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    margin-bottom: 20px;
+    resize: none;
+}
+
+.btn-save {
+    background: linear-gradient(45deg, #8e2de2, #4a00e0);
+    box-shadow: 0 0 15px #8e2de2;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.color-selector {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.color-option {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.2s;
+}
+
+.color-option.selected {
+    border: 4px solid black !important;
+    transform: scale(1.2);
+    box-shadow: 0 0 0 2px #ffffff;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.btn-cancel {
+    background-color: #f44336;
+    color: white;
+}
+
+#tutorialModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 500;
+    justify-content: center;
+    align-items: center;
+}
+
+.tutorial-card {
+    background: #1a1a1a;
+    width: 90%;
+    max-width: 350px;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid #444;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.tut-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.btn-tut {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    background: #444;
+    color: white;
+}
+
+.btn-tut.primary {
+    background: #4CAF50;
+}
+
+#instructionText {
+    font-size: 13px;
+    color: #ccc;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+/* --- STILE MODALITÀ ZOOM (ORO) --- */
+
+/* La barra di scorrimento diventa dorata */
+#timeSlider.gold-mode {
+    background: rgba(255, 215, 0, 0.3);
+}
+
+/* Il pallino diventa Oro */
+#timeSlider.gold-mode::-webkit-slider-thumb {
+    background: #ffd700 !important;
+    box-shadow: 0 0 15px #ffd700, 0 0 30px #ffaa00 !important;
+    transform: scale(1.2);
+    /* Leggermente più grande per indicare precisione */
+}
+
+/* Il tasto Zoom quando è attivo */
+#btnTimeZoom.active {
+    background: #ffd700 !important;
+    color: black !important;
+    border-color: #ffd700 !important;
+    box-shadow: 0 0 10px #ffd700;
+}
+
+/* --- STILI GARGANTUA V4 (Fixed Mask System) --- */
+
+/* 1. L'ALONE DIFFUSO (Sfondo) */
+#accretionDisk {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+
+    /* Background gestito da JS */
+
+    /* MASCHERA: Allargata fino all'85% per vederlo di più */
+    mask-image: radial-gradient(circle, black 30%, black 60%, transparent 85%);
+    -webkit-mask-image: radial-gradient(circle, black 30%, black 60%, transparent 85%);
+
+    filter: blur(8px);
+    /* Molto meno sfocato (era 20px) */
+    opacity: 0.9;
+    /* Quasi solido (era 0.6) */
+    z-index: 0;
+    animation: diskSpin 25s linear infinite;
+}
+
+/* 2. CONTENITORI DEGLI ANELLI (La "Finestra" Fissa) */
+/* Questi div danno la forma, l'inclinazione 3D e il taglio (maschera). NON RUOTANO. */
+.ring-container {
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    transform: rotateX(78deg);
+    /* Inclinazione fissa Gargantua */
+    pointer-events: none;
+}
+
+/* MASCHERA POSTERIORE (Mostra solo metà ALTA) */
+.ring-container.back {
+    /* Taglia via la parte bassa E il buco centrale */
+    mask-image:
+        linear-gradient(to bottom, black 0%, black 55%, transparent 70%),
+        radial-gradient(circle, transparent 26%, black 28%);
+    /* Buco allargato a 26% */
+    -webkit-mask-image:
+        linear-gradient(to bottom, black 0%, black 55%, transparent 70%),
+        radial-gradient(circle, transparent 26%, black 28%);
+    mask-composite: intersect;
+    -webkit-mask-composite: source-in;
+}
+
+/* MASCHERA ANTERIORE (Mostra solo metà BASSA) */
+.ring-container.front {
+    /* Taglia via la parte alta E il buco centrale */
+    mask-image:
+        linear-gradient(to top, black 0%, black 55%, transparent 70%),
+        radial-gradient(circle, transparent 26%, black 28%);
+    -webkit-mask-image:
+        linear-gradient(to top, black 0%, black 55%, transparent 70%),
+        radial-gradient(circle, transparent 26%, black 28%);
+    mask-composite: intersect;
+    -webkit-mask-composite: source-in;
+}
+
+/* 3. LA TEXTURE INTERNA (Il "Gas" che gira) */
+/* Questo è il div interno che riceve il colore dal JS e RUOTA dentro la maschera ferma */
+.ring-texture {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    filter: blur(2px);
+    /* Quasi nitido (era 6px) */
+    opacity: 1;
+    /* Opacità massima */
+    animation: spinTexture 25s linear infinite;
+}
+
+/* 4. IL VUOTO (Sfera Nera) */
+.black-hole-void {
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    background-color: #000;
+    border-radius: 50%;
+    box-shadow: 0 0 15px black;
+    z-index: 2;
+    pointer-events: auto !important;
+    /* Forza il click */
+    cursor: pointer;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Rimbalzo elastico */
+}
+
+/* Effetto Hover: Il buco nero "respira" quando stai per cliccarlo */
+.black-hole-void:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 30px #000, 0 0 10px rgba(255, 255, 255, 0.5);
+    /* Bagliore bianco sull'orizzonte */
+}
+
+/* Quando clicchi */
+.black-hole-void:active {
+    transform: scale(0.9)
+}
+
+/* ANIMAZIONI */
+@keyframes diskSpin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Nuova animazione semplice per la texture piatta */
+@keyframes spinTexture {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- ICONA BUCO NERO PER TUTORIAL --- */
+.tutorial-bh-icon {
+    display: inline-block;
+    position: relative;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    /* Lo allinea al testo */
+    margin: 0 4px;
+    /* Un po' di spazio laterale */
+}
+
+/* La sfera centrale nera */
+.tutorial-bh-icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    /* Sfera piccola */
+    background: black;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+    /* Leggero bagliore */
+    z-index: 2;
+}
+
+/* L'anello inclinato */
+.tutorial-bh-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* Stessa inclinazione 3D del buco nero vero */
+    transform: translate(-50%, -50%) rotateX(78deg);
+    width: 22px;
+    height: 22px;
+    /* Anello un po' più largo della sfera */
+    border-radius: 50%;
+    /* Colore neutro luminoso per l'anello */
+    background: conic-gradient(from 0deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.8));
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+    z-index: 1;
+}
+
+/* --- ANIMAZIONE GALASSIA --- */
+
+/* 1. Il motore della rotazione (Il contenitore #galaxy) */
+@keyframes galaxySpin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 2. La contro-rotazione (Per tenere le stelle e i testi dritti) */
+@keyframes counterSpin {
+    from {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+}
+
+/* Applichiamo la rotazione al nuovo contenitore */
+#galaxy {
+    animation: galaxySpin 120s linear infinite;
+    /* 4 minuti per un giro completo */
+    transform-origin: 50% 50%;
+}
+
+#galacticCenter {
+    /* Deve avere la stessa durata della galassia (120s nel tuo file) */
+    animation: counterSpin 120s linear infinite;
+
+    /* Queste proprietà servono perché l'animazione counterSpin usa translate(-50%,-50%) */
+    /* e dobbiamo assicurarci che parta dal centro esatto */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+
+/* Applichiamo la contro-rotazione agli oggetti */
+.star,
+.constellation-label,
+.nebula-container {
+    animation: counterSpin 120s linear infinite !important;
+}
+
+/* --- GESTIONE PAUSA INTELLIGENTE --- */
+body.user-interacting #galaxy,
+body.manual-pause #galaxy,
+body.user-interacting .star,
+body.manual-pause .star,
+body.user-interacting .constellation-label,
+body.manual-pause .constellation-label,
+body.user-interacting .nebula-container,
+body.manual-pause .nebula-container,
+body.user-interacting .nebula-particle,
+body.manual-pause .nebula-particle,
+body.user-interacting #galacticCenter,
+body.manual-pause #galacticCenter {
+    animation-play-state: paused !important;
+}
+
+/* Stile per il tasto quando è attivo (Rosso/Acceso) */
+.btn-music.active-lock {
+    background: rgba(255, 90, 90, 0.3);
+    border-color: #ff5a5a;
+    box-shadow: 0 0 10px #ff5a5a;
+}
+
+
+
+/* --- SCROLLBAR SPAZIALE PERSONALIZZATA --- */
+
+/* Larghezza della barra */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* Lo sfondo della barra (binario) */
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* La parte che si muove (il pollice) */
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+/* Quando ci passi sopra col mouse */
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* --- BADGE OFFLINE --- */
+#offlineBadge {
+    display: none;
+    /* Nascosto di default */
+    position: fixed;
+    top: 20px;
+    /* Distanza dal top su PC */
+    left: 50%;
+    transform: translateX(-50%);
+    /* Centrato perfettamente */
+    background: rgba(255, 90, 90, 0.85);
+    border: 1px solid #ff5a5a;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 9999;
+    /* Sta sopra a TUTTO (modali, menu, ecc.) */
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 15px rgba(255, 90, 90, 0.5);
+    white-space: nowrap;
+    /* Evita che il testo vada a capo */
+    transition: all 0.3s ease;
+}
+
+/* --- OTTIMIZZAZIONI MOBILE (RESPONSIVE) --- */
+@media screen and (max-width: 768px) {
+
+    /* 1. RISOLUZIONE SOVRAPPOSIZIONE BARRA RICERCA */
+    #searchContainer {
+        top: 80px !important;
+        right: 10px !important;
+        left: 10px !important;
+        align-items: center !important;
+        pointer-events: none;
+    }
+
+    #searchContainer>div {
+        pointer-events: auto;
+        width: 100% !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+        justify-content: space-between !important;
+    }
+
+    #searchInput {
+        width: 100% !important;
+        font-size: 16px !important;
+    }
+
+    /* 2. MENU PIÙ COMPATTO */
+    .btn-menu {
+        font-size: 18px !important;
+        padding: 5px 10px !important;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 15px;
+    }
+
+    /* 3. MODALE SCRITTURA (Fix Tastiera) */
+    #entryModal {
+        align-items: flex-start !important;
+        padding-top: 20px;
+        overflow-y: auto;
+    }
+
+    #entryModal textarea {
+        height: 150px !important;
+    }
+
+    /* 4. BOTTONI PIÙ GRANDI */
+    .btn-zoom,
+    .btn-edit,
+    .btn-float,
+    .btn-music {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    .zoom-controls {
+        display: none !important;
+    }
+
+    /* 5. SIDE MENU A TUTTO SCHERMO */
+    #sideMenu {
+        width: 85% !important;
+        left: -90% !important;
+    }
+
+    #sideMenu.open {
+        left: 0 !important;
+    }
+
+    /* --- 6. RIDUZIONE BUCO NERO (GARGANTUA MINI) --- */
+    /* Riduciamo tutto di circa il 40% per lasciare spazio alle stelle */
+
+    /* Il contenitore generale */
+    #galacticCenter {
+        width: 180px !important;
+        height: 180px !important;
+    }
+
+    /* Gli anelli (La struttura 3D) */
+    .ring-container {
+        width: 150px !important;
+        /* Era 260px */
+        height: 150px !important;
+        /* Era 260px */
+    }
+
+    /* L'alone di sfondo */
+    #accretionDisk {
+        width: 110px !important;
+        /* Era 180px */
+        height: 110px !important;
+        /* Era 180px */
+    }
+
+    /* La sfera nera centrale */
+    .black-hole-void {
+        width: 32px !important;
+        /* Era 52px */
+        height: 32px !important;
+        /* Era 52px */
+    }
+
+    /* Aggiustiamo l'animazione del satellite (orbita più stretta) */
+    @keyframes satelliteOrbit {
+        from {
+            transform: rotate(0deg) translateX(8px);
+        }
+
+        /* Era 16px */
+        to {
+            transform: rotate(360deg) translateX(8px);
+        }
+    }
+
+    /* ADATTAMENTO BADGE OFFLINE PER MOBILE */
+    #offlineBadge {
+        top: 75px !important;
+        /* Si sposta PIÙ GIÙ, sotto la barra di ricerca! */
+        font-size: 12px;
+        padding: 6px 14px;
+    }
+}
+
+/* --- TIMELINE SLIDER (Macchina del Tempo) --- */
+#timelineWrapper {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 90;
+    /* Sotto i popup ma sopra le stelle */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 400px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Effetto rimbalzo fluido */
+}
+
+/* IL PULSANTE OROLOGIO (Maniglia) */
+#btnTimeToggle {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #00e5ff;
+    color: #00e5ff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+    backdrop-filter: blur(4px);
+    display: none;
+    /* Su PC è nascosto di default (o statico) */
+}
+
+/* IL CONTENUTO (Barra + Data) */
+#timelineContent {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    text-align: center;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+/* LA DATA FLUTTUANTE */
+#timelineDateDisplay {
+    color: #00e5ff;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    margin-bottom: 5px;
+    text-shadow: 0 0 5px #00e5ff;
+    font-weight: bold;
+}
+
+/* LO SLIDER VERO E PROPRIO (Input Range) */
+#timeSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Il pallino dello slider (Thumb) */
+#timeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #00e5ff;
+    box-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+#timeSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+}
+
+/* --- OTTIMIZZAZIONI MOBILE (RESPONSIVE) --- */
+@media screen and (max-width: 768px) {
+
+    /* 1. RISOLUZIONE SOVRAPPOSIZIONE BARRA RICERCA */
+    /* Ora si posiziona ESATTAMENTE tra il tasto menu e i tasti a destra */
+    #searchContainer {
+        top: 24px !important;
+        /* Allineato in altezza coi bottoni */
+        left: 140px !important;
+        /* Parte DOPO la scritta "Ricordi" */
+        right: 85px !important;
+        /* Finisce PRIMA del tasto Musica */
+        width: auto !important;
+        /* Si adatta allo spazio disponibile */
+        align-items: center !important;
+        pointer-events: none;
+    }
+
+    #searchContainer>div {
+        pointer-events: auto;
+        width: 100% !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+        justify-content: space-between !important;
+        padding: 5px 10px !important;
+        /* Un po' più compatto */
+    }
+
+    /* Riduciamo un po' il font per farci stare il testo */
+    #searchInput {
+        width: 100% !important;
+        font-size: 14px !important;
+        min-width: 0;
+        /* Permette di rimpicciolirsi se serve */
+    }
+
+    /* Nascondiamo l'icona del telescopio se lo spazio è troppo poco */
+    #searchContainer span:first-child {
+        font-size: 14px !important;
+        margin-right: 5px !important;
+    }
+
+    /* 2. MENU PIÙ COMPATTO */
+    .btn-menu {
+        font-size: 16px !important;
+        /* Leggermente più piccolo */
+        padding: 8px 12px !important;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 15px;
+        white-space: nowrap;
+        /* Evita che vada a capo */
+    }
+
+    /* 3. MODALE SCRITTURA (Fix Tastiera e Centratura) */
+    #entryModal {
+        justify-content: flex-start !important;
+        /* Spinge in verticale verso l'ALTO */
+        align-items: center !important;
+        /* Spinge in orizzontale al CENTRO */
+
+        padding-top: 50px;
+        /* Un po' più di aria in alto */
+        overflow-y: auto;
+    }
+
+    #entryModal textarea {
+        height: 150px !important;
+    }
+
+    /* 4. BOTTONI PIÙ GRANDI */
+    .btn-zoom,
+    .btn-edit,
+    .btn-float,
+    .btn-music,
+    #btnRotation {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    .zoom-controls {
+        display: none !important;
+    }
+
+    /* Spostiamo un po' più giù il tasto rotazione per sicurezza */
+    #btnRotation {
+        top: 85px !important;
+    }
+
+    /* 5. SIDE MENU */
+    #sideMenu {
+        width: 85% !important;
+        left: -90% !important;
+    }
+
+    #sideMenu.open {
+        left: 0 !important;
+    }
+
+    /* 6. RIDUZIONE BUCO NERO */
+    #galacticCenter {
+        width: 180px !important;
+        height: 180px !important;
+    }
+
+    .ring-container {
+        width: 150px !important;
+        height: 150px !important;
+    }
+
+    #accretionDisk {
+        width: 110px !important;
+        height: 110px !important;
+    }
+
+    .black-hole-void {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    @keyframes satelliteOrbit {
+        from {
+            transform: rotate(0deg) translateX(8px);
+        }
+
+        to {
+            transform: rotate(360deg) translateX(8px);
+        }
+    }
+
+    /* --- 7. FIX TIMELINE (Più stretta) --- */
+    #timelineWrapper {
+        /* Larghezza fissa al 55% lascia circa il 22% libero per lato */
+        /* Questo è sufficiente per non toccare i bottoni agli angoli */
+        width: 55% !important;
+        bottom: 20px;
+    }
+
+    /* Su mobile mostriamo il bottone */
+    #btnTimeToggle {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+    }
+
+    /* STATO CHIUSO (Default): Nascondiamo la barra spingendola GIÙ o rendendola invisibile */
+    /* TRUCCO: Spostiamo la barra SOTTO il bottone e la nascondiamo */
+    #timelineContent {
+        height: 0;
+        opacity: 0;
+        padding: 0;
+        overflow: hidden;
+        border: none;
+        transform: translateY(20px);
+        /* Parte un po' più giù */
+    }
+
+    /* STATO APERTO (Classe 'open' aggiunta da JS) */
+    #timelineWrapper.open #timelineContent {
+        height: auto;
+        opacity: 1;
+        padding: 10px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transform: translateY(0);
+        margin-top: 10px;
+        /* Spazio tra bottone e barra */
+    }
+
+    /* Quando aperto, l'intero blocco sale un po' per non stare troppo in basso */
+    #timelineWrapper.open {
+        bottom: 40px;
+    }
+
+    /* Il bottone cambia colore quando attivo */
+    #timelineWrapper.open #btnTimeToggle {
+        background: #00e5ff;
+        color: black;
+        box-shadow: 0 0 20px #00e5ff;
+    }
+
+    /* Quando è aperta, la data deve vedersi bene */
+    #timelineDateDisplay {
+        font-size: 12px !important;
+    }
+}
+
+/* --- STILE FILTRI COLORE (Lenti del Telescopio) --- */
+
+#colorFilterContainer {
+    display: flex;
+    gap: 8px;
+    margin-left: 15px;
+    margin-right: 5px;
+    align-items: center;
+}
+
+.filter-lens {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    /* Bordo trasparente di base per non cambiare dimensione quando attivo */
+    border: 2px solid transparent;
+    opacity: 0.6;
+    /* Leggermente spenti di default */
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    /* Effetto lente concava */
+}
+
+.filter-lens:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Stato ATTIVO (Quando una lente è selezionata) */
+.filter-lens.active {
+    opacity: 1;
+    border-color: white;
+    /* Bordo bianco luminoso */
+    /* Un alone luminoso che prende il colore della lente stessa (currentColor) */
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+    transform: scale(1.15);
+}
+
+/* --- AGGIORNAMENTO CSS MOBILE (Per farci stare tutto) --- */
+@media screen and (max-width: 768px) {
+    #searchContainer>div {
+        /* Permettiamo agli elementi di andare a capo se necessario su schermi piccolissimi */
+        flex-wrap: wrap;
+        padding: 10px !important;
+    }
+
+    #searchInput {
+        /* Su mobile l'input prende la sua riga se c'è poco spazio */
+        flex-grow: 1;
+        margin-bottom: 5px;
+    }
+
+    #colorFilterContainer {
+        /* Su mobile i filtri si spostano un po' per allinearsi */
+        margin-left: 5px;
+        margin-top: 5px;
+    }
+
+    .filter-lens {
+        /* Leggermente più grandi su mobile per il touch */
+        width: 26px;
+        height: 26px;
+    }
+}
