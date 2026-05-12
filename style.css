@@ -374,6 +374,105 @@ body.editing .star {
     }
 }
 
+/* --- SPLASH SCREEN (ANIMAZIONE AVVIO) ---  */
+#splashScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #010105;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    /* Sta sopra a tutto il resto dell'app */
+    transition: opacity 1s ease, visibility 1s;
+}
+
+/* Quando l'animazione finisce, Javascript aggiunge questa classe per farla dissolvere */
+#splashScreen.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Il quadrato scuro del logo */
+#splashScreen .logo-container {
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle at top left, #2a2a35, #0d0d12);
+    border-radius: 45px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+#splashScreen svg {
+    overflow: visible;
+}
+
+/* --- 1. ANIMAZIONE DEL TRACCIATO --- */
+.d-path {
+    fill: none;
+    stroke: url(#dGrad);
+    stroke-width: 34;
+    stroke-linecap: round;
+
+    /* Applichiamo la maschera chirurgica */
+    mask: url(#cutGap);
+
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: drawD 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* --- 2. ANIMAZIONE DELLA STELLA --- */
+.star-group {
+    /* La stella parcheggia al pixel 92, chiudendo il gap */
+    offset-path: path("M 60,160 L 60,40 C 140,40 170,70 170,100 C 170,130 140,160 92,160");
+    offset-rotate: 0deg;
+    animation: movePath 3.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    z-index: 10;
+}
+
+/* --- 3. ROTAZIONE ED EFFETTO GLOW --- */
+.star-shape {
+    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.8));
+    animation: spinStar 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes drawD {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes movePath {
+    0% {
+        offset-distance: 0%;
+    }
+
+    100% {
+        offset-distance: 100%;
+    }
+}
+
+@keyframes spinStar {
+    0% {
+        transform: rotate(-270deg) scale(0);
+    }
+
+    15% {
+        transform: rotate(-180deg) scale(1.4);
+    }
+
+    100% {
+        transform: rotate(0deg) scale(1.2);
+    }
+}
+
 /* --- UI --- */
 .btn-float {
     position: fixed;

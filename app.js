@@ -35,6 +35,25 @@ let isZoomedMode = false; // False = Galassia (Salti), True = Mese (Giorni)
 
 let isEditingExisting = false; // Ci dice se stiamo modificando
 
+// ==========================================
+// --- GESTIONE SPLASH SCREEN (ANIMAZIONE) ---
+// ==========================================
+window.addEventListener('load', () => {
+    // Aspettiamo 3.5s (durata animazione) + 0.5s di pausa scenica
+    setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        if (splash) {
+            splash.classList.add('fade-out');
+            
+            // Opzionale: Rimuove l'elemento dal DOM dopo la dissolvenza (1s) 
+            // per alleggerire il browser
+            setTimeout(() => {
+                splash.remove();
+            }, 1000); 
+        }
+    }, 4000);
+});
+
 function toggleTimeZoom() {
     const slider = document.getElementById('timeSlider');
     const btn = document.getElementById('btnTimeZoom');

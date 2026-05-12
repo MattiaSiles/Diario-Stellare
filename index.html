@@ -14,6 +14,28 @@
 </head>
 
 <body>
+    <div id="splashScreen">
+        <div class="logo-container">
+            <svg viewBox="0 0 200 200" width="160" height="160">
+                <defs>
+                    <linearGradient id="dGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#1B288C" />
+                        <stop offset="100%" stop-color="#8021B3" />
+                    </linearGradient>
+                    <mask id="cutGap" maskUnits="userSpaceOnUse" x="-50" y="-50" width="300" height="300">
+                        <rect x="-50" y="-50" width="300" height="300" fill="white" />
+                        <rect x="77.5" y="130" width="25" height="60" fill="black" />
+                    </mask>
+                </defs>
+                <path class="d-path" pathLength="100" d="M 60,160 L 60,40 C 140,40 170,70 170,100 C 170,130 140,160 92,160" />
+                <g class="star-group">
+                    <path class="star-shape" d="M 0,-15 L 4,-4 L 15,-4 L 6,3 L 10,14 L 0,7 L -10,14 L -6,3 L -15,-4 L -4,-4 Z" fill="#ffcc00" />
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <div id="offlineBadge"> ...
 
     <div id="offlineBadge">
         🛰️ Segnale perso (Salvataggio locale)
