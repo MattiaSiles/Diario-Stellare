@@ -1,4 +1,4 @@
-const CACHE_NAME = 'diario-stellare-v6';
+const CACHE_NAME = 'diario-stellare-v7';
 
 // Questa è la lista delle cose da "scaricare" per far funzionare l'app offline
 const ASSETS_TO_CACHE = [
