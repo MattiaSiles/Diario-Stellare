@@ -1,9 +1,68 @@
 // ==========================================
 // 1. LOGICA PRINCIPALE DEL DIARIO STELLARE
 // ==========================================
-// --- RICONOSCIMENTO FILE ---
-// Capisce se siamo su forGemini o no
-const isDev = window.location.pathname.includes('ForGemini');
+// ==========================================
+// 0. GESTIONE MANUTENZIONE E MODALITÀ DEV
+// ==========================================
+
+// 🔴 INTERRUTTORE MANUTENZIONE: Metti "true" per chiudere l'app, "false" per aprirla a tutti.
+const IS_UNDER_MAINTENANCE = false; 
+
+// Controlla se questo telefono/PC ha il pass da sviluppatore salvato in memoria
+let isDev = localStorage.getItem('is_admin') === 'true';
+console.log("Modalità Sviluppo (Admin):", isDev);
+
+window.addEventListener('DOMContentLoaded', () => {
+    
+    // --- GESTIONE SCHERMATA MANUTENZIONE ---
+    const maintenanceScreen = document.getElementById('maintenanceScreen');
+    if (IS_UNDER_MAINTENANCE && !isDev) {
+        maintenanceScreen.style.display = 'flex';
+        const splash = document.getElementById('splashScreen');
+        if(splash) splash.remove(); // Togliamo il logo se c'è la manutenzione
+    }
+
+    // --- TRUCCO 1: Sblocco dalla schermata di manutenzione (5 tocchi sulla 🛠️) ---
+    const wrenchIcon = document.getElementById('wrenchIcon');
+    if (wrenchIcon) {
+        let tapCount = 0;
+        let tapTimer;
+        wrenchIcon.addEventListener('click', () => {
+            tapCount++;
+            clearTimeout(tapTimer);
+            tapTimer = setTimeout(() => { tapCount = 0; }, 1500); 
+            
+            if (tapCount >= 5) {
+                localStorage.setItem('is_admin', 'true');
+                alert("✨ Accesso Sviluppatore Sbloccato! Riavvio in corso...");
+                location.reload();
+            }
+        });
+    }
+
+    // --- TRUCCO 2: Attiva/Disattiva Dev Mode (5 tocchi sul Pulsante Fantasma in basso sotto la matita) ---
+    const devTrigger = document.getElementById('devTrigger');
+    if (devTrigger) {
+        let menuTapCount = 0;
+        let menuTapTimer;
+        devTrigger.addEventListener('click', (e) => {
+            menuTapCount++;
+            clearTimeout(menuTapTimer);
+            menuTapTimer = setTimeout(() => { menuTapCount = 0; }, 1500);
+            
+            if (menuTapCount >= 5) {
+                if (isDev) {
+                    localStorage.removeItem('is_admin');
+                    alert("🔒 Modalità Sviluppatore DISATTIVATA. Torni al database reale.");
+                } else {
+                    localStorage.setItem('is_admin', 'true');
+                    alert("✨ Modalità Sviluppatore ATTIVATA! Usi il database di test.");
+                }
+                location.reload();
+            }
+        });
+    }
+});
 
 // --- CHIAVI DI MEMORIA DINAMICHE ---
 // Se siamo su forGemini usa le chiavi "_DEV", altrimenti quelle normali
@@ -683,14 +742,17 @@ function toggleEditMode() {
 }
 
 function saveData() {
+    // 1. SALVATAGGIO LOCALE (Sempre attivo)
     localStorage.setItem(KEY_MEMORIES, JSON.stringify(memories));
     localStorage.setItem(KEY_LINES, JSON.stringify(lines));
     localStorage.setItem(KEY_LABELS, JSON.stringify(constellations));
 
-    // 2. SALVATAGGIO CLOUD (Nuovo!)
-    // Se l'utente è loggato, spediamo tutti e 3 i dati a Firebase
-    if (window.currentUser) {
+    // 2. SALVATAGGIO CLOUD (Sicuro)
+    // Spediamo a Firebase SOLO se l'utente è loggato E NON è in modalità Sviluppatore
+    if (window.currentUser && !isDev) {
         window.saveToCloud(memories, lines, constellations);
+    } else if (window.currentUser && isDev) {
+        console.log("☁️ Salvataggio Cloud bloccato (Modalità Sviluppatore Attiva)");
     }
 }
 
