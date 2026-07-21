@@ -1154,7 +1154,39 @@ function viewMemory(m) {
     document.getElementById('viewModal').style.display = 'flex';
 }
 function toggleFavorite() { const m = memories.find(x => x.id === currentMemoryId); if (m) { m.isFavorite = !m.isFavorite; saveData(); viewMemory(m); renderStars(); renderList(); } }
-function deleteMemory() { if (confirm("Spegnere questa stella?")) { memories = memories.filter(x => x.id !== currentMemoryId); lines = lines.filter(l => l.from !== currentMemoryId && l.to !== currentMemoryId); constellations.forEach(c => { c.stars = c.stars.filter(id => id !== currentMemoryId) }); saveData(); closeViewer(); renderStars(); renderLines(); renderLabels(); renderList(); } }
+// Aggiungiamo "async" per permettere all'app di aspettare la cancellazione dal cloud
+async function deleteMemory() { 
+    const m = memories.find(x => x.id === currentMemoryId);
+    if (!m) return;
+
+    if (confirm("Spegnere questa stella?")) { 
+        
+        // --- NOVITÀ: ELIMINAZIONE FOTO DAL CLOUD ---
+        // Se la stella ha un'immagine, e quell'immagine è un link Firebase (inizia con http)
+        if (m.image && m.image.startsWith('http') && window.deleteObject && window.storageRef && window.storage) {
+            try {
+                console.log("☁️ Eliminazione foto dal cloud in corso...");
+                // Firebase capisce quale file eliminare direttamente dal suo link!
+                const fileRef = window.storageRef(window.storage, m.image);
+                await window.deleteObject(fileRef);
+                console.log("✅ Foto eliminata dallo Storage in modo permanente.");
+            } catch (error) {
+                console.error("Errore durante l'eliminazione della foto:", error);
+            }
+        }
+
+        // --- VECCHIA LOGICA DI ELIMINAZIONE STELLA ---
+        memories = memories.filter(x => x.id !== currentMemoryId); 
+        lines = lines.filter(l => l.from !== currentMemoryId && l.to !== currentMemoryId); 
+        constellations.forEach(c => { c.stars = c.stars.filter(id => id !== currentMemoryId) }); 
+        saveData(); 
+        closeViewer(); 
+        renderStars(); 
+        renderLines(); 
+        renderLabels(); 
+        renderList(); 
+    } 
+}
 function exportText() { let c = "IL MIO DIARIO STELLARE\n\n";[...memories].sort((a, b) => a.id - b.id).forEach(m => { c += `DATA: ${m.date}\nCOLORE: ${m.color}\n${m.text}\n------------------\n`; }); const b = new Blob([c], { type: "text/plain" }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'diario.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
 function renderList() {
     const l = document.getElementById('memoryList');

@@ -24,7 +24,7 @@
                 manutenzione per un aggiornamento dei sistemi.<br><br>Torna tra poco!</p>
         </div>
 
-        <div id="devTrigger" style="position: fixed; bottom: 0; left: 0; width: 60px; height: 60px; z-index: 9998;">
+        <div id="devTrigger" style="position: fixed; bottom: 0; left: 0; width: 30px; height: 30px; z-index: 9998;">
         </div>
 
         <div id="splashScreen">
@@ -370,7 +370,7 @@
             import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
             // 🚀 1. NUOVO IMPORT PER LO STORAGE
-            import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+            import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
             // 2. LA TUA CONFIGURAZIONE
             const firebaseConfig = {
@@ -397,6 +397,7 @@
             window.storageRef = ref;
             window.uploadBytes = uploadBytes;
             window.getDownloadURL = getDownloadURL;
+            window.deleteObject = deleteObject;
 
             // 4. FUNZIONI GLOBALI (Il ponte tra Firebase e il tuo Diario)
 
