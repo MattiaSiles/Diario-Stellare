@@ -14,148 +14,158 @@
 </head>
 
 <body>
+
     <body>
-    <div id="maintenanceScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #010105; z-index: 99999; color: white; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: sans-serif;">
-        <span id="wrenchIcon" style="font-size: 60px; margin-bottom: 20px; cursor: pointer;">🛠️</span>
-        <h1 style="color: #00e5ff;">Lavori in corso</h1>
-        <p style="color: #aaa; max-width: 80%; line-height: 1.5;">Il Diario Stellare è momentaneamente in manutenzione per un aggiornamento dei sistemi.<br><br>Torna tra poco!</p>
-    </div>
-    
-    <div id="devTrigger" style="position: fixed; bottom: 0; left: 0; width: 60px; height: 60px; z-index: 9998;"></div>
-    
-    <div id="splashScreen">
-        <div class="logo-container">
-            <svg viewBox="0 0 200 200" width="160" height="160">
-                <defs>
-                    <linearGradient id="dGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#1B288C" />
-                        <stop offset="100%" stop-color="#8021B3" />
-                    </linearGradient>
-                    <mask id="cutGap" maskUnits="userSpaceOnUse" x="-50" y="-50" width="300" height="300">
-                        <rect x="-50" y="-50" width="300" height="300" fill="white" />
-                        <rect x="77.5" y="130" width="25" height="60" fill="black" />
-                    </mask>
-                </defs>
-                <path class="d-path" pathLength="100" d="M 60,160 L 60,40 C 140,40 170,70 170,100 C 170,130 140,160 92,160" />
-                <g class="star-group">
-                    <path class="star-shape" d="M 0,-15 L 4,-4 L 15,-4 L 6,3 L 10,14 L 0,7 L -10,14 L -6,3 L -15,-4 L -4,-4 Z" fill="#ffcc00" />
-                </g>
-            </svg>
+        <div id="maintenanceScreen"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #010105; z-index: 99999; color: white; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: sans-serif;">
+            <span id="wrenchIcon" style="font-size: 60px; margin-bottom: 20px; cursor: pointer;">🛠️</span>
+            <h1 style="color: #00e5ff;">Lavori in corso</h1>
+            <p style="color: #aaa; max-width: 80%; line-height: 1.5;">Il Diario Stellare è momentaneamente in
+                manutenzione per un aggiornamento dei sistemi.<br><br>Torna tra poco!</p>
         </div>
-    </div>
 
-    <div id="offlineBadge">
-        🛰️ Segnale perso (Salvataggio locale)
-    </div>
+        <div id="devTrigger" style="position: fixed; bottom: 0; left: 0; width: 60px; height: 60px; z-index: 9998;">
+        </div>
 
-    <audio id="bgMusic" loop>
-        <source src="musica.mp3" type="audio/mpeg">
-    </audio>
+        <div id="splashScreen">
+            <div class="logo-container">
+                <svg viewBox="0 0 200 200" width="160" height="160">
+                    <defs>
+                        <linearGradient id="dGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#1B288C" />
+                            <stop offset="100%" stop-color="#8021B3" />
+                        </linearGradient>
+                        <mask id="cutGap" maskUnits="userSpaceOnUse" x="-50" y="-50" width="300" height="300">
+                            <rect x="-50" y="-50" width="300" height="300" fill="white" />
+                            <rect x="77.5" y="130" width="25" height="60" fill="black" />
+                        </mask>
+                    </defs>
+                    <path class="d-path" pathLength="100"
+                        d="M 60,160 L 60,40 C 140,40 170,70 170,100 C 170,130 140,160 92,160" />
+                    <g class="star-group">
+                        <path class="star-shape"
+                            d="M 0,-15 L 4,-4 L 15,-4 L 6,3 L 10,14 L 0,7 L -10,14 L -6,3 L -15,-4 L -4,-4 Z"
+                            fill="#ffcc00" />
+                    </g>
+                </svg>
+            </div>
+        </div>
 
-    <div id="skyContainer" class="grab">
-        <div id="sky">
-            <div id="galaxy" style="width:100%; height:100%; position:absolute; top:0; left:0;">
+        <div id="offlineBadge">
+            🛰️ Segnale perso (Salvataggio locale)
+        </div>
 
-                <div id="galacticCenter" style="
+        <audio id="bgMusic" loop>
+            <source src="musica.mp3" type="audio/mpeg">
+        </audio>
+
+        <div id="skyContainer" class="grab">
+            <div id="sky">
+                <div id="galaxy" style="width:100%; height:100%; position:absolute; top:0; left:0;">
+
+                    <div id="galacticCenter" style="
                     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
                     z-index: 0; pointer-events: none; 
                     display: grid; place-items: center;
                     width: 300px; height: 300px;
                 ">
 
-                    <div id="accretionDisk"></div>
+                        <div id="accretionDisk"></div>
 
-                    <div class="ring-container back" style="z-index: 1;">
-                        <div id="ringBack" class="ring-texture"></div>
+                        <div class="ring-container back" style="z-index: 1;">
+                            <div id="ringBack" class="ring-texture"></div>
+                        </div>
+
+                        <div class="black-hole-void" onclick="openStats()" title="Analizza l'Anima della Galassia">
+                        </div>
+
+                        <div class="ring-container front" style="z-index: 3;">
+                            <div id="ringFront" class="ring-texture"></div>
+                        </div>
+
                     </div>
 
-                    <div class="black-hole-void" onclick="openStats()" title="Analizza l'Anima della Galassia"></div>
 
-                    <div class="ring-container front" style="z-index: 3;">
-                        <div id="ringFront" class="ring-texture"></div>
-                    </div>
-
+                    <svg id="constellationLayer"></svg>
+                    <div id="labelsLayer"></div>
                 </div>
-
-
-                <svg id="constellationLayer"></svg>
-                <div id="labelsLayer"></div>
             </div>
         </div>
-    </div>
 
-    <button class="btn-menu" onclick="toggleMenu()">☰ Ricordi</button>
-    <button class="btn-music" onclick="toggleMusic()">🔇</button>
-    <button id="btnRotation" onclick="toggleRotation()" class="btn-music" style="top: 80px;"
-        title="Blocca/Sblocca Rotazione">
-        ⏸️
-    </button>
+        <button class="btn-menu" onclick="toggleMenu()">☰ Ricordi</button>
+        <button class="btn-music" onclick="toggleMusic()">🔇</button>
+        <button id="btnRotation" onclick="toggleRotation()" class="btn-music" style="top: 80px;"
+            title="Blocca/Sblocca Rotazione">
+            ⏸️
+        </button>
 
-    <div class="zoom-controls">
-        <button class="btn-zoom" onclick="zoomIn()">+</button>
-        <button class="btn-zoom" onclick="zoomOut()">-</button>
-    </div>
+        <div class="zoom-controls">
+            <button class="btn-zoom" onclick="zoomIn()">+</button>
+            <button class="btn-zoom" onclick="zoomOut()">-</button>
+        </div>
 
-    <button class="btn-edit" onclick="toggleEditMode()" title="Modalità Modifica">✏️</button>
+        <button class="btn-edit" onclick="toggleEditMode()" title="Modalità Modifica">✏️</button>
 
-    <div id="constellationPanel">
-        <div id="instructionText">Modo: <b>Sposta/Collega</b><br><small>Clicca 2 stelle per unire.</small></div>
+        <div id="constellationPanel">
+            <div id="instructionText">Modo: <b>Sposta/Collega</b><br><small>Clicca 2 stelle per unire.</small></div>
 
-        <button class="btn-small cyan" id="btnGroupMode" onclick="toggleGroupMode()">✨ Crea Nuova Costellazione</button>
+            <button class="btn-small cyan" id="btnGroupMode" onclick="toggleGroupMode()">✨ Crea Nuova
+                Costellazione</button>
 
-        <div id="groupControls" style="display:none;">
-            <div id="groupStatus"
-                style="font-size:12px; color:#00e5ff; margin-bottom:8px; border-bottom:1px solid #444; padding-bottom:5px;">
-                Seleziona stelle...
+            <div id="groupControls" style="display:none;">
+                <div id="groupStatus"
+                    style="font-size:12px; color:#00e5ff; margin-bottom:8px; border-bottom:1px solid #444; padding-bottom:5px;">
+                    Seleziona stelle...
+                </div>
+                <button class="btn-small" onclick="saveConstellationName()"
+                    style="background:#4CAF50; border-color:#4CAF50;">💾 Salva Gruppo</button>
+                <button class="btn-small red" id="btnDeleteGroup" onclick="deleteCurrentGroup()"
+                    style="display:none;">🗑
+                    Elimina Gruppo</button>
+                <button class="btn-small" onclick="cancelGroupMode()"
+                    style="background:#f44336; border-color:#f44336;">Annulla</button>
             </div>
-            <button class="btn-small" onclick="saveConstellationName()"
-                style="background:#4CAF50; border-color:#4CAF50;">💾 Salva Gruppo</button>
-            <button class="btn-small red" id="btnDeleteGroup" onclick="deleteCurrentGroup()" style="display:none;">🗑
-                Elimina Gruppo</button>
-            <button class="btn-small" onclick="cancelGroupMode()"
-                style="background:#f44336; border-color:#f44336;">Annulla</button>
-        </div>
-    </div>
-
-    <button class="btn-float" onclick="openWriter()">✒️</button>
-
-    <div id="searchContainer"
-        style="position:fixed; top:20px; right:100px; z-index:100; display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
-
-        <div
-            style="background:rgba(255,255,255,0.1); backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:5px 15px; display:flex; align-items:center; height: 34px;">
-
-            <span style="font-size:18px; margin-right:10px;">🔭</span>
-
-            <input type="text" id="searchInput" placeholder="Cerca un ricordo..." onkeyup="performSearch()"
-                style="background:transparent; border:none; color:white; font-family:'Courier New', monospace; outline:none; width:150px;">
-
-            <span id="clearSearch" onclick="resetSearch()"
-                style="cursor:pointer; display:none; color:#aaa; font-size:16px; margin-left: 5px;">✖</span>
         </div>
 
-        <div id="colorFilterContainer" style="
+        <button class="btn-float" onclick="openWriter()">✒️</button>
+
+        <div id="searchContainer"
+            style="position:fixed; top:20px; right:100px; z-index:100; display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+
+            <div
+                style="background:rgba(255,255,255,0.1); backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:5px 15px; display:flex; align-items:center; height: 34px;">
+
+                <span style="font-size:18px; margin-right:10px;">🔭</span>
+
+                <input type="text" id="searchInput" placeholder="Cerca un ricordo..." onkeyup="performSearch()"
+                    style="background:transparent; border:none; color:white; font-family:'Courier New', monospace; outline:none; width:150px;">
+
+                <span id="clearSearch" onclick="resetSearch()"
+                    style="cursor:pointer; display:none; color:#aaa; font-size:16px; margin-left: 5px;">✖</span>
+            </div>
+
+            <div id="colorFilterContainer" style="
         display:flex; 
         gap: 8px; 
         padding: 5px 10px; 
         background: rgba(0,0,0,0.3); 
         border-radius: 20px; 
         backdrop-filter: blur(2px);">
+            </div>
+
+            <div id="searchCounter" style="color:#aaa; font-size:12px; margin-right:10px; display:none;"></div>
         </div>
 
-        <div id="searchCounter" style="color:#aaa; font-size:12px; margin-right:10px; display:none;"></div>
-    </div>
+        <div id="sideMenu">
+            <button class="close-menu" onclick="toggleMenu()">×</button>
 
-    <div id="sideMenu">
-        <button class="close-menu" onclick="toggleMenu()">×</button>
-
-        <div id="userSection" style="
+            <div id="userSection" style="
         text-align: center; 
         margin-bottom: 5px;   /* RIDOTTO (era 20px) per avvicinare ai preferiti */
         padding-bottom: 10px; /* RIDOTTO (era 15px) per avvicinare la linea al bottone */
         border-bottom: 1px solid #333;">
 
-            <button id="btnLogin" onclick="loginGoogle()" style="
+                <button id="btnLogin" onclick="loginGoogle()" style="
             background: white; 
             color: black; 
             border: none; 
@@ -166,16 +176,16 @@
             font-size: 14px;
             box-shadow: 0 0 10px rgba(255,255,255,0.2);
             transition: transform 0.2s;">
-                🔑 Accedi con Google
-            </button>
+                    🔑 Accedi con Google
+                </button>
 
-            <div id="userInfo" style="display: none; color: #ccc;">
-                <div style="font-size: 12px; color: #888; margin-bottom: 5px;">BENTORNATO</div>
-                <div id="userName" style="font-size: 16px; color: white; font-weight: bold; margin-bottom: 5px;">
-                    Viaggiatore</div>
-                <div style="font-size: 11px; color: #4CAF50; margin-bottom: 10px;">● Sincronizzato col Cloud</div>
+                <div id="userInfo" style="display: none; color: #ccc;">
+                    <div style="font-size: 12px; color: #888; margin-bottom: 5px;">BENTORNATO</div>
+                    <div id="userName" style="font-size: 16px; color: white; font-weight: bold; margin-bottom: 5px;">
+                        Viaggiatore</div>
+                    <div style="font-size: 11px; color: #4CAF50; margin-bottom: 10px;">● Sincronizzato col Cloud</div>
 
-                <button onclick="logoutGoogle()" style="
+                    <button onclick="logoutGoogle()" style="
                 background: transparent; 
                 border: 1px solid #555; 
                 color: #aaa; 
@@ -183,25 +193,25 @@
                 border-radius: 10px; 
                 cursor: pointer; 
                 font-size: 11px;">
-                    Disconnetti
-                </button>
+                        Disconnetti
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <div class="menu-title" style="color: #ffd700;">★ Preferiti</div>
-        <div id="favList"></div>
+            <div class="menu-title" style="color: #ffd700;">★ Preferiti</div>
+            <div id="favList"></div>
 
-        <div class="menu-title">Tutti i Ricordi</div>
-        <div id="memoryList"></div>
+            <div class="menu-title">Tutti i Ricordi</div>
+            <div id="memoryList"></div>
 
-        <div style="
+            <div style="
         margin-top: 20px; 
         border-top: 1px solid #555; 
         padding-top: 20px;    /* Distanza SOPRA il bottone */
         padding-bottom: 20px; /* Distanza SOTTO il bottone (uguale a sopra) */
         text-align: center;">
 
-            <button onclick="setupDailyReminder()" style="
+                <button onclick="setupDailyReminder()" style="
             width: 100%;
             background: rgba(255, 255, 255, 0.05); 
             color: #e0e0e0; 
@@ -215,320 +225,332 @@
             justify-content: center; 
             gap: 10px;
             transition: all 0.3s ease;">
-                📅 Imposta promemoria giornaliero
-            </button>
-        </div>
-
-        <div style="margin-top: 0px; border-top: 1px solid #555; padding-top: 20px;">
-            <div class="menu-title" style="font-size: 18px; border:none;">Gestione Dati</div>
-            <button class="btn-backup" onclick="exportData()" style="background: #4CAF50;">💾 Salva Backup (File
-                App)</button>
-            <button class="btn-backup" onclick="exportText()" style="background: #2196F3;">📄 Scarica come
-                Testo</button>
-            <button class="btn-backup" onclick="document.getElementById('importFile').click()"
-                style="background: #ff9800;">📂 Importa Backup</button>
-            <input type="file" id="importFile" style="display:none" onchange="importData(this)">
-        </div>
-    </div>
-
-    <div id="entryModal">
-        <h2 style="color:white">Come ti senti oggi?</h2>
-        <div style="position: relative; width: 90%; max-width: 500px; margin-bottom: 20px;">
-            <textarea id="journalInput" placeholder="Scrivi qui i tuoi pensieri..."
-                style="width: 100%; height: 200px; padding: 15px; padding-right: 40px; box-sizing: border-box; margin-bottom: 0;"></textarea>
-
-            <span onclick="document.getElementById('fileInput').click()"
-                style="position: absolute; bottom: 15px; right: 15px; cursor: pointer; font-size: 24px; opacity: 0.7; z-index: 10;"
-                title="Allega una foto">
-                📎
-            </span>
-        </div>
-
-        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="processImage(this)">
-
-        <div id="imagePreviewContainer" style="display:none; margin-bottom: 20px; text-align: center;">
-            <img id="previewImg" src=""
-                style="max-width: 120px; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5); transform: rotate(-2deg); border-radius: 2px;">
-            <span onclick="removeImage()"
-                style="cursor:pointer; color:#ff5e5e; margin-left:15px; font-size: 20px; vertical-align: middle;">✖
-                Rimuovi foto</span>
-        </div>
-
-        <div style="margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-            <label style="display: flex; align-items: center; color: #ccc; cursor: pointer; font-size: 14px;">
-                <input type="checkbox" id="capsuleCheckbox" style="margin-right: 10px;"
-                    onchange="toggleCapsuleDate(this.checked)">
-                Trasforma in Nebulosa del Tempo (Capsula) ⏳
-            </label>
-
-            <div id="capsuleDateContainer" style="display: none; margin-top: 10px; color: #ccc; font-size: 14px;">
-                Apri il giorno:
-                <input type="date" id="capsuleDateInput"
-                    style="background: rgba(0,0,0,0.3); border: 1px solid #555; color: white; padding: 5px; border-radius: 4px; font-family: inherit; margin-left: 10px;">
-            </div>
-        </div>
-
-        <div class="color-selector">
-            <div class="color-option" style="background:white; border: 2px solid white;"
-                onclick="selectColor('white', this)"></div>
-            <div class="color-option" style="background:#ff5e5e" onclick="selectColor('red', this)"></div>
-            <div class="color-option" style="background:#5eaaff" onclick="selectColor('blue', this)"></div>
-            <div class="color-option" style="background:#ffea5e" onclick="selectColor('yellow', this)"></div>
-            <div class="color-option" style="background:#ffaa33" onclick="selectColor('orange', this)"></div>
-        </div>
-        <div><button class="modal-btn btn-cancel" onclick="closeWriter()">Annulla</button><button
-                class="modal-btn btn-save" onclick="saveEntry()">Accendi Stella</button></div>
-    </div>
-
-    <div id="viewModal">
-        <h3 id="viewDate" style="margin-top:0; margin-bottom: 5px;"></h3>
-        <div id="viewColorInfo"></div>
-        <p id="viewText"></p>
-        <div
-            style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; border-top: 1px solid #444; padding-top: 15px;">
-            <button class="modal-btn" id="btnFav" onclick="toggleFavorite()"
-                style="background:transparent; border:1px solid #666; color:white;">★ Preferito</button>
-
-            <button class="modal-btn" onclick="openEditMode()"
-                style="background:transparent; border:1px solid #00e5ff; color:#00e5ff;">✏️ Modifica</button>
-
-            <button class="modal-btn" onclick="deleteMemory()"
-                style="background:transparent; border:1px solid #ff5e5e; color:#ff5e5e;">🗑 Elimina</button>
-        </div>
-        <br><button class="modal-btn btn-cancel" onclick="closeViewer()">Chiudi</button>
-    </div>
-
-    <div id="tutorialModal">
-        <div class="tutorial-card">
-            <span id="tutIcon" style="font-size:40px; display:block; margin-bottom:15px;"></span>
-            <div id="tutTitle" style="font-size:22px; color:#ffd700; margin-bottom:10px;"></div>
-            <div id="tutText" style="font-size:16px; color:#ccc; margin-bottom:20px;"></div>
-            <div class="tut-buttons"><button class="btn-tut" onclick="prevStep()" id="btnPrev">Indietro</button><button
-                    class="btn-tut primary" onclick="nextStep()" id="btnNext">Avanti</button></div>
-        </div>
-    </div>
-
-    <div id="statsModal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:400; flex-direction:column; align-items:center; overflow-y:auto;">
-        <div style="width:90%; max-width:500px; margin-top:50px; padding-bottom:50px;">
-            <h2 style="text-align:center; color:white;">Analisi del Cielo</h2>
-
-            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
-                <button class="modal-btn" onclick="switchStatTab('time')" id="btnTabTime"
-                    style="background:#444; border:1px solid #666;">⏳ Tempo</button>
-                <button class="modal-btn" onclick="switchStatTab('const')" id="btnTabConst"
-                    style="background:#444; border:1px solid #666;">✨ Costellazioni</button>
-            </div>
-
-            <div id="statTabTime">
-                <div style="display:flex; justify-content:center; gap:5px; margin-bottom:20px;">
-                    <button class="btn-small" onclick="renderTimeStats('week')">7 Giorni</button>
-                    <button class="btn-small" onclick="renderTimeStats('month')">Mese</button>
-                    <button class="btn-small" onclick="renderTimeStats('year')">Anno</button>
-                    <button class="btn-small" onclick="renderTimeStats('all')">Sempre</button>
-                </div>
-                <h3 id="statTimeTitle" style="text-align:center; color:#ccc;">Ultimi 7 Giorni</h3>
-
-                <div class="pie-container">
-                    <div id="timePieChart" class="pie-chart"></div>
-                </div>
-
-                <div id="timeLegend" class="stat-legend"></div>
-            </div>
-
-            <div id="statTabConst" style="display:none;">
-                <h3 style="text-align:center; color:#ccc;">Analisi Costellazioni</h3>
-                <p style="text-align:center; font-size:12px; color:#888; margin-bottom:20px;">
-                    Dettaglio mood per ogni costellazione creata.
-                </p>
-
-                <div id="constListStats" style="display:flex; flex-direction:column; gap:20px;"></div>
-            </div>
-
-            <button class="modal-btn btn-cancel" onclick="document.getElementById('statsModal').style.display='none'"
-                style="width:100%; margin-top:30px;">Chiudi</button>
-        </div>
-    </div>
-
-
-    <script type="module">
-        // 1. Importiamo Firebase usando gli indirizzi WEB (giusti per HTML semplice)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // 2. LA TUA CONFIGURAZIONE (Copiata dalla tua immagine)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCnq1n_8bO4ZquP8dzpzaILEs2DKqyWg0o",
-            authDomain: "diario-stellare.firebaseapp.com",
-            projectId: "diario-stellare",
-            storageBucket: "diario-stellare.firebasestorage.app",
-            messagingSenderId: "81958146968",
-            appId: "1:81958146968:web:ab066dab212cbea35f91ed"
-        };
-
-        // 3. Avviamo i motori
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        enableIndexedDbPersistence(db).catch((err) => {
-            console.warn("Errore persistenza offline:", err.code);
-        });
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
-        // 4. FUNZIONI GLOBALI (Il ponte tra Firebase e il tuo Diario)
-
-        // --- LOGIN ---
-        window.loginGoogle = async () => {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                console.log("Login effettuato:", user.displayName);
-                alert("Benvenuto " + user.displayName + "! Carico il tuo universo...");
-                window.loadFromCloud();
-            } catch (error) {
-                console.error("Errore Login:", error);
-                alert("Errore login: " + error.message);
-            }
-        };
-
-        // --- LOGOUT ---
-        window.logoutGoogle = () => {
-            signOut(auth).then(() => {
-                alert("Disconnesso. Ora stai usando la memoria locale.");
-                location.reload();
-            });
-        };
-
-        // --- SALVA TUTTO (Stelle + Linee + Costellazioni) ---
-        window.saveToCloud = async (m, l, c) => {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            // SE sono in modalità DEV, uso una collezione diversa ("users_test")
-            const collectionName = isDev ? "users_test" : "users";
-
-            try {
-                // Salviamo un oggetto unico che contiene tutto
-                await setDoc(doc(db, collectionName, user.uid), {
-                    data_stars: JSON.stringify(m),
-                    data_lines: JSON.stringify(l),
-                    data_constellations: JSON.stringify(c),
-                    last_update: new Date().toISOString() // Utile per sapere quando è stato salvato
-                });
-                console.log("☁️ Salvataggio su ${collectionName} completo!");
-            } catch (e) {
-                console.error("Errore salvataggio cloud:", e);
-            }
-        };
-
-        // --- CARICA TUTTO ---
-        window.loadFromCloud = async () => {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            // SE sono in modalità DEV, leggo dalla collezione di test
-            const collectionName = isDev ? "users_test" : "users";
-
-            const docRef = doc(db, collectionName, user.uid);
-
-            try {
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    // --- CASO 1: UTENTE CON DATI NEL CLOUD (SCARICA) ---
-                    const data = docSnap.data();
-
-                    // 1. Aggiorniamo le variabili globali (usando i tuoi nomi corretti)
-                    window.memories = JSON.parse(data.data_stars || "[]");
-                    window.lines = JSON.parse(data.data_lines || "[]");
-                    window.constellations = JSON.parse(data.data_constellations || "[]");
-
-                    // 2. Aggiorniamo la memoria locale
-                    localStorage.setItem('galaxy_memories', JSON.stringify(window.memories));
-                    localStorage.setItem('galaxy_lines', JSON.stringify(window.lines));
-                    localStorage.setItem('galaxy_labels', JSON.stringify(window.constellations));
-
-                    // 3. Ridisegniamo tutto
-                    if (window.renderStars) window.renderStars();
-                    if (window.renderLines) window.renderLines();
-                    if (window.updateStats) window.updateStats();
-                    if (window.renderList) window.renderList();
-
-                    console.log("☁️ Universo completo scaricato!");
-
-                } else {
-                    // --- CASO 2: CLOUD VUOTO (PRIMO ACCESSO) ---
-                    console.log("Primo accesso: Nessun dato sul cloud.");
-
-                    // CONTROLLO FORZATO: Se ho dati locali, li salvo subito sul cloud!
-                    // Nota: Qui uso 'window.memories' perché è così che chiami le stelle nel tuo codice
-                    if (window.memories && window.memories.length > 0) {
-                        console.log("Trovati dati locali! Eseguo il PRIMO SALVATAGGIO forzato.");
-
-                        // Richiamo la tua funzione di salvataggio
-                        if (window.saveData) {
-                            window.saveData();
-                        } else {
-                            console.error("Errore: Funzione saveData non trovata!");
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error("Errore durante il caricamento dal cloud:", error);
-            }
-        };
-
-        // 5. CONTROLLO AUTOMATICO STATO UTENTE
-        onAuthStateChanged(auth, (user) => {
-            const btnLogin = document.getElementById('btnLogin');
-            const userInfo = document.getElementById('userInfo');
-            const userName = document.getElementById('userName');
-
-            if (user) {
-                // UTENTE LOGGATO
-                window.currentUser = user;
-                console.log("Utente connesso:", user.displayName);
-
-                // Aggiorna la grafica del menu
-                if (btnLogin) btnLogin.style.display = 'none';
-                if (userInfo) userInfo.style.display = 'block';
-                if (userName) userName.innerText = user.displayName;
-
-                // Carica i dati
-                window.loadFromCloud();
-            } else {
-                // UTENTE DISCONNESSO
-                window.currentUser = null;
-
-                // Ripristina grafica menu
-                if (btnLogin) btnLogin.style.display = 'inline-block';
-                if (userInfo) userInfo.style.display = 'none';
-            }
-        });
-
-    </script>
-
-    <div id="timelineWrapper">
-        <button id="btnTimeToggle" onclick="toggleTimelineMobile()">🕰️</button>
-
-        <div id="timelineContent">
-            <div id="timelineHeader"
-                style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 5px;">
-                <div id="timelineDateDisplay" style="font-weight: bold; text-shadow: 0 0 5px currentColor;">OGGI</div>
-
-                <button id="btnTimeZoom" onclick="toggleTimeZoom()"
-                    style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 15px; cursor: pointer; padding: 2px 8px; font-size: 12px; transition: all 0.3s;">
-                    🔍 ZOOM
+                    📅 Imposta promemoria giornaliero
                 </button>
             </div>
 
-            <input type="range" id="timeSlider" min="0" max="100" value="100" oninput="updateTimeTravel(this.value)">
+            <div style="margin-top: 0px; border-top: 1px solid #555; padding-top: 20px;">
+                <div class="menu-title" style="font-size: 18px; border:none;">Gestione Dati</div>
+                <button class="btn-backup" onclick="exportData()" style="background: #4CAF50;">💾 Salva Backup (File
+                    App)</button>
+                <button class="btn-backup" onclick="exportText()" style="background: #2196F3;">📄 Scarica come
+                    Testo</button>
+                <button class="btn-backup" onclick="document.getElementById('importFile').click()"
+                    style="background: #ff9800;">📂 Importa Backup</button>
+                <input type="file" id="importFile" style="display:none" onchange="importData(this)">
+            </div>
         </div>
-    </div>
 
-    <script src="app.js"></script>
-</body>
+        <div id="entryModal">
+            <h2 style="color:white">Come ti senti oggi?</h2>
+            <div style="position: relative; width: 90%; max-width: 500px; margin-bottom: 20px;">
+                <textarea id="journalInput" placeholder="Scrivi qui i tuoi pensieri..."
+                    style="width: 100%; height: 200px; padding: 15px; padding-right: 40px; box-sizing: border-box; margin-bottom: 0;"></textarea>
+
+                <span onclick="document.getElementById('fileInput').click()"
+                    style="position: absolute; bottom: 15px; right: 15px; cursor: pointer; font-size: 24px; opacity: 0.7; z-index: 10;"
+                    title="Allega una foto">
+                    📎
+                </span>
+            </div>
+
+            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="processImage(this)">
+
+            <div id="imagePreviewContainer" style="display:none; margin-bottom: 20px; text-align: center;">
+                <img id="previewImg" src=""
+                    style="max-width: 120px; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5); transform: rotate(-2deg); border-radius: 2px;">
+                <span onclick="removeImage()"
+                    style="cursor:pointer; color:#ff5e5e; margin-left:15px; font-size: 20px; vertical-align: middle;">✖
+                    Rimuovi foto</span>
+            </div>
+
+            <div style="margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                <label style="display: flex; align-items: center; color: #ccc; cursor: pointer; font-size: 14px;">
+                    <input type="checkbox" id="capsuleCheckbox" style="margin-right: 10px;"
+                        onchange="toggleCapsuleDate(this.checked)">
+                    Trasforma in Nebulosa del Tempo (Capsula) ⏳
+                </label>
+
+                <div id="capsuleDateContainer" style="display: none; margin-top: 10px; color: #ccc; font-size: 14px;">
+                    Apri il giorno:
+                    <input type="date" id="capsuleDateInput"
+                        style="background: rgba(0,0,0,0.3); border: 1px solid #555; color: white; padding: 5px; border-radius: 4px; font-family: inherit; margin-left: 10px;">
+                </div>
+            </div>
+
+            <div class="color-selector">
+                <div class="color-option" style="background:white; border: 2px solid white;"
+                    onclick="selectColor('white', this)"></div>
+                <div class="color-option" style="background:#ff5e5e" onclick="selectColor('red', this)"></div>
+                <div class="color-option" style="background:#5eaaff" onclick="selectColor('blue', this)"></div>
+                <div class="color-option" style="background:#ffea5e" onclick="selectColor('yellow', this)"></div>
+                <div class="color-option" style="background:#ffaa33" onclick="selectColor('orange', this)"></div>
+            </div>
+            <div><button class="modal-btn btn-cancel" onclick="closeWriter()">Annulla</button><button
+                    class="modal-btn btn-save" onclick="saveEntry()">Accendi Stella</button></div>
+        </div>
+
+        <div id="viewModal">
+            <h3 id="viewDate" style="margin-top:0; margin-bottom: 5px;"></h3>
+            <div id="viewColorInfo"></div>
+            <p id="viewText"></p>
+            <div
+                style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; border-top: 1px solid #444; padding-top: 15px;">
+                <button class="modal-btn" id="btnFav" onclick="toggleFavorite()"
+                    style="background:transparent; border:1px solid #666; color:white;">★ Preferito</button>
+
+                <button class="modal-btn" onclick="openEditMode()"
+                    style="background:transparent; border:1px solid #00e5ff; color:#00e5ff;">✏️ Modifica</button>
+
+                <button class="modal-btn" onclick="deleteMemory()"
+                    style="background:transparent; border:1px solid #ff5e5e; color:#ff5e5e;">🗑 Elimina</button>
+            </div>
+            <br><button class="modal-btn btn-cancel" onclick="closeViewer()">Chiudi</button>
+        </div>
+
+        <div id="tutorialModal">
+            <div class="tutorial-card">
+                <span id="tutIcon" style="font-size:40px; display:block; margin-bottom:15px;"></span>
+                <div id="tutTitle" style="font-size:22px; color:#ffd700; margin-bottom:10px;"></div>
+                <div id="tutText" style="font-size:16px; color:#ccc; margin-bottom:20px;"></div>
+                <div class="tut-buttons"><button class="btn-tut" onclick="prevStep()"
+                        id="btnPrev">Indietro</button><button class="btn-tut primary" onclick="nextStep()"
+                        id="btnNext">Avanti</button></div>
+            </div>
+        </div>
+
+        <div id="statsModal"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:400; flex-direction:column; align-items:center; overflow-y:auto;">
+            <div style="width:90%; max-width:500px; margin-top:50px; padding-bottom:50px;">
+                <h2 style="text-align:center; color:white;">Analisi del Cielo</h2>
+
+                <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+                    <button class="modal-btn" onclick="switchStatTab('time')" id="btnTabTime"
+                        style="background:#444; border:1px solid #666;">⏳ Tempo</button>
+                    <button class="modal-btn" onclick="switchStatTab('const')" id="btnTabConst"
+                        style="background:#444; border:1px solid #666;">✨ Costellazioni</button>
+                </div>
+
+                <div id="statTabTime">
+                    <div style="display:flex; justify-content:center; gap:5px; margin-bottom:20px;">
+                        <button class="btn-small" onclick="renderTimeStats('week')">7 Giorni</button>
+                        <button class="btn-small" onclick="renderTimeStats('month')">Mese</button>
+                        <button class="btn-small" onclick="renderTimeStats('year')">Anno</button>
+                        <button class="btn-small" onclick="renderTimeStats('all')">Sempre</button>
+                    </div>
+                    <h3 id="statTimeTitle" style="text-align:center; color:#ccc;">Ultimi 7 Giorni</h3>
+
+                    <div class="pie-container">
+                        <div id="timePieChart" class="pie-chart"></div>
+                    </div>
+
+                    <div id="timeLegend" class="stat-legend"></div>
+                </div>
+
+                <div id="statTabConst" style="display:none;">
+                    <h3 style="text-align:center; color:#ccc;">Analisi Costellazioni</h3>
+                    <p style="text-align:center; font-size:12px; color:#888; margin-bottom:20px;">
+                        Dettaglio mood per ogni costellazione creata.
+                    </p>
+
+                    <div id="constListStats" style="display:flex; flex-direction:column; gap:20px;"></div>
+                </div>
+
+                <button class="modal-btn btn-cancel"
+                    onclick="document.getElementById('statsModal').style.display='none'"
+                    style="width:100%; margin-top:30px;">Chiudi</button>
+            </div>
+        </div>
+
+
+        <script type="module">
+            // 1. Importiamo Firebase usando gli indirizzi WEB
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+            import { getFirestore, doc, setDoc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+            import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+            // 🚀 1. NUOVO IMPORT PER LO STORAGE
+            import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+            // 2. LA TUA CONFIGURAZIONE
+            const firebaseConfig = {
+                apiKey: "AIzaSyCnq1n_8bO4ZquP8dzpzaILEs2DKqyWg0o",
+                authDomain: "diario-stellare.firebaseapp.com",
+                projectId: "diario-stellare",
+                storageBucket: "diario-stellare.firebasestorage.app",
+                messagingSenderId: "81958146968",
+                appId: "1:81958146968:web:ab066dab212cbea35f91ed"
+            };
+
+            // 3. Avviamo i motori
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            enableIndexedDbPersistence(db).catch((err) => {
+                console.warn("Errore persistenza offline:", err.code);
+            });
+            const auth = getAuth(app);
+            const provider = new GoogleAuthProvider();
+
+            // 🚀 2. INIZIALIZZIAMO LO STORAGE E LO RENDIAMO GLOBALE
+            const storage = getStorage(app);
+            window.storage = storage;
+            window.storageRef = ref;
+            window.uploadBytes = uploadBytes;
+            window.getDownloadURL = getDownloadURL;
+
+            // 4. FUNZIONI GLOBALI (Il ponte tra Firebase e il tuo Diario)
+
+            // --- LOGIN ---
+            window.loginGoogle = async () => {
+                try {
+                    const result = await signInWithPopup(auth, provider);
+                    const user = result.user;
+                    console.log("Login effettuato:", user.displayName);
+                    alert("Benvenuto " + user.displayName + "! Carico il tuo universo...");
+                    window.loadFromCloud();
+                } catch (error) {
+                    console.error("Errore Login:", error);
+                    alert("Errore login: " + error.message);
+                }
+            };
+
+            // --- LOGOUT ---
+            window.logoutGoogle = () => {
+                signOut(auth).then(() => {
+                    alert("Disconnesso. Ora stai usando la memoria locale.");
+                    location.reload();
+                });
+            };
+
+            // --- SALVA TUTTO (Stelle + Linee + Costellazioni) ---
+            window.saveToCloud = async (m, l, c) => {
+                const user = auth.currentUser;
+                if (!user) return;
+
+                // SE sono in modalità DEV, uso una collezione diversa ("users_test")
+                const collectionName = isDev ? "users_test" : "users";
+
+                try {
+                    // Salviamo un oggetto unico che contiene tutto
+                    await setDoc(doc(db, collectionName, user.uid), {
+                        data_stars: JSON.stringify(m),
+                        data_lines: JSON.stringify(l),
+                        data_constellations: JSON.stringify(c),
+                        last_update: new Date().toISOString() // Utile per sapere quando è stato salvato
+                    });
+                    console.log(`☁️ Salvataggio su ${collectionName} completo!`);
+                } catch (e) {
+                    console.error("Errore salvataggio cloud:", e);
+                }
+            };
+
+            // --- CARICA TUTTO ---
+            window.loadFromCloud = async () => {
+                const user = auth.currentUser;
+                if (!user) return;
+
+                // SE sono in modalità DEV, leggo dalla collezione di test
+                const collectionName = isDev ? "users_test" : "users";
+
+                const docRef = doc(db, collectionName, user.uid);
+
+                try {
+                    const docSnap = await getDoc(docRef);
+
+                    if (docSnap.exists()) {
+                        // --- CASO 1: UTENTE CON DATI NEL CLOUD (SCARICA) ---
+                        const data = docSnap.data();
+
+                        // 1. Aggiorniamo le variabili globali
+                        window.memories = JSON.parse(data.data_stars || "[]");
+                        window.lines = JSON.parse(data.data_lines || "[]");
+                        window.constellations = JSON.parse(data.data_constellations || "[]");
+
+                        // 2. Aggiorniamo la memoria locale
+                        localStorage.setItem('galaxy_memories', JSON.stringify(window.memories));
+                        localStorage.setItem('galaxy_lines', JSON.stringify(window.lines));
+                        localStorage.setItem('galaxy_labels', JSON.stringify(window.constellations));
+
+                        // 3. Ridisegniamo tutto
+                        if (window.renderStars) window.renderStars();
+                        if (window.renderLines) window.renderLines();
+                        if (window.updateStats) window.updateStats();
+                        if (window.renderList) window.renderList();
+
+                        console.log("☁️ Universo completo scaricato!");
+
+                    } else {
+                        // --- CASO 2: CLOUD VUOTO (PRIMO ACCESSO) ---
+                        console.log("Primo accesso: Nessun dato sul cloud.");
+
+                        // CONTROLLO FORZATO: Se ho dati locali, li salvo subito sul cloud!
+                        if (window.memories && window.memories.length > 0) {
+                            console.log("Trovati dati locali! Eseguo il PRIMO SALVATAGGIO forzato.");
+
+                            if (window.saveData) {
+                                window.saveData();
+                            } else {
+                                console.error("Errore: Funzione saveData non trovata!");
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error("Errore durante il caricamento dal cloud:", error);
+                }
+            };
+
+            // 5. CONTROLLO AUTOMATICO STATO UTENTE
+            onAuthStateChanged(auth, (user) => {
+                const btnLogin = document.getElementById('btnLogin');
+                const userInfo = document.getElementById('userInfo');
+                const userName = document.getElementById('userName');
+
+                if (user) {
+                    // UTENTE LOGGATO
+                    window.currentUser = user;
+                    console.log("Utente connesso:", user.displayName);
+
+                    // Aggiorna la grafica del menu
+                    if (btnLogin) btnLogin.style.display = 'none';
+                    if (userInfo) userInfo.style.display = 'block';
+                    if (userName) userName.innerText = user.displayName;
+
+                    // Carica i dati
+                    window.loadFromCloud();
+                } else {
+                    // UTENTE DISCONNESSO
+                    window.currentUser = null;
+
+                    // Ripristina grafica menu
+                    if (btnLogin) btnLogin.style.display = 'inline-block';
+                    if (userInfo) userInfo.style.display = 'none';
+                }
+            });
+
+        </script>
+
+        <div id="timelineWrapper">
+            <button id="btnTimeToggle" onclick="toggleTimelineMobile()">🕰️</button>
+
+            <div id="timelineContent">
+                <div id="timelineHeader"
+                    style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 5px;">
+                    <div id="timelineDateDisplay" style="font-weight: bold; text-shadow: 0 0 5px currentColor;">OGGI
+                    </div>
+
+                    <button id="btnTimeZoom" onclick="toggleTimeZoom()"
+                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 15px; cursor: pointer; padding: 2px 8px; font-size: 12px; transition: all 0.3s;">
+                        🔍 ZOOM
+                    </button>
+                </div>
+
+                <input type="range" id="timeSlider" min="0" max="100" value="100"
+                    oninput="updateTimeTravel(this.value)">
+            </div>
+        </div>
+
+        <script src="app.js"></script>
+    </body>
 
 
 </html>

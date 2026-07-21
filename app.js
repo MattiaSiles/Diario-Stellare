@@ -195,26 +195,74 @@ function getRotationAngle(element) {
     return Math.atan2(parseFloat(values[1]), parseFloat(values[0]));
 }
 
-function processImage(input) {
+// Aggiungiamo "async" per poter usare Firebase
+async function processImage(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
         const reader = new FileReader();
+        
+        // Troviamo il bottone usando lo stesso selettore che usi in closeWriter()!
+        const saveButton = document.querySelector('#entryModal .btn-save');
+        
         reader.onload = function (e) {
             const img = new Image();
             img.src = e.target.result;
+            
             img.onload = function () {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                // Ridimensiona a max 300px per non appesantire il backup
+                
+                // Manteniamo la tua ottima compressione a 300px
                 const maxWidth = 300;
                 const scaleFactor = maxWidth / img.width;
                 canvas.width = maxWidth;
                 canvas.height = img.height * scaleFactor;
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                tempImageData = canvas.toDataURL('image/jpeg', 0.7);
 
-                document.getElementById('previewImg').src = tempImageData;
+                // Mostra l'anteprima visiva all'istante
+                document.getElementById('previewImg').src = canvas.toDataURL('image/jpeg', 0.7);
                 document.getElementById('imagePreviewContainer').style.display = 'block';
+
+                // SE NON C'È NESSUN UTENTE LOGGATO (Uso Locale)
+                if (!window.currentUser) {
+                    tempImageData = canvas.toDataURL('image/jpeg', 0.7); 
+                    console.log("💾 Uso locale: Foto salvata come stringa Base64.");
+                    return; // Ci fermiamo qui
+                }
+
+                // --- DA QUI IN POI: SE L'UTENTE È LOGGATO (Uso Cloud) ---
+                canvas.toBlob(async function(blob) {
+                    if (blob) {
+                        const fileForFirebase = new File([blob], file.name, { type: 'image/jpeg' });
+                        
+                        console.log("☁️ Caricamento su Firebase in corso...");
+                        
+                        // BLOCCA IL PULSANTE SALVA MENTRE CARICA
+                        if(saveButton) {
+                            saveButton.disabled = true;
+                            saveButton.innerText = "Caricamento foto..."; 
+                            saveButton.style.opacity = "0.5"; // Lo rendiamo un po' trasparente per far capire che è bloccato
+                        }
+                        
+                        const imageUrl = await uploadImageToStorage(fileForFirebase);
+                        
+                        if (imageUrl) {
+                            tempImageData = imageUrl; // Salva il Link leggerissimo!
+                            console.log("✅ Foto sul Cloud pronta!");
+                        } else {
+                            // Se fallisce (es. file > 5MB), annulliamo l'immagine
+                            tempImageData = null; 
+                        }
+                        
+                        // SBLOCCA IL PULSANTE SALVA
+                        if(saveButton) {
+                            saveButton.disabled = false;
+                            saveButton.style.opacity = "1";
+                            // Ripristiniamo il testo corretto in base a cosa stavi facendo
+                            saveButton.innerText = isEditingExisting ? "Salva Modifiche" : "Accendi Stella"; 
+                        }
+                    }
+                }, 'image/jpeg', 0.7);
             };
         };
         reader.readAsDataURL(file);
@@ -1781,4 +1829,44 @@ if ('serviceWorker' in navigator) {
             .then(reg => console.log('🌌 Maggiordomo Offline (SW) attivato!', reg.scope))
             .catch(err => console.log('❌ Errore Service Worker:', err));
     });
+}
+
+// ==========================================
+// FUNZIONE PER CARICARE IMMAGINI SU STORAGE (Firebase v10)
+// ==========================================
+async function uploadImageToStorage(imageFile) {
+    // 1. Controlli di sicurezza
+    if (!window.currentUser) {
+        alert("Devi aver fatto l'accesso per caricare un'immagine.");
+        return null;
+    }
+    
+    if (imageFile.size > 5 * 1024 * 1024) {
+        alert("L'immagine è troppo grande! Massimo 5MB.");
+        return null;
+    }
+
+    try {
+        const userId = window.currentUser.uid;
+        // Creiamo un nome unico (es. 167890123_foto.jpg)
+        const uniqueFileName = Date.now() + '_' + imageFile.name; 
+        
+        // 2. Puntiamo alla cartella giusta nello Storage
+        const fileRef = window.storageRef(window.storage, `users/${userId}/${uniqueFileName}`);
+        
+        // 3. Eseguiamo il caricamento
+        console.log("☁️ Caricamento immagine in corso...");
+        const snapshot = await window.uploadBytes(fileRef, imageFile);
+        
+        // 4. Chiediamo a Firebase il link pubblico generato
+        const downloadURL = await window.getDownloadURL(snapshot.ref);
+        console.log("✅ Immagine caricata! Link:", downloadURL);
+        
+        return downloadURL; // Questo è il link che salveremo nella stella!
+        
+    } catch (error) {
+        console.error("Errore nel caricamento dell'immagine:", error);
+        alert("Si è verificato un errore nel caricamento dell'immagine.");
+        return null;
+    }
 }
