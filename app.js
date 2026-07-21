@@ -195,14 +195,20 @@ function getRotationAngle(element) {
     return Math.atan2(parseFloat(values[1]), parseFloat(values[0]));
 }
 
-// Aggiungiamo "async" per poter usare Firebase
+// Aggiungiamo "async" per poter usare Firebase1
 async function processImage(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
-        const reader = new FileReader();
         
-        // Troviamo il bottone usando lo stesso selettore che usi in closeWriter()!
+        // 1. BLOCCAGGIO IMMEDIATO DEL PULSANTE
         const saveButton = document.querySelector('#entryModal .btn-save');
+        if(saveButton) {
+            saveButton.disabled = true;
+            saveButton.innerText = "Elaborazione foto..."; 
+            saveButton.style.opacity = "0.5"; // Opacità per far capire che sta lavorando
+        }
+
+        const reader = new FileReader();
         
         reader.onload = function (e) {
             const img = new Image();
@@ -212,54 +218,58 @@ async function processImage(input) {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
-                // Manteniamo la tua ottima compressione a 300px
+                // Compressione a 300px
                 const maxWidth = 300;
                 const scaleFactor = maxWidth / img.width;
                 canvas.width = maxWidth;
                 canvas.height = img.height * scaleFactor;
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                // Mostra l'anteprima visiva all'istante
+                // Mostra anteprima
                 document.getElementById('previewImg').src = canvas.toDataURL('image/jpeg', 0.7);
                 document.getElementById('imagePreviewContainer').style.display = 'block';
 
-                // SE NON C'È NESSUN UTENTE LOGGATO (Uso Locale)
+                // 2. CONTROLLO SICURO DELLO STATO UTENTE
                 if (!window.currentUser) {
+                    // L'utente non è connesso, salviamo la stringa Base64
                     tempImageData = canvas.toDataURL('image/jpeg', 0.7); 
-                    console.log("💾 Uso locale: Foto salvata come stringa Base64.");
-                    return; // Ci fermiamo qui
+                    console.log("💾 Uso locale: Nessun utente loggato. Foto salvata come stringa Base64.");
+                    
+                    // Sblocchiamo il pulsante per permettere il salvataggio locale
+                    if(saveButton) {
+                        saveButton.disabled = false;
+                        saveButton.style.opacity = "1";
+                        saveButton.innerText = isEditingExisting ? "Aggiorna Stella" : "Accendi Stella"; 
+                    }
+                    return; 
                 }
 
-                // --- DA QUI IN POI: SE L'UTENTE È LOGGATO (Uso Cloud) ---
+                // 3. USO CLOUD: L'utente è loggato in Firebase
                 canvas.toBlob(async function(blob) {
                     if (blob) {
                         const fileForFirebase = new File([blob], file.name, { type: 'image/jpeg' });
                         
                         console.log("☁️ Caricamento su Firebase in corso...");
                         
-                        // BLOCCA IL PULSANTE SALVA MENTRE CARICA
-                        if(saveButton) {
-                            saveButton.disabled = true;
-                            saveButton.innerText = "Caricamento foto..."; 
-                            saveButton.style.opacity = "0.5"; // Lo rendiamo un po' trasparente per far capire che è bloccato
-                        }
+                        // Aggiorniamo il testo del pulsante per chiarezza
+                        if(saveButton) saveButton.innerText = "Caricamento sul Cloud..."; 
                         
+                        // Avvia il motore dello Storage
                         const imageUrl = await uploadImageToStorage(fileForFirebase);
                         
                         if (imageUrl) {
-                            tempImageData = imageUrl; // Salva il Link leggerissimo!
-                            console.log("✅ Foto sul Cloud pronta!");
+                            tempImageData = imageUrl; 
+                            console.log("✅ Foto sul Cloud pronta! Link salvato.");
                         } else {
-                            // Se fallisce (es. file > 5MB), annulliamo l'immagine
                             tempImageData = null; 
+                            console.log("❌ Errore durante il caricamento cloud.");
                         }
                         
-                        // SBLOCCA IL PULSANTE SALVA
+                        // 4. SBLOCCO FINALE E SICURO DEL PULSANTE
                         if(saveButton) {
                             saveButton.disabled = false;
                             saveButton.style.opacity = "1";
-                            // Ripristiniamo il testo corretto in base a cosa stavi facendo
-                            saveButton.innerText = isEditingExisting ? "Salva Modifiche" : "Accendi Stella"; 
+                            saveButton.innerText = isEditingExisting ? "Aggiorna Stella" : "Accendi Stella"; 
                         }
                     }
                 }, 'image/jpeg', 0.7);
