@@ -19,8 +19,8 @@
         <div id="maintenanceScreen"
             style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #010105; z-index: 99998; color: white; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: sans-serif;">
             <span id="wrenchIcon" style="font-size: 60px; margin-bottom: 20px; cursor: pointer;">🛠️</span>
-            <h1 style="color: #00e5ff;">Lavori in corso</h1>
-            <p style="color: #aaa; max-width: 80%; line-height: 1.5;">Il Diario Stellare è momentaneamente in
+            <h1 style="color: #00e5ff;" data-i18n="maintenance_title">Lavori in corso</h1>
+            <p style="color: #aaa; max-width: 80%; line-height: 1.5;" data-i18n="maintenance_text">Il Diario Stellare è momentaneamente in
                 manutenzione per un aggiornamento dei sistemi.<br><br>Torna tra poco!</p>
         </div>
 
@@ -51,7 +51,7 @@
             </div>
         </div>
 
-        <div id="offlineBadge">
+        <div id="offlineBadge" data-i18n="offline_badge">
             🛰️ Segnale perso (Salvataggio locale)
         </div>
 
@@ -76,7 +76,7 @@
                             <div id="ringBack" class="ring-texture"></div>
                         </div>
 
-                        <div class="black-hole-void" onclick="openStats()" title="Analizza l'Anima della Galassia">
+                        <div class="black-hole-void" onclick="openStats()" title="Analizza l'Anima della Galassia" data-i18n-title="tooltip_blackhole">
                         </div>
 
                         <div class="ring-container front" style="z-index: 3;">
@@ -92,10 +92,10 @@
             </div>
         </div>
 
-        <button class="btn-menu" onclick="toggleMenu()">☰ Ricordi</button>
+        <button class="btn-menu" onclick="toggleMenu()" data-i18n="menu_button">☰ Ricordi</button>
         <button class="btn-music" onclick="toggleMusic()">🔇</button>
         <button id="btnRotation" onclick="toggleRotation()" class="btn-music" style="top: 80px;"
-            title="Blocca/Sblocca Rotazione">
+            title="Blocca/Sblocca Rotazione" data-i18n-title="tooltip_rotation">
             ⏸️
         </button>
 
@@ -104,26 +104,26 @@
             <button class="btn-zoom" onclick="zoomOut()">-</button>
         </div>
 
-        <button class="btn-edit" onclick="toggleEditMode()" title="Modalità Modifica">✏️</button>
+        <button class="btn-edit" onclick="toggleEditMode()" title="Modalità Modifica" data-i18n-title="tooltip_edit_mode">✏️</button>
 
         <div id="constellationPanel">
-            <div id="instructionText">Modo: <b>Sposta/Collega</b><br><small>Clicca 2 stelle per unire.</small></div>
+            <div id="instructionText" data-i18n="const_mode_title">Modo: <b>Sposta/Collega</b><br><small>Clicca 2 stelle per unire.</small></div>
 
-            <button class="btn-small cyan" id="btnGroupMode" onclick="toggleGroupMode()">✨ Crea Nuova
+            <button class="btn-small cyan" id="btnGroupMode" onclick="toggleGroupMode()" data-i18n="const_btn_new">✨ Crea Nuova
                 Costellazione</button>
 
             <div id="groupControls" style="display:none;">
                 <div id="groupStatus"
-                    style="font-size:12px; color:#00e5ff; margin-bottom:8px; border-bottom:1px solid #444; padding-bottom:5px;">
+                    style="font-size:12px; color:#00e5ff; margin-bottom:8px; border-bottom:1px solid #444; padding-bottom:5px;" data-i18n="const_status_select">
                     Seleziona stelle...
                 </div>
                 <button class="btn-small" onclick="saveConstellationName()"
-                    style="background:#4CAF50; border-color:#4CAF50;">💾 Salva Gruppo</button>
+                    style="background:#4CAF50; border-color:#4CAF50;" data-i18n="const_btn_save">💾 Salva Gruppo</button>
                 <button class="btn-small red" id="btnDeleteGroup" onclick="deleteCurrentGroup()"
-                    style="display:none;">🗑
+                    style="display:none;" data-i18n="const_btn_delete">🗑
                     Elimina Gruppo</button>
                 <button class="btn-small" onclick="cancelGroupMode()"
-                    style="background:#f44336; border-color:#f44336;">Annulla</button>
+                    style="background:#f44336; border-color:#f44336;" data-i18n="const_btn_cancel">Annulla</button>
             </div>
         </div>
 
@@ -137,7 +137,7 @@
 
                 <span style="font-size:18px; margin-right:10px;">🔭</span>
 
-                <input type="text" id="searchInput" placeholder="Cerca un ricordo..." onkeyup="performSearch()"
+                <input type="text" id="searchInput" placeholder="Cerca un ricordo..." data-i18n="search_placeholder" onkeyup="performSearch()"
                     style="background:transparent; border:none; color:white; font-family:'Courier New', monospace; outline:none; width:150px;">
 
                 <span id="clearSearch" onclick="resetSearch()"
@@ -161,8 +161,8 @@
 
             <div id="userSection" style="
         text-align: center; 
-        margin-bottom: 5px;   /* RIDOTTO (era 20px) per avvicinare ai preferiti */
-        padding-bottom: 10px; /* RIDOTTO (era 15px) per avvicinare la linea al bottone */
+        margin-bottom: 5px;   
+        padding-bottom: 10px; 
         border-bottom: 1px solid #333;">
 
                 <button id="btnLogin" onclick="loginGoogle()" style="
@@ -175,15 +175,14 @@
             cursor: pointer; 
             font-size: 14px;
             box-shadow: 0 0 10px rgba(255,255,255,0.2);
-            transition: transform 0.2s;">
+            transition: transform 0.2s;" data-i18n="menu_login">
                     🔑 Accedi con Google
                 </button>
 
                 <div id="userInfo" style="display: none; color: #ccc;">
-                    <div style="font-size: 12px; color: #888; margin-bottom: 5px;">BENTORNATO</div>
-                    <div id="userName" style="font-size: 16px; color: white; font-weight: bold; margin-bottom: 5px;">
-                        Viaggiatore</div>
-                    <div style="font-size: 11px; color: #4CAF50; margin-bottom: 10px;">● Sincronizzato col Cloud</div>
+                    <div style="font-size: 12px; color: #888; margin-bottom: 5px;" data-i18n="menu_welcome_back">BENTORNATO</div>
+                    <div id="userName" style="font-size: 16px; color: white; font-weight: bold; margin-bottom: 5px;" data-i18n="menu_default_user">Viaggiatore</div>
+                    <div style="font-size: 11px; color: #4CAF50; margin-bottom: 10px;" data-i18n="menu_sync_status">● Sincronizzato col Cloud</div>
 
                     <button onclick="logoutGoogle()" style="
                 background: transparent; 
@@ -192,16 +191,16 @@
                 padding: 5px 12px; 
                 border-radius: 10px; 
                 cursor: pointer; 
-                font-size: 11px;">
+                font-size: 11px;" data-i18n="menu_logout">
                         Disconnetti
                     </button>
                 </div>
             </div>
 
-            <div class="menu-title" style="color: #ffd700;">★ Preferiti</div>
+            <div class="menu-title" style="color: #ffd700;" data-i18n="menu_favorites_title">★ Preferiti</div>
             <div id="favList"></div>
 
-            <div class="menu-title">Tutti i Ricordi</div>
+            <div class="menu-title" data-i18n="menu_all_memories_title">Tutti i Ricordi</div>
             <div id="memoryList"></div>
 
             <div style="
@@ -224,32 +223,38 @@
             align-items: center; 
             justify-content: center; 
             gap: 10px;
-            transition: all 0.3s ease;">
+            transition: all 0.3s ease;" data-i18n="menu_reminder">
                     📅 Imposta promemoria giornaliero
                 </button>
             </div>
 
             <div style="margin-top: 0px; border-top: 1px solid #555; padding-top: 20px;">
-                <div class="menu-title" style="font-size: 18px; border:none;">Gestione Dati</div>
-                <button class="btn-backup" onclick="exportData()" style="background: #4CAF50;">💾 Salva Backup (File
+                <div class="menu-title" style="font-size: 18px; border:none;" data-i18n="menu_data_management">Gestione Dati</div>
+                <div style="margin-bottom: 15px; text-align: center;">
+                    <select id="langSelector" onchange="switchLanguage(this.value)" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid #555; padding: 5px 10px; border-radius: 5px; font-family: inherit;">
+                        <option value="it">🇮🇹 Italiano</option>
+                        <option value="en">🇬🇧 English</option>
+                    </select>
+                </div>
+                <button class="btn-backup" onclick="exportData()" style="background: #4CAF50;" data-i18n="menu_backup_app">💾 Salva Backup (File
                     App)</button>
-                <button class="btn-backup" onclick="exportText()" style="background: #2196F3;">📄 Scarica come
+                <button class="btn-backup" onclick="exportText()" style="background: #2196F3;" data-i18n="menu_backup_text">📄 Scarica come
                     Testo</button>
                 <button class="btn-backup" onclick="document.getElementById('importFile').click()"
-                    style="background: #ff9800;">📂 Importa Backup</button>
+                    style="background: #ff9800;" data-i18n="menu_import">📂 Importa Backup</button>
                 <input type="file" id="importFile" style="display:none" onchange="importData(this)">
             </div>
         </div>
 
         <div id="entryModal">
-            <h2 style="color:white">Come ti senti oggi?</h2>
+            <h2 style="color:white" data-i18n="writer_title">Come ti senti oggi?</h2>
             <div style="position: relative; width: 90%; max-width: 500px; margin-bottom: 20px;">
-                <textarea id="journalInput" placeholder="Scrivi qui i tuoi pensieri..."
+                <textarea id="journalInput" placeholder="Scrivi qui i tuoi pensieri..." data-i18n="writer_placeholder"
                     style="width: 100%; height: 200px; padding: 15px; padding-right: 40px; box-sizing: border-box; margin-bottom: 0;"></textarea>
 
                 <span onclick="document.getElementById('fileInput').click()"
                     style="position: absolute; bottom: 15px; right: 15px; cursor: pointer; font-size: 24px; opacity: 0.7; z-index: 10;"
-                    title="Allega una foto">
+                    title="Allega una foto" data-i18n-title="writer_tooltip_photo">
                     📎
                 </span>
             </div>
@@ -260,7 +265,7 @@
                 <img id="previewImg" src=""
                     style="max-width: 120px; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5); transform: rotate(-2deg); border-radius: 2px;">
                 <span onclick="removeImage()"
-                    style="cursor:pointer; color:#ff5e5e; margin-left:15px; font-size: 20px; vertical-align: middle;">✖
+                    style="cursor:pointer; color:#ff5e5e; margin-left:15px; font-size: 20px; vertical-align: middle;" data-i18n="writer_remove_photo">✖
                     Rimuovi foto</span>
             </div>
 
@@ -268,11 +273,11 @@
                 <label style="display: flex; align-items: center; color: #ccc; cursor: pointer; font-size: 14px;">
                     <input type="checkbox" id="capsuleCheckbox" style="margin-right: 10px;"
                         onchange="toggleCapsuleDate(this.checked)">
-                    Trasforma in Nebulosa del Tempo (Capsula) ⏳
+                        <span data-i18n="writer_capsule_check">Trasforma in Nebulosa del Tempo (Capsula) ⏳</span>
                 </label>
 
                 <div id="capsuleDateContainer" style="display: none; margin-top: 10px; color: #ccc; font-size: 14px;">
-                    Apri il giorno:
+                    <span data-i18n="writer_capsule_date">Apri il giorno:</span>
                     <input type="date" id="capsuleDateInput"
                         style="background: rgba(0,0,0,0.3); border: 1px solid #555; color: white; padding: 5px; border-radius: 4px; font-family: inherit; margin-left: 10px;">
                 </div>
@@ -286,8 +291,8 @@
                 <div class="color-option" style="background:#ffea5e" onclick="selectColor('yellow', this)"></div>
                 <div class="color-option" style="background:#ffaa33" onclick="selectColor('orange', this)"></div>
             </div>
-            <div><button class="modal-btn btn-cancel" onclick="closeWriter()">Annulla</button><button
-                    class="modal-btn btn-save" onclick="saveEntry()">Accendi Stella</button></div>
+            <div><button class="modal-btn btn-cancel" onclick="closeWriter()" data-i18n="writer_btn_cancel">Annulla</button><button
+                    class="modal-btn btn-save" onclick="saveEntry()" data-i18n="writer_btn_save">Accendi la Stella</button></div>
         </div>
 
         <div id="viewModal">
@@ -297,15 +302,27 @@
             <div
                 style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; border-top: 1px solid #444; padding-top: 15px;">
                 <button class="modal-btn" id="btnFav" onclick="toggleFavorite()"
-                    style="background:transparent; border:1px solid #666; color:white;">★ Preferito</button>
+                    style="background:transparent; border:1px solid #666; color:white;" data-i18n="viewer_btn_fav">★ Preferito</button>
 
                 <button class="modal-btn" onclick="openEditMode()"
-                    style="background:transparent; border:1px solid #00e5ff; color:#00e5ff;">✏️ Modifica</button>
+                    style="background:transparent; border:1px solid #00e5ff; color:#00e5ff;" data-i18n="viewer_btn_edit">✏️ Modifica</button>
 
                 <button class="modal-btn" onclick="deleteMemory()"
-                    style="background:transparent; border:1px solid #ff5e5e; color:#ff5e5e;">🗑 Elimina</button>
+                    style="background:transparent; border:1px solid #ff5e5e; color:#ff5e5e;" data-i18n="viewer_btn_delete">🗑 Elimina</button>
             </div>
-            <br><button class="modal-btn btn-cancel" onclick="closeViewer()">Chiudi</button>
+            <br><button class="modal-btn btn-cancel" onclick="closeViewer()" data-i18n="viewer_btn_close">Chiudi</button>
+        </div>
+
+        <!-- MODALE SCELTA LINGUA PRIMO AVVIO -->
+        <div id="langSelectionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:401; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+            <h2 style="color:white; margin-bottom: 30px; font-family: sans-serif;">
+                Scegli la tua lingua<br>
+                <span style="font-size:16px; color:#aaa; font-weight:normal;">Choose your language</span>
+            </h2>
+            <div style="display:flex; gap:20px;">
+                <button onclick="setInitialLanguage('it')" style="background:transparent; border:2px solid #00e5ff; color:#00e5ff; padding:15px 30px; border-radius:10px; font-size:18px; cursor:pointer; font-weight:bold; transition:all 0.3s;">🇮🇹 Italiano</button>
+                <button onclick="setInitialLanguage('en')" style="background:transparent; border:2px solid #ffd700; color:#ffd700; padding:15px 30px; border-radius:10px; font-size:18px; cursor:pointer; font-weight:bold; transition:all 0.3s;">🇬🇧 English</button>
+            </div>
         </div>
 
         <div id="tutorialModal">
@@ -314,31 +331,31 @@
                 <div id="tutTitle" style="font-size:22px; color:#ffd700; margin-bottom:10px;"></div>
                 <div id="tutText" style="font-size:16px; color:#ccc; margin-bottom:20px;"></div>
                 <div class="tut-buttons"><button class="btn-tut" onclick="prevStep()"
-                        id="btnPrev">Indietro</button><button class="btn-tut primary" onclick="nextStep()"
-                        id="btnNext">Avanti</button></div>
+                        id="btnPrev" data-i18n="tutorial_btn_prev">Indietro</button><button class="btn-tut primary" onclick="nextStep()"
+                        id="btnNext" data-i18n="tutorial_btn_next">Avanti</button></div>
             </div>
         </div>
 
         <div id="statsModal"
             style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:400; flex-direction:column; align-items:center; overflow-y:auto;">
             <div style="width:90%; max-width:500px; margin-top:50px; padding-bottom:50px;">
-                <h2 style="text-align:center; color:white;">Analisi del Cielo</h2>
+                <h2 style="text-align:center; color:white;" data-i18n="stats_title">Analisi del Cielo</h2>
 
                 <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
                     <button class="modal-btn" onclick="switchStatTab('time')" id="btnTabTime"
-                        style="background:#444; border:1px solid #666;">⏳ Tempo</button>
+                        style="background:#444; border:1px solid #666;" data-i18n="stats_tab_time">⏳ Tempo</button>
                     <button class="modal-btn" onclick="switchStatTab('const')" id="btnTabConst"
-                        style="background:#444; border:1px solid #666;">✨ Costellazioni</button>
+                        style="background:#444; border:1px solid #666;" data-i18n="stats_tab_const">✨ Costellazioni</button>
                 </div>
 
                 <div id="statTabTime">
                     <div style="display:flex; justify-content:center; gap:5px; margin-bottom:20px;">
-                        <button class="btn-small" onclick="renderTimeStats('week')">7 Giorni</button>
-                        <button class="btn-small" onclick="renderTimeStats('month')">Mese</button>
-                        <button class="btn-small" onclick="renderTimeStats('year')">Anno</button>
-                        <button class="btn-small" onclick="renderTimeStats('all')">Sempre</button>
+                        <button class="btn-small" onclick="renderTimeStats('week')" data-i18n="stats_filter_7days">7 Giorni</button>
+                        <button class="btn-small" onclick="renderTimeStats('month')" data-i18n="stats_filter_month">Mese</button>
+                        <button class="btn-small" onclick="renderTimeStats('year')" data-i18n="stats_filter_year">Anno</button>
+                        <button class="btn-small" onclick="renderTimeStats('all')" data-i18n="stats_filter_always">Sempre</button>
                     </div>
-                    <h3 id="statTimeTitle" style="text-align:center; color:#ccc;">Ultimi 7 Giorni</h3>
+                    <h3 id="statTimeTitle" style="text-align:center; color:#ccc;" data-i18n="stats_period_week">Ultimi 7 Giorni</h3>
 
                     <div class="pie-container">
                         <div id="timePieChart" class="pie-chart"></div>
@@ -348,8 +365,8 @@
                 </div>
 
                 <div id="statTabConst" style="display:none;">
-                    <h3 style="text-align:center; color:#ccc;">Analisi Costellazioni</h3>
-                    <p style="text-align:center; font-size:12px; color:#888; margin-bottom:20px;">
+                    <h3 style="text-align:center; color:#ccc;" data-i18n="stats_const_subtitle">Analisi Costellazioni</h3>
+                    <p style="text-align:center; font-size:12px; color:#888; margin-bottom:20px;" data-i18n="stats_const_desc">
                         Dettaglio mood per ogni costellazione creata.
                     </p>
 
@@ -358,7 +375,7 @@
 
                 <button class="modal-btn btn-cancel"
                     onclick="document.getElementById('statsModal').style.display='none'"
-                    style="width:100%; margin-top:30px;">Chiudi</button>
+                    style="width:100%; margin-top:30px;" data-i18n="stats_btn_close">Chiudi</button>
             </div>
         </div>
 
@@ -407,20 +424,20 @@
                     const result = await signInWithPopup(auth, provider);
                     const user = result.user;
                     console.log("Login effettuato:", user.displayName);
-                    alert("Benvenuto " + user.displayName + "! Carico il tuo universo...");
+                    alert(t('alert_login_success').replace('{nome}', user.displayName));
                     window.loadFromCloud();
                 } catch (error) {
                     console.error("Errore Login:", error);
-                    alert("Errore login: " + error.message);
+                    alert(t('alert_login_error').replace('{errore}', error.message));
                 }
             };
 
             // --- LOGOUT ---
             window.logoutGoogle = () => {
                 signOut(auth).then(() => {
-                    alert("Disconnesso. Ora stai usando la memoria locale.");
+                    alert(t('alert_logout'));
                     location.reload();
-                });
+                }); 
             };
 
             // --- SALVA TUTTO (Stelle + Linee + Costellazioni) ---
@@ -536,11 +553,11 @@
             <div id="timelineContent">
                 <div id="timelineHeader"
                     style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <div id="timelineDateDisplay" style="font-weight: bold; text-shadow: 0 0 5px currentColor;">OGGI
+                    <div id="timelineDateDisplay" style="font-weight: bold; text-shadow: 0 0 5px currentColor;" data-i18n="timeline_today">OGGI
                     </div>
 
                     <button id="btnTimeZoom" onclick="toggleTimeZoom()"
-                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 15px; cursor: pointer; padding: 2px 8px; font-size: 12px; transition: all 0.3s;">
+                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 15px; cursor: pointer; padding: 2px 8px; font-size: 12px; transition: all 0.3s;" data-i18n="timeline_btn_zoom">
                         🔍 ZOOM
                     </button>
                 </div>
@@ -550,6 +567,7 @@
             </div>
         </div>
 
+        <script src="i18n.js"></script>
         <script src="app.js"></script>
     </body>
 

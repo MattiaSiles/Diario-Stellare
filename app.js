@@ -34,7 +34,7 @@ window.addEventListener('DOMContentLoaded', () => {
             
             if (tapCount >= 5) {
                 localStorage.setItem('is_admin', 'true');
-                alert("✨ Accesso Sviluppatore Sbloccato! Riavvio in corso...");
+                alert(t('alert_dev_unlocked'));
                 location.reload();
             }
         });
@@ -53,10 +53,10 @@ window.addEventListener('DOMContentLoaded', () => {
             if (menuTapCount >= 5) {
                 if (isDev) {
                     localStorage.removeItem('is_admin');
-                    alert("🔒 Modalità Sviluppatore DISATTIVATA. Torni al database reale.");
+                    alert(t('alert_dev_off'));
                 } else {
                     localStorage.setItem('is_admin', 'true');
-                    alert("✨ Modalità Sviluppatore ATTIVATA! Usi il database di test.");
+                    alert(t('alert_dev_on'));
                 }
                 location.reload();
             }
@@ -150,7 +150,7 @@ function toggleTimeZoom() {
         // 4. Effetti Grafici (ORO)
         slider.classList.add('gold-mode');
         btn.classList.add('active');
-        btn.innerHTML = "🔙 GALASSIA"; // Tasto per tornare indietro
+        btn.innerHTML = t('btn_galaxy_back'); // Tasto per tornare indietro
 
     } else {
         // --- USCIAMO DALLO ZOOM (Torniamo alla Galassia) ---
@@ -180,7 +180,7 @@ function toggleTimeZoom() {
         // 3. Rimuovi Effetti Grafici
         slider.classList.remove('gold-mode');
         btn.classList.remove('active');
-        btn.innerHTML = "🔍 ZOOM";
+        btn.innerHTML = t('timeline_btn_zoom');
     }
 
     // Aggiorna subito la visualizzazione
@@ -204,7 +204,7 @@ async function processImage(input) {
         const saveButton = document.querySelector('#entryModal .btn-save');
         if(saveButton) {
             saveButton.disabled = true;
-            saveButton.innerText = "Elaborazione foto..."; 
+            saveButton.innerText = t('status_processing_photo'); 
             saveButton.style.opacity = "0.5"; // Opacità per far capire che sta lavorando
         }
 
@@ -239,7 +239,7 @@ async function processImage(input) {
                     if(saveButton) {
                         saveButton.disabled = false;
                         saveButton.style.opacity = "1";
-                        saveButton.innerText = isEditingExisting ? "Aggiorna Stella" : "Accendi Stella"; 
+                        saveButton.innerText = isEditingExisting ? t('viewer_btn_update') : t('writer_btn_save'); 
                     }
                     return; 
                 }
@@ -252,7 +252,7 @@ async function processImage(input) {
                         console.log("☁️ Caricamento su Firebase in corso...");
                         
                         // Aggiorniamo il testo del pulsante per chiarezza
-                        if(saveButton) saveButton.innerText = "Caricamento sul Cloud..."; 
+                        if(saveButton) saveButton.innerText = t('status_uploading_cloud'); 
                         
                         // Avvia il motore dello Storage
                         const imageUrl = await uploadImageToStorage(fileForFirebase);
@@ -304,7 +304,9 @@ let selectedForGroup = []; // Array ID stelle
 
 window.onload = function () {
     renderStars(); renderLines(); renderLabels(); renderList();
-    checkTutorial(); setupSkyInteraction(); setupColorFilters();
+    setupSkyInteraction(); setupColorFilters();
+    // Al posto di lanciare subito checkTutorial(), lanciamo il nuovo controllo:
+    checkFirstLaunch(); 
 };
 
 function updateGalacticCore() {
@@ -434,7 +436,7 @@ function renderStars() {
             nebula.onclick = (e) => {
                 e.stopPropagation();
                 const openDate = new Date(mem.unlockDate).toLocaleDateString();
-                alert(`✨ Questa stella si sta ancora formando.\n\nLa nebulosa diventerà una stella e svelerà il suo ricordo il giorno:\n${openDate}`);
+                alert(t('alert_nebula_forming').replace('{data}',openDate));
             }
 
             sky.appendChild(nebula);
@@ -476,7 +478,7 @@ function renderLines() {
             el.dataset.from = line.from;
             el.dataset.to = line.to;
 
-            el.onclick = () => { if (isEditing && !isGroupMode && confirm("Cancellare collegamento?")) { lines.splice(index, 1); saveData(); renderLines(); } };
+            el.onclick = () => { if (isEditing && !isGroupMode && confirm(t('confirm_delete_line'))) { lines.splice(index, 1); saveData(); renderLines(); } };
             svg.appendChild(el);
         }
     });
@@ -560,7 +562,7 @@ function startEditingConstellation(constellation) {
     selectedForGroup = [...constellation.stars]; // Copia le stelle
 
     // Aggiorna UI
-    document.getElementById('instructionText').innerHTML = "Modifica: <b>" + constellation.name + "</b>";
+    document.getElementById('instructionText').innerHTML = t('const_mode_edit').replace('{nome_costellazione}', constellation.name);
     document.getElementById('groupStatus').innerHTML = selectedForGroup.length + " stelle selezionate";
     document.getElementById('btnGroupMode').style.display = 'none'; // Nascondi tasto crea
     document.getElementById('btnDeleteGroup').style.display = 'block'; // Mostra tasto elimina
@@ -574,8 +576,8 @@ function toggleGroupMode() {
     editingConstellationId = null; // Di base è nuova
     selectedForGroup = [];
 
-    document.getElementById('instructionText').innerHTML = "Modo: <b>Creazione Gruppo</b>";
-    document.getElementById('groupStatus').innerHTML = "0 stelle selezionate";
+    document.getElementById('instructionText').innerHTML = t('const_mode_create');
+    document.getElementById('groupStatus').innerHTML = t('const_0_star');
 
     document.getElementById('btnGroupMode').style.display = 'none';
     document.getElementById('groupControls').style.display = 'block';
@@ -590,7 +592,7 @@ function cancelGroupMode() {
     editingConstellationId = null;
     selectedForGroup = [];
 
-    document.getElementById('instructionText').innerHTML = "Modo: <b>Sposta/Collega</b><br><small>Clicca 2 stelle per unire.</small>";
+    document.getElementById('instructionText').innerHTML = t('const_mode_title');
     document.getElementById('btnGroupMode').style.display = 'block';
     document.getElementById('groupControls').style.display = 'none';
 
@@ -606,7 +608,7 @@ function updateSelectionVisuals() {
 }
 
 function saveConstellationName() {
-    if (selectedForGroup.length < 1) { alert("Seleziona almeno una stella!"); return; }
+    if (selectedForGroup.length < 1) { alert(t('alert_select_star')); return; }
 
     // Chiedi nome (precompilato se modifica)
     let defaultName = "";
@@ -615,11 +617,11 @@ function saveConstellationName() {
         if (existing) defaultName = existing.name;
     }
 
-    const name = prompt("Nome della Costellazione:", defaultName);
+    const name = prompt(t('prompt_const_name'), defaultName);
     if (!name || name.trim() === "") return;
 
     // NUOVO: Chiedi se tracciare linee automatiche
-    const autoLines = confirm("Vuoi unire automaticamente queste stelle con delle linee bianche?");
+    const autoLines = confirm(t('confirm_auto_lines'));
 
     if (editingConstellationId) {
         // AGGIORNA ESISTENTE
@@ -655,7 +657,7 @@ function saveConstellationName() {
 }
 
 function deleteCurrentGroup() {
-    if (editingConstellationId && confirm("Eliminare questo nome? (Le stelle resteranno)")) {
+    if (editingConstellationId && confirm(t('confirm_delete_group'))) {
         constellations = constellations.filter(c => c.id !== editingConstellationId);
         saveData();
         renderLabels();
@@ -729,7 +731,7 @@ function setupStarInteraction(starElement, memData) {
                     selectedForGroup.splice(idx, 1); // Rimuove
                 }
                 updateSelectionVisuals();
-                document.getElementById('groupStatus').innerHTML = selectedForGroup.length + " stelle selezionate";
+                document.getElementById('groupStatus').innerHTML = selectedForGroup.length + t('status_stars_selected');
             } else {
                 // LOGICA CONNESSIONE LINEE (VECCHIA)
                 if (connectStartId === null) {
@@ -826,11 +828,11 @@ function importData(input) {
     reader.onload = function (e) {
         try {
             const d = JSON.parse(e.target.result);
-            if (d.memories && confirm("Sovrascrivere tutto?")) {
+            if (d.memories && confirm(t('confirm_overwrite'))) {
                 memories = d.memories; lines = d.lines || []; constellations = d.labels || [];
                 saveData(); location.reload();
             }
-        } catch (err) { alert("File non valido"); }
+        } catch (err) { alert(t('alert_invalid_file')); }
     };
     reader.readAsText(file);
 }
@@ -905,7 +907,7 @@ function saveEntry() {
 
     // --- RESET POST-MODIFICA ---
     isEditingExisting = false;
-    document.querySelector('#entryModal .btn-save').innerText = "Accendi Stella";
+    document.querySelector('#entryModal .btn-save').innerText = t('writer_btn_save');
 }
 
 function updateSkyTransform() { document.getElementById('sky').style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`; }
@@ -1080,7 +1082,7 @@ function closeWriter() {
 
     // AGGIUNGI QUESTE DUE RIGHE ALLA FINE DI CLOSEWRITER:
     isEditingExisting = false;
-    document.querySelector('#entryModal .btn-save').innerText = "Accendi Stella";
+    document.querySelector('#entryModal .btn-save').innerText = t('writer_btn_save');
 }
 
 function openEditMode() {
@@ -1110,7 +1112,7 @@ function openEditMode() {
     }
 
     // 4. Cambiamo il testo del bottone nel modale di scrittura
-    document.querySelector('#entryModal .btn-save').innerText = "Aggiorna Stella";
+    document.querySelector('#entryModal .btn-save').innerText = t('viewer_btn_update');
 
     // 5. Chiudiamo il visualizzatore e apriamo lo scrittore
     closeViewer();
@@ -1133,7 +1135,7 @@ function selectColor(c, el) {
 function viewMemory(m) {
     currentMemoryId = m.id;
     document.getElementById('viewDate').innerText = m.date;
-    document.getElementById('viewColorInfo').innerText = "Colore: " + m.color;
+    document.getElementById('viewColorInfo').innerText = t('viewer_color_prefix') + t('label_' + m.color);
 
     // COSTRUZIONE CONTENUTO (Testo + Foto)
     const textBox = document.getElementById('viewText');
@@ -1149,7 +1151,7 @@ function viewMemory(m) {
     textBox.innerHTML = content; // Usa innerHTML per mostrare l'immagine
 
     const b = document.getElementById('btnFav');
-    if (m.isFavorite) { b.innerText = '★ Preferito (Sì)'; } else { b.innerText = '☆ Aggiungi a Preferiti'; }
+    if (m.isFavorite) { b.innerText = t('viewer_btn_fav'); } else { b.innerText = t('viewer_btn_add_fav'); }
 
     document.getElementById('viewModal').style.display = 'flex';
 }
@@ -1159,7 +1161,7 @@ async function deleteMemory() {
     const m = memories.find(x => x.id === currentMemoryId);
     if (!m) return;
 
-    if (confirm("Spegnere questa stella?")) { 
+    if (confirm(t('confirm_extinguish'))) { 
         
         // --- NOVITÀ: ELIMINAZIONE FOTO DAL CLOUD ---
         // Se la stella ha un'immagine, e quell'immagine è un link Firebase (inizia con http)
@@ -1187,7 +1189,7 @@ async function deleteMemory() {
         renderList(); 
     } 
 }
-function exportText() { let c = "IL MIO DIARIO STELLARE\n\n";[...memories].sort((a, b) => a.id - b.id).forEach(m => { c += `DATA: ${m.date}\nCOLORE: ${m.color}\n${m.text}\n------------------\n`; }); const b = new Blob([c], { type: "text/plain" }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'diario.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+function exportText() { let c = t('export_title');[...memories].sort((a, b) => a.id - b.id).forEach(m => { c += `${t('export_date')}${m.date}\n${t('export_color')}${m.color}\n${m.text}\n------------------\n`; }); const b = new Blob([c], { type: "text/plain" }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'diario.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
 function renderList() {
     const l = document.getElementById('memoryList');
     const f = document.getElementById('favList');
@@ -1201,7 +1203,7 @@ function renderList() {
         i.className = 'memory-item';
 
         // GESTIONE TESTO SICURA: Se non c'è testo, scrive "Ricordo visivo"
-        const safeText = m.text ? m.text : "📸 Ricordo visivo...";
+        const safeText = m.text ? m.text : t('memory_visual_only');
         const shortText = safeText.substring(0, 20) + (safeText.length > 20 ? "..." : "");
 
         i.innerHTML = `<span style="background:${m.color === 'red' ? '#ff5e5e' : m.color === 'blue' ? '#5eaaff' : m.color === 'yellow' ? '#ffea5e' : m.color === 'orange' ? '#ffaa33' : 'white'}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px; box-shadow: 0 0 5px currentColor;"></span> ${m.date.split(' ')[0]} - ${shortText}`;
@@ -1219,8 +1221,8 @@ function renderList() {
         else l.appendChild(i);
     });
 
-    if (f.innerHTML === '') f.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">Nessun preferito</div>';
-    if (l.innerHTML === '') l.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">Nessun ricordo nel cielo</div>';
+    if (f.innerHTML === '') f.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">' + t('empty_favs') + '</div>';
+    if (l.innerHTML === '') l.innerHTML = '<div style="font-size:12px; color:#666; padding:5px;">' + t('empty_sky') + '</div>';
 }
 // Crea i bottoni colorati (lenti) nel telescopio
 function setupColorFilters() {
@@ -1258,16 +1260,43 @@ function toggleColorFilter(color, lensElement) {
     performSearch();
 }
 
+// --- LOGICA PRIMO AVVIO (LINGUA -> TUTORIAL) ---
+function checkFirstLaunch() {
+    // Se NON esiste la variabile della lingua nella memoria locale...
+    if (!localStorage.getItem('stardiary_lang')) {
+        // ...è il primissimo avvio assoluto: apriamo la modale della lingua
+        document.getElementById('langSelectionModal').style.display = 'flex';
+    } else {
+        // La lingua è già stata scelta in passato: procediamo col normale iter
+        checkTutorial();
+    }
+}
+
+// Funzione chiamata dai bottoni della nuova modale
+window.setInitialLanguage = function(lang) {
+    // 1. Nascondiamo questa modale
+    document.getElementById('langSelectionModal').style.display = 'none';
+    
+    // 2. Sfruttiamo la funzione che hai già creato in i18n.js per impostare e tradurre tutto
+    if (typeof switchLanguage === 'function') {
+        switchLanguage(lang);
+    }
+    
+    // 3. ORA che l'HTML è stato tradotto, facciamo partire il tutorial!
+    checkTutorial();
+};
+
+
 // TUTORIAL NUOVO
 const tutorialSteps = [
-    { icon: "👋", title: "Benvenut*", text: "Nello spazio nessuno può sentire i tuoi pensieri, ma potrai vederli brillare. In questo spazio sicuro, ogni tuo pensiero diventa una stella. Il cielo si riempirà col tempo." },
-    { icon: "🔍", title: "Navigazione", text: "Usa la rotellina (o i tasti + e -) per Zoomare. Clicca e trascina lo sfondo nero per spostarti ed esplorare il cielo." },
-    { icon: "✒️", title: "Nuovo Ricordo", text: "Usa il tasto ✒️ in basso a destra per scrivere come ti senti. Puoi scegliere il colore della tua stella in base al tuo umore." },
-    { icon: "☰", title: "I tuoi Ricordi", text: "Usa il menu Ricordi in alto a sinistra per rivedere tutti i tuoi pensieri ordinati o ritrovare i preferiti." },
-    { icon: "✏️", title: "Costellazioni", text: "Clicca la matita. Puoi unire due stelle, oppure cliccare 'Crea Nuova Costellazione' per selezionare tante stelle e dare un nome unico." },
-    { icon: "<span class='tutorial-bh-icon' style='transform: scale(2);'></span>", title: "Il Buco Nero", text: "Al centro della galassia trovi il buco nero il cui colore cambia adattandosi al colore generale delle stelle. Cliccaci per vedere le statistiche" },
-    { icon: "🔭", title: "Telescopio", text: "Clicca sulla barra di ricerca e inserisci la o le parole chiave che vuoi cercare nelle note. Rimarranno accese solo le stelle che le contengono." },
-    { icon: "🎵", title: "Atmosfera", text: "Usa l'icona in alto a destra per attivare la musica di sottofondo." }
+    { icon: "👋", titleKey: "tut_1_title", textKey: "tut_1_text" },
+    { icon: "🔍", titleKey: "tut_2_title", textKey: "tut_2_text" },
+    { icon: "✒️", titleKey: "tut_3_title", textKey: "tut_3_text" },
+    { icon: "☰", titleKey: "tut_4_title", textKey: "tut_4_text" },
+    { icon: "✏️", titleKey: "tut_5_title", textKey: "tut_5_text" },
+    { icon: "<span class='tutorial-bh-icon' style='transform: scale(2);'></span>", titleKey: "tut_6_title", textKey: "tut_6_text" },
+    { icon: "🔭", titleKey: "tut_7_title", textKey: "tut_7_text" },
+    { icon: "🎵", titleKey: "tut_8_title", textKey: "tut_8_text" }
 
 ];
 let currentStep = 0;
@@ -1285,14 +1314,14 @@ function showStep(i) {
     document.getElementById('tutIcon').innerHTML = s.icon;
 
     // Usa innerHTML per permettere formattazione nel titolo (opzionale, ma comodo)
-    document.getElementById('tutTitle').innerHTML = s.title;
+    document.getElementById('tutTitle').innerHTML = t(s.titleKey);
 
     // Usa innerHTML per interpretare <strong>, <br> e le icone nel testo
-    document.getElementById('tutText').innerHTML = s.text;
+    document.getElementById('tutText').innerHTML = t(s.textKey);
 
     // Gestione bottoni (rimane uguale)
     document.getElementById('btnPrev').style.visibility = i === 0 ? 'hidden' : 'visible';
-    document.getElementById('btnNext').innerText = i === tutorialSteps.length - 1 ? 'Inizia' : 'Avanti';
+    document.getElementById('btnNext').innerText = i === tutorialSteps.length - 1 ? t('tut_btn_start') : t('tutorial_btn_next');
 }
 function nextStep() { if (currentStep < tutorialSteps.length - 1) showStep(currentStep + 1); else { document.getElementById('tutorialModal').style.display = 'none'; localStorage.setItem('tutorial_seen_v6', 'true'); } }
 function prevStep() { if (currentStep > 0) showStep(currentStep - 1); }
@@ -1329,7 +1358,7 @@ function renderTimeStats(period) {
 
     if (period === 'all') {
         filtered = memories;
-        title = "Statistiche: Sempre";
+        title = t('stats_period_always');
     } else if (period === 'week') {
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         filtered = memories.filter(m => {
@@ -1338,19 +1367,19 @@ function renderTimeStats(period) {
             const memDate = new Date(parts[2], parts[1] - 1, parts[0]);
             return memDate >= oneWeekAgo;
         });
-        title = "Ultimi 7 Giorni";
+        title = t('stats_period_week');
     } else if (period === 'month') {
         filtered = memories.filter(m => {
             const parts = m.date.split(' ')[0].split('/');
             return parseInt(parts[1]) === (now.getMonth() + 1) && parseInt(parts[2]) === now.getFullYear();
         });
-        title = "Questo Mese";
+        title = t('stats_period_month');
     } else if (period === 'year') {
         filtered = memories.filter(m => {
             const parts = m.date.split(' ')[0].split('/');
             return parseInt(parts[2]) === now.getFullYear();
         });
-        title = "Anno " + now.getFullYear();
+        title = t('stats_period_year') + now.getFullYear();
     }
 
     document.getElementById('statTimeTitle').innerText = title;
@@ -1363,7 +1392,7 @@ function renderConstStats() {
     listDiv.innerHTML = ''; // Pulisci lista
 
     if (constellations.length === 0) {
-        listDiv.innerHTML = '<p style="text-align:center; color:#666;">Nessuna costellazione creata.</p>';
+        listDiv.innerHTML = '<p style="text-align:center; color:#666;">' + t('stats_no_constellations') + '</p>';
         return;
     }
 
@@ -1406,7 +1435,7 @@ function drawPieChart(dataArray, chartId, legendId, isCompact = false) {
 
     if (!dataArray || dataArray.length === 0) {
         chart.style.background = '#333';
-        legend.innerHTML = '<span style="color:#666">Nessun dato</span>';
+        legend.innerHTML = '<span style="color:#666">' + t('stats_no_data') + '</span>';
         return;
     }
 
@@ -1427,7 +1456,7 @@ function drawPieChart(dataArray, chartId, legendId, isCompact = false) {
     };
 
     // Etichette (solo per versione grande)
-    const labelMap = { 'white': 'Bianco', 'red': 'Rosso', 'blue': 'Blu', 'yellow': 'Giallo', 'orange': 'Arancione' };
+    const labelMap = { 'white': t('label_white'), 'red': t('label_red'), 'blue': t('label_blue'), 'yellow': t('label_yellow'), 'orange': t('label_orange') };
 
     let gradientStr = "";
     let currentDeg = 0;
@@ -1518,7 +1547,7 @@ function performSearch() {
     // Aggiorna contatore
     const counter = document.getElementById('searchCounter');
     counter.style.display = 'block';
-    counter.innerText = foundCount === 0 ? "Nessun risultato" : `${foundCount} stelle trovate`;
+    counter.innerText = foundCount === 0 ? t('search_no_results') : `${foundCount}${t('search_stars_found')}`;
 
     // Nascondi le linee che collegano stelle invisibili
     document.querySelectorAll('.constellation-line').forEach(line => {
@@ -1637,7 +1666,7 @@ function updateTimeTravel(val) {
 
     // Se non ci sono dati
     if (!timelineDates || timelineDates.length === 0) {
-        display.innerText = "Nessun ricordo";
+        display.innerText = t('timeline_no_memories');
         return;
     }
 
@@ -1674,13 +1703,13 @@ function updateTimeTravel(val) {
     // 2. Confrontiamo i giorni
     if (checkPure.getTime() > todayPure.getTime()) {
         // È STRETTAMENTE DOMANI O DOPO (Futuro)
-        labelText = "🌑 ZONA IGNOTA";
+        labelText = t('timeline_unknown_zone');
         // Opzionale: fai tremare leggermente il testo o cambia colore
         display.style.color = "#666";
     }
     else if (checkPure.getTime() === todayPure.getTime()) {
         // È ESATTAMENTE OGGI
-        labelText = `OGGI (${dateString})`;
+        labelText = `${t('timeline_today_prefix')} (${dateString})`;
         display.style.opacity = "1";
         // Ripristina i colori corretti in base alla modalità
         display.style.color = isZoomedMode ? '#ffd700' : '#00e5ff';
@@ -1771,7 +1800,7 @@ function renderLinesFiltered() {
                 el.setAttribute('x2', e.x + '%'); el.setAttribute('y2', e.y + '%');
                 el.classList.add('constellation-line');
                 // Mantieni il click per cancellare (opzionale in questa modalità)
-                el.onclick = () => { if (isEditing && !isGroupMode && confirm("Cancellare collegamento?")) { lines = lines.filter(l => l !== line); saveData(); renderLines(); } };
+                el.onclick = () => { if (isEditing && !isGroupMode && confirm(t('confirm_delete_line'))) { lines = lines.filter(l => l !== line); saveData(); renderLines(); } };
                 svg.appendChild(el);
             }
         }
@@ -1879,12 +1908,12 @@ if ('serviceWorker' in navigator) {
 async function uploadImageToStorage(imageFile) {
     // 1. Controlli di sicurezza
     if (!window.currentUser) {
-        alert("Devi aver fatto l'accesso per caricare un'immagine.");
+        alert(t('alert_login_required'));
         return null;
     }
     
     if (imageFile.size > 5 * 1024 * 1024) {
-        alert("L'immagine è troppo grande! Massimo 5MB.");
+        alert(t('alert_image_too_large'));
         return null;
     }
 
@@ -1908,7 +1937,7 @@ async function uploadImageToStorage(imageFile) {
         
     } catch (error) {
         console.error("Errore nel caricamento dell'immagine:", error);
-        alert("Si è verificato un errore nel caricamento dell'immagine.");
+        alert(t('alert_upload_error'));
         return null;
     }
 }
