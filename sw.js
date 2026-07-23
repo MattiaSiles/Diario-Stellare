@@ -1,4 +1,4 @@
-const CACHE_NAME = 'diario-stellare-v19';
+const CACHE_NAME = 'diario-stellare-v20';
 
 // Questa è la lista delle cose da "scaricare" per far funzionare l'app offline
 const ASSETS_TO_CACHE = [
@@ -14,6 +14,10 @@ const ASSETS_TO_CACHE = [
 
 // 1. INSTALLAZIONE: Il maggiordomo scarica i file
 self.addEventListener('install', event => {
+  // 🔥 NOVITÀ: Forza l'attivazione immediata del nuovo Service Worker
+  // (Ignora la fase di "waiting" anche se l'app è aperta)
+  self.skipWaiting(); 
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -31,6 +35,10 @@ self.addEventListener('activate', event => {
         cacheNames.filter(name => name !== CACHE_NAME)
           .map(name => caches.delete(name))
       );
+    }).then(() => {
+      // 🔥 NOVITÀ: Prende immediatamente il controllo di tutte le schede e tab aperti
+      // (Costringe l'app a usare subito i nuovi file senza doverla riavviare)
+      return self.clients.claim(); 
     })
   );
 });
